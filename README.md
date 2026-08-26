@@ -54,7 +54,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Daniel Ejimadu
 * Janak Karki
 * Jason Karuma
-* Jessica Clark - Architecture * Design | Project Management
+* Jessica Clark - Architecture & Design | Project Management
 * Josiah Hugo
 * Logan Brewer
 * Roshan Inaganti
