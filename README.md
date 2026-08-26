@@ -51,7 +51,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Andres Renteria
 * Ashley Tackett
 * Brianna Mmbaga - Architecture & Design | Project Management
-* Daniel Ejimadu
+* Daniel Ejimadu - Quality Assurance | User Experience
 * Janak Karki
 * Jason Karuma
 * Jessica Clark - Architecture & Design | Project Management
