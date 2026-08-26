@@ -48,7 +48,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 
 ## Team Members
 
-* Andres Renteria
+* Andres Renteria - Quality Assurance | Project Management
 * Ashley Tackett
 * Brianna Mmbaga - Architecture & Design | Project Management
 * Daniel Ejimadu - Quality Assurance | User Experience
