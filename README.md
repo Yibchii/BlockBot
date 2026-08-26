@@ -50,7 +50,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 
 * Andres Renteria
 * Ashley Tackett
-* Brianna Mmbaga
+* Brianna Mmbaga - PM/Design and Architecture
 * Daniel Ejimadu
 * Janak Karki
 * Jason Karuma
