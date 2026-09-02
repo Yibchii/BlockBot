@@ -60,5 +60,5 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Roshan Inaganti
 * Temitayo Oluwaseun
 * Terry Nicks
-* Tin Nguyen
+* Tin Nguyen - Architecture & Design | UI/UX
 * Truitt Crozier
