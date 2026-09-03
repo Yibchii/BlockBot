@@ -55,7 +55,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Janak Karki
 * Jason Karuma
 * Jessica Clark - Architecture & Design | Project Management
-* Josiah Hugo
+* Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
 * Logan Brewer
 * Roshan Inaganti
 * Temitayo Oluwaseun
