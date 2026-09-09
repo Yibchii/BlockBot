@@ -49,7 +49,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 ## Team Members
 
 * Andres Renteria - Quality Assurance | Project Management
-* Ashley Tackett
+* Ashley Tackett - Architecture & Design | Tools & Infrastructure
 * Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
 * Daniel Ejimadu - Quality Assurance | User Experience
 * Janak Karki
