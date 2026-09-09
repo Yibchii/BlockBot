@@ -52,7 +52,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Ashley Tackett - Architecture & Design | Tools & Infrastructure
 * Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
 * Daniel Ejimadu - Quality Assurance | User Experience
-* Janak Karki
+* Janak Karki - Tools & Infrastructure | Artificial Intelligence 
 * Jason Karuma
 * Jessica Clark - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
