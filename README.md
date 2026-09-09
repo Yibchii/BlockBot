@@ -61,4 +61,4 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
 * Tin Nguyen - Architecture & Design | UI/UX
-* Truitt Crozier (@tjcrozier) - Tools and Infrastructure | Quality Assurance
+* Truitt Crozier (@tjcrozier) - Tools and Infrastructure | Quality Assurance 
