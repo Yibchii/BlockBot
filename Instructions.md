@@ -37,6 +37,8 @@ to apply migrations
 
 for direct userbase/databse control, navigate in your browser to `localhost:8000/admin`
 a superuser account has been created for developement purposes. Sign in as the superuser using 
+
+test
 ```
 username: admin
 password: password
