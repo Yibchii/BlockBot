@@ -59,6 +59,6 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Logan Brewer - Architecture & Design | Project Management
 * Roshan Inaganti
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
-* Terry Nicks
+* Terry Nicks - PM/AI
 * Tin Nguyen - Architecture & Design | UI/UX
 * Truitt Crozier
