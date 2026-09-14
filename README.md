@@ -57,7 +57,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Jessica Clark - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
 * Logan Brewer - Architecture & Design | Project Management
-* Roshan Inaganti
+* Roshan Inaganti - Tools & Infrastructure | Artificial Intelligence
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
 * Tin Nguyen - Architecture & Design | UI/UX
