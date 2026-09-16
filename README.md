@@ -63,3 +63,4 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Tin Nguyen - Architecture & Design | UI/UX
 * Truitt Crozier (@tjcrozier) - Tools and Infrastructure | Quality Assurance 
 * Neako Ramos - Architecture & Design | UI/UX
+* Awad Aljaidi - Artificial Intelligence | Quality Assurance 
