@@ -11,8 +11,9 @@ pip install -r requirements.txt
 
 # Running The Web Server
 Create and work within a local python virtual enviornment.
-for Ubunutu, do this via
-If your using Visual Studio code on windows, skip the 'source venv/bin/activate' code below
+for Ubunutu, do this via:
+
+(If your using Visual Studio code on windows, skip the 'source venv/bin/activate' code below)
 
 ```
 python -m venv venv
