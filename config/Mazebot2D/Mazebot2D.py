@@ -20,6 +20,13 @@ class Mazebot2D:
         """Return the robot's current position as an (x, y) tuple."""
         return self.x, self.y
 
+    #this method can be used by the site to dynamically determine what blocks must be created for this robot.
+    #it may need adjusting, but the idea sticks for now.
+    @classmethod
+    def get_commands(cls):
+        """Return the robot's supported API commands in stable order."""
+        return sorted(cls.COMMANDS)
+
     def move_up(self):
         self._move_to(self.x, max(self.y - 1, 0))
         return self.position

@@ -20,6 +20,12 @@ class RobotTestCase(unittest.TestCase):
 
         self.assertEqual(robot.execute("right"), (1, 0))
 
+    def test_get_commands_returns_all_supported_commands(self):
+        self.assertEqual(
+            Mazebot2D.get_commands(),
+            ["down", "left", "reset", "right", "up"],
+        )
+
     def test_reset_returns_robot_to_grid_default_position(self):
         layout = [[" " for _ in range(10)] for _ in range(10)]
         robot = Mazebot2D(3, 4, grid=Grid(layout=layout))
