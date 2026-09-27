@@ -29,7 +29,9 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+# Robots are not installed Django apps.
+# They are non-Django backend libraries that are referenced by Django, so are included, but do not go here.
+# Django is a middleman between frontend (html) and backend (robot simulations)
 INSTALLED_APPS = [
     'BlockBot.apps.BlockbotConfig',
     'django.contrib.admin',

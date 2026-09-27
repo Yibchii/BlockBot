@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mazebot2D</title>
+</head>
+<body>
+    <h1>Mazebot2D</h1>
+    <pre>{{ ascii_grid }}</pre>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="command" value="up">Up</button>
+        <button type="submit" name="command" value="down">Down</button>
+        <button type="submit" name="command" value="left">Left</button>
+        <button type="submit" name="command" value="right">Right</button>
+    </form>
+</body>
+</html>
