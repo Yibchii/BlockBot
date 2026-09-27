@@ -20,6 +20,12 @@ class RobotTestCase(unittest.TestCase):
 
         self.assertEqual(robot.execute("right"), (1, 0))
 
+    def test_reset_returns_robot_to_grid_default_position(self):
+        layout = [[" " for _ in range(10)] for _ in range(10)]
+        robot = Mazebot2D(3, 4, grid=Grid(layout=layout))
+
+        self.assertEqual(robot.execute("reset"), Grid.DEFAULT_POSITION)
+
     def test_robot_stays_inside_grid(self):
         layout = [[" " for _ in range(10)] for _ in range(10)]
         robot = Mazebot2D(9, 9, grid=Grid(layout=layout))

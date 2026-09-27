@@ -5,7 +5,7 @@ class Mazebot2D:
     """A robot that moves within a bounded 10x10 grid."""
 
     GRID_SIZE = 10
-    COMMANDS = {"up", "down", "left", "right"}
+    COMMANDS = {"up", "down", "left", "right", "reset"}
 
     def __init__(self, x=0, y=0, grid=None):
         self._validate_position(x, y)
@@ -36,13 +36,20 @@ class Mazebot2D:
         self._move_to(min(self.x + 1, self.GRID_SIZE - 1), self.y)
         return self.position
 
+    def reset(self):
+        self._move_to(*self.grid.DEFAULT_POSITION)
+        return self.position
+
     def execute(self, command):
-        """Execute one of the four supported movement commands."""
+        """Execute one of the supported robot commands."""
         if command not in self.COMMANDS:
             raise ValueError(
                 f"Unknown command {command!r}; expected one of "
                 f"{sorted(self.COMMANDS)}"
             )
+
+        if command == "reset":
+            return self.reset()
 
         return getattr(self, f"move_{command}")()
 

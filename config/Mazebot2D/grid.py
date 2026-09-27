@@ -29,6 +29,7 @@ class Grid:
     """A 10x10 grid that stores the state of every cell."""
 
     SIZE = 10
+    DEFAULT_POSITION = (0, 0)
 
     def __init__(self, layout=None):
         layout = layout or MAZE_LAYOUT
