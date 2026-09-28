@@ -49,7 +49,6 @@ Create a Pull Request from your feature branch into the main branch for review b
 ## Team Members
 
 * Andres Renteria - Quality Assurance | Project Management
-* Ashley Tackett - Architecture & Design | Tools & Infrastructure
 * Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
 * Daniel Ejimadu - Quality Assurance | User Experience
 * Janak Karki - Tools & Infrastructure | Artificial Intelligence 
@@ -61,6 +60,5 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
 * Tin Nguyen - Architecture & Design | UI/UX
-* Truitt Crozier (@tjcrozier) - Tools and Infrastructure | Quality Assurance 
 * Neako Ramos - Architecture & Design | UI/UX
 * Awad Aljaidi - Artificial Intelligence | Quality Assurance 
