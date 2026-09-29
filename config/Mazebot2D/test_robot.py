@@ -61,7 +61,41 @@ class RobotTestCase(unittest.TestCase):
         robot = Mazebot2D(grid=grid)
 
         self.assertEqual(robot.move_right(), (0, 0))
+    def test_invalid_start_coordinates_raise_error(self):
+        with self.assertRaises(ValueError):
+            Mazebot2D(-1, 0)
 
+        with self.assertRaises(ValueError):
+            Mazebot2D(10, 0)
 
+    def test_non_integer_start_coordinates_raise_error(self):
+        with self.assertRaises(TypeError):
+            Mazebot2D("0", 0)
+
+    def test_robot_cannot_start_on_blocked_cell(self):
+        grid = Grid()
+
+        with self.assertRaises(ValueError):
+            Mazebot2D(1, 0, grid=grid)
+
+    def test_invalid_grid_size_raises_error(self):
+        layout = [[" " for _ in range(10)] for _ in range(9)]
+
+        with self.assertRaises(ValueError):
+            Grid(layout=layout)
+
+    def test_unknown_grid_symbol_raises_error(self):
+        layout = [[" " for _ in range(10)] for _ in range(10)]
+        layout[0][0] = "X"
+
+        with self.assertRaises(ValueError):
+            Grid(layout=layout)
+
+    def test_set_cell_rejects_invalid_type(self):
+        grid = Grid()
+
+        with self.assertRaises(TypeError):
+            grid.set_cell(0, 0, "blocked")
+            
 if __name__ == "__main__":
     unittest.main()
