@@ -29,6 +29,10 @@ def mazebot2d(request):
     )
 
 
+def blockly(request):
+    return render(request, 'BlockBot/blockly_test.html')
+
+
 def _ascii_grid(grid, robot):
     rows = []
     rows.append("+" + "-" * grid.SIZE + "+")
