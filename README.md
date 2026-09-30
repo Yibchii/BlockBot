@@ -51,7 +51,7 @@ Create a Pull Request from your feature branch into the main branch for review b
 * Andres Renteria - Quality Assurance | Project Management
 * Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
 * Daniel Ejimadu - Quality Assurance | User Experience
-* Janak Karki - Tools & Infrastructure | Artificial Intelligence 
+* Janak Karki - Tools & Infrastructure | QA
 * Jason Karuma
 * Jessica Clark - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
