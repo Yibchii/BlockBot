@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from .utils import loadDefaultBlocks
 from Mazebot2D import CellType, Grid, Mazebot2D
 
 # Create your views here.
@@ -21,7 +22,10 @@ def mazebot2d(request):
     return render(
         request,
         "BlockBot/mazebot2d.html",
-        {"ascii_grid": _ascii_grid(grid, robot)},
+        {
+            "ascii_grid": _ascii_grid(grid, robot),
+            "blocks_test": loadDefaultBlocks(),
+        },
     )
 
 
