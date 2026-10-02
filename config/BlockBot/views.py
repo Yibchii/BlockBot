@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from .utils import loadDefaultBlocks
 from Mazebot2D import CellType, Grid, Mazebot2D
+from django.http import JsonResponse
 
 # Create your views here.
 def index(request):
@@ -47,3 +48,7 @@ def _ascii_grid(grid, robot):
     rows.append("+" + "-" * grid.SIZE + "+")
 
     return "\n".join(rows)
+
+# API test
+def test_api(request):
+    return JsonResponse({"message" : "Django is connected"})
