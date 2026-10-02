@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import BlocklyComponent from "./BlocklyComponent";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -15,6 +16,7 @@ function App() {
     <div>
       <h1>BlockBot</h1>
       <p>{message}</p>
+      <BlocklyComponent />
     </div>
   );
 }
