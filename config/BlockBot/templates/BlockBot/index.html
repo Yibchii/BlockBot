@@ -1,70 +1,14 @@
-<!DOCTYPE html>
+{% load static %}
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLOCKBOT</title>
-    <!-- Dynamic Favicon Script -->
-    <script>
-      (function setRandomGearFavicon() {
-        const vibrantColors = [
-          '#FF5733', '#33FF57', '#3357FF', '#F3FF33', 
-          '#FF33F3', '#00F0FF', '#FF9900', '#9900FF', 
-          '#00FFA6', '#FF0055', '#7A00FF', '#00E5FF'
-        ];
-        
-        // Pick a random color from the palette
-        const randomColor = vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
-
-        // Generate path for an 8-tooth gear centered at (50, 50)
-        const teeth = 8;
-        const innerR = 25;
-        const outerR = 40;
-        const holeR = 12;
-        const angleStep = (Math.PI * 2) / teeth;
-        let pathData = '';
-
-        for (let i = 0; i < teeth; i++) {
-          const a1 = i * angleStep;
-          const a2 = a1 + angleStep * 0.25;
-          const a3 = a1 + angleStep * 0.55;
-          const a4 = a1 + angleStep * 0.80;
-
-          const x1 = (50 + innerR * Math.cos(a1)).toFixed(2);
-          const y1 = (50 + innerR * Math.sin(a1)).toFixed(2);
-          const x2 = (50 + outerR * Math.cos(a2)).toFixed(2);
-          const y2 = (50 + outerR * Math.sin(a2)).toFixed(2);
-          const x3 = (50 + outerR * Math.cos(a3)).toFixed(2);
-          const y3 = (50 + outerR * Math.sin(a3)).toFixed(2);
-          const x4 = (50 + innerR * Math.cos(a4)).toFixed(2);
-          const y4 = (50 + innerR * Math.sin(a4)).toFixed(2);
-
-          pathData += (i === 0 ? `M ${x1},${y1} ` : `L ${x1},${y1} `);
-          pathData += `L ${x2},${y2} L ${x3},${y3} L ${x4},${y4} `;
-        }
-        pathData += 'Z ';
-        
-        // Center cutout
-        pathData += `M 50,${50 - holeR} A ${holeR} ${holeR} 0 1 0 50,${50 + holeR} A ${holeR} ${holeR} 0 1 0 50,${50 - holeR} Z`;
-
-        // Construct raw SVG string
-        const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="${randomColor}" fill-rule="evenodd" d="${pathData}"/></svg>`;
-        
-        // Create link element and set as shortcut icon
-        const link = document.createElement('link');
-        link.rel = 'icon';
-        link.type = 'image/svg+xml';
-        link.href = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgString);
-        document.head.appendChild(link);
-      })();
-    </script>
-</head>
-<body>
-    <header>
-        <h1>BlockBot Homepage</h1>
-        <h2>(index.html)</h2>
-        <p><a href="/mazebot2d" style="font-size: 2em;">dev art mazebot2d</a></p>
-        
-    </header>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlockBot</title>
+    <link rel="stylesheet" href="{% static 'frontend/assets/index.css' %}" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="{% static 'frontend/app.js' %}"></script>
+  </body>
 </html>
