@@ -17,19 +17,85 @@ export default function BlocklyComponent() {
           kind: 'category',
           name: 'Logic',
           colour: '#5b80a5',
-          contents: [{ kind: 'block', type: 'controls_if' }]
+          contents: [
+            { 
+              kind: 'block', 
+              type: 'controls_if' 
+            },
+            {
+              kind: 'block',
+              type: 'logic_compare'
+            },
+            {
+              kind: 'block',
+              type: 'logic_operation'
+            },
+            {
+              kind: 'block',
+              type: 'logic_boolean'
+            },
+            {
+              kind: 'block',
+              type: 'logic_negate'
+            },
+            {
+              kind: 'block',
+              type: 'logic_ternary'
+            }
+          ]
         },
         {
           kind: 'category',
           name: 'Loops',
           colour: '#5ba55b',
-          contents: [{ kind: 'block', type: 'controls_repeat_ext' }]
+          contents: [
+            { 
+              kind: 'block', 
+              type: 'controls_repeat_ext' 
+            },
+            {
+              kind: 'block',
+              type: 'controls_whileUntil'
+            },
+            {
+              kind: 'block',
+              type: 'controls_for'
+            },
+            {
+              kind: 'block',
+              type: 'controls_forEach'
+            },
+            {
+              kind: 'block',
+              type: 'controls_flow_statements'
+            }
+          ]
         },
         {
           kind: 'category',
           name: 'Math',
           colour: '#5b67a5',
-          contents: [{ kind: 'block', type: 'math_number' }]
+          contents: [
+            { 
+              kind: 'block', 
+              type: 'math_number' 
+            },
+            {
+              
+            }
+          ]
+        },
+        {
+          kind: 'category',
+          name: 'Text',
+          colour: '#dede07',
+          contents: [{ kind: 'block', type: 'text' }]
+        },
+        {
+          kind: 'category',
+          name: 'Lists',
+          colour: '#11b2b2',
+          contents: [{ kind: 'block', type: 'lists_create_with' }]
         }
       ]
     };
