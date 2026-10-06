@@ -51,7 +51,7 @@ export default function BlocklyComponent() {
           contents: [
             { 
               kind: 'block', 
-              type: 'controls_repeat_ext' 
+              type: 'controls_repeat_ext' // add shadow blocks
             },
             {
               kind: 'block',
@@ -59,7 +59,7 @@ export default function BlocklyComponent() {
             },
             {
               kind: 'block',
-              type: 'controls_for'
+              type: 'controls_for' // add shadow blocks
             },
             {
               kind: 'block',
@@ -81,7 +81,48 @@ export default function BlocklyComponent() {
               type: 'math_number' 
             },
             {
-              
+              kind: 'block',
+              type: 'math_arithmetic' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_single' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_trig' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_constant'
+            },
+            {
+              kind: 'block',
+              type: 'math_number_property' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_round' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_on_list' 
+            },
+            {
+              kind: 'block',
+              type: 'math_modulo' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_constrain' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_random_int' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'math_random_float'
             }
           ]
         },
@@ -89,7 +130,67 @@ export default function BlocklyComponent() {
           kind: 'category',
           name: 'Text',
           colour: '#dede07',
-          contents: [{ kind: 'block', type: 'text' }]
+          contents: [
+            { kind: 'block', 
+              type: 'text' 
+            },
+            {
+              kind: 'block',
+              type: 'text_join'
+            },
+            {
+              kind: 'block',
+              type: 'text_append' // add shadow block
+            },
+            {
+              kind: 'block',
+              type: 'text_length' // add shadow block
+            },
+            {
+              kind: 'block',
+              type: 'text_isEmpty' // add shadow block
+            },
+            {
+              kind: 'block',
+              type: 'text_indexOf' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_charAt' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_getSubstring' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_changeCase' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_trim' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_count' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_replace' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_reverse' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_print' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'text_prompt_ext' // add shadow blocks
+            }
+          ]
         },
         {
           kind: 'category',
