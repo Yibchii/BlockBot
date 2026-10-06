@@ -196,7 +196,100 @@ export default function BlocklyComponent() {
           kind: 'category',
           name: 'Lists',
           colour: '#11b2b2',
-          contents: [{ kind: 'block', type: 'lists_create_with' }]
+          contents: [
+            { 
+              kind: 'block', 
+              type: 'lists_create_empty' 
+            },
+            {
+              kind: 'block',
+              type: 'lists_create_with'
+            },
+            {
+              kind: 'block',
+              type: 'lists_repeat' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_length'
+            },
+            {
+              kind: 'block',
+              type: 'lists_isEmpty'
+            },
+            {
+              kind: 'block',
+              type: 'lists_indexOf' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_getIndex' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_setIndex' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_getSublist' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_split' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_sort' // add shadow blocks
+            },
+            {
+              kind: 'block',
+              type: 'lists_reverse' // add shadow blocks
+            }
+          ]
+        },
+        {
+          kind: 'category',
+          name: 'Variables',
+          colour: '#a55b80',
+          contents: [
+            {
+              kind: 'block',
+              type: 'variables_get'
+            },
+            {
+              kind: 'block',
+              type: 'variables_set'
+            }
+          ]
+        },
+        {
+          kind: 'category',
+          name: 'Functions',
+          colour: '#995ba5',
+          contents: [
+            {
+              kind: 'block',
+              type: 'procedures_defnoreturn' // add shadow block
+            },
+            {
+              kind: 'block',
+              type: 'procedures_defreturn' // add shadow block
+            },
+            {
+              kind: 'block',
+              type: 'procedures_ifreturn', 
+              inputs: {
+                CONDITION: {
+                  shadow: {
+                    type: 'logic_boolean',
+                    fields: {
+                      BOOL: 'FALSE'
+                    }
+                  }
+                }
+              }
+            },
+          ]
         }
       ]
     };
