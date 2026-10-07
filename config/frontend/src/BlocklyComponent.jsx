@@ -312,8 +312,11 @@ export default function BlocklyComponent() {
                 }
               }
             },
+            { 
+              kind: 'block', 
+              type: 'math_number' 
+            }
           ]
-          contents: [{ kind: 'block', type: 'math_number' }]
         },
         {
           kind: 'category',
