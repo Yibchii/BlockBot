@@ -38,7 +38,16 @@ export default function BlocklyComponent() {
     workspaceRef.current = Blockly.inject(blocklyDiv.current, {
       toolbox: toolbox,
       scrollbars: true,
-      trashcan: true
+      trashcan: true,
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3.0,
+        minScale: 0.3,
+        scaleSpeed: 1.2,
+        pinch: true
+      }
     });
 
     return () => {
