@@ -2,6 +2,29 @@ import React, { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 
+// Define the custom Direction Constant block
+if (!Blockly.Blocks['direction_constant']) {
+  Blockly.Blocks['direction_constant'] = {
+    init: function () {
+      this.appendDummyInput()
+        .appendField('direction:')
+        .appendField(
+          new Blockly.FieldDropdown([
+            ['forward', 'FORWARD'],
+            ['backward', 'BACKWARD'],
+            ['left', 'LEFT'],
+            ['right', 'RIGHT']
+          ]),
+          'DIRECTION'
+        );
+      this.setOutput(true, 'String');
+      this.setColour('#e67e22');
+      this.setTooltip('Specifies a direction constant.');
+      this.setHelpUrl('');
+    }
+  };
+}
+
 export default function BlocklyComponent() {
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
@@ -9,7 +32,7 @@ export default function BlocklyComponent() {
   useEffect(() => {
     if (!blocklyDiv.current) return;
 
-    // Define basic toolbox categories
+    // Define basic toolbox categories including Directions
     const toolbox = {
       kind: 'categoryToolbox',
       contents: [
@@ -691,6 +714,16 @@ export default function BlocklyComponent() {
               type: 'procedures_ifreturn'
             },
           ]
+        },
+        {
+          kind: 'category',
+          name: 'Directions',
+          colour: '#e67e22',
+          contents: [
+            { kind: 'block', 
+              type: 'direction_constant' 
+            }
+          ]
         }
       ]
     };
@@ -699,7 +732,16 @@ export default function BlocklyComponent() {
     workspaceRef.current = Blockly.inject(blocklyDiv.current, {
       toolbox,
       scrollbars: true,
-      trashcan: true
+      trashcan: true,
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3.0,
+        minScale: 0.3,
+        scaleSpeed: 1.2,
+        pinch: true
+      }
     });
 
     // using blocky's built-in dynamic variables category
