@@ -1,0 +1,7 @@
+{
+  "comment": "store json definition of all blocks specific to mazebot2d here",
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": []
+  }
+}
