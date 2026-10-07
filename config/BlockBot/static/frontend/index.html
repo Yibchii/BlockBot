@@ -2,13 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" id="dynamic-favicon" type="image/png" href="/favicon-1.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>frontend</title>
-    <script type="module" crossorigin src="/static/frontend/app.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/frontend/assets/index.css">
+    <script>
+      // Set random favicon on page load
+      function setRandomFavicon() {
+        const iconCount = 3; // Change this to match your number of images
+        const randomNum = Math.floor(Math.random() * iconCount) + 1;
+        const faviconUrl = "/favicon-" + randomNum + ".png";
+        document.getElementById('dynamic-favicon').href = faviconUrl;
+      }
+      setRandomFavicon();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
