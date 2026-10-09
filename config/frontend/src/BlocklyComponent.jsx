@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
+import './IntegerConstantBlock';
 
 // Define the custom Direction Constant block
 if (!Blockly.Blocks['direction_constant']) {
@@ -138,6 +139,10 @@ export default function BlocklyComponent() {
             { 
               kind: 'block', 
               type: 'math_number' 
+            },
+            {
+              kind: 'block',
+              type: 'integer_constant'
             },
             {
               kind: 'block',
