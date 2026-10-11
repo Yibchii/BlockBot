@@ -26,6 +26,22 @@ if (!Blockly.Blocks['direction_constant']) {
   };
 }
 
+// Define the Mazebot2D move block
+if (!Blockly.Blocks['mazebot2d_move']) {
+  Blockly.Blocks['mazebot2d_move'] = {
+    init: function () {
+      this.appendValueInput('DIRECTION')
+          .setCheck('String')
+          .appendField('move');
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour('#e67e22');
+      this.setTooltip('Moves the Mazebot in the specified direction.');
+      this.setHelpUrl('');
+    }
+  };
+}
+
 export default function BlocklyComponent() {
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
@@ -725,6 +741,10 @@ export default function BlocklyComponent() {
           name: 'Directions',
           colour: '#e67e22',
           contents: [
+            {
+              kind: 'block',
+              type: 'mazebot2d_move'
+            },
             { kind: 'block', 
               type: 'direction_constant' 
             }
