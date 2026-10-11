@@ -7,7 +7,7 @@ from .utils import loadDefaultBlocks
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
 
-# Create your views here.
+# Web Pages
 def index(request):
     return render(request, 'BlockBot/index.html')
 
@@ -32,7 +32,7 @@ def mazebot2d(request):
         },
     )
 
-
+#Utility library
 def _ascii_grid(grid, robot):
     rows = []
     rows.append("+" + "-" * grid.SIZE + "+")
@@ -52,7 +52,7 @@ def _ascii_grid(grid, robot):
 
     return "\n".join(rows)
 
-# API test
+# API Endpoints
 def test_api(request):
     return JsonResponse({"message" : "Django is connected"})
 
