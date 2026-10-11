@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import BlocklyComponent from "./BlocklyComponent";
-import MazeBot2DComponent from "./MazeBot2DComponent";
+import BlocklyComponent from "./components/BlocklyComponent";
+import MazeBot2DComponent from "./components/MazeBot2DComponent";
 
 function App() {
   const [message, setMessage] = useState("");
