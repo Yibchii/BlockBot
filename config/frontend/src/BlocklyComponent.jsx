@@ -3,44 +3,6 @@ import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import './IntegerConstantBlock';
 
-// Define the custom Direction Constant block
-if (!Blockly.Blocks['direction_constant']) {
-  Blockly.Blocks['direction_constant'] = {
-    init: function () {
-      this.appendDummyInput()
-        .appendField('direction:')
-        .appendField(
-          new Blockly.FieldDropdown([
-            ['forward', 'FORWARD'],
-            ['backward', 'BACKWARD'],
-            ['left', 'LEFT'],
-            ['right', 'RIGHT']
-          ]),
-          'DIRECTION'
-        );
-      this.setOutput(true, 'String');
-      this.setColour('#e67e22');
-      this.setTooltip('Specifies a direction constant.');
-      this.setHelpUrl('');
-    }
-  };
-}
-
-// Define the Mazebot2D move block
-if (!Blockly.Blocks['mazebot2d_move']) {
-  Blockly.Blocks['mazebot2d_move'] = {
-    init: function () {
-      this.appendValueInput('DIRECTION')
-          .setCheck('String')
-          .appendField('move');
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour('#e67e22');
-      this.setTooltip('Moves the Mazebot in the specified direction.');
-      this.setHelpUrl('');
-    }
-  };
-}
 
 export default function BlocklyComponent() {
   const blocklyDiv = useRef(null);
