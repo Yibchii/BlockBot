@@ -10,6 +10,7 @@ function App() {
       <NavBar />
       <main className="mx-auto">
         <Routes>
+          { /* To add new pages, create a new component, add a path to BlockBot/urls.py, then add a route here */}
           <Route path="/" element={<Editor />} />
           <Route path="/editor" element={<Editor />} />
           <Route path="/home" element={<Home />} />
