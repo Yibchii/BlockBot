@@ -4,6 +4,12 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name="index"),
+    path('home', views.index, name="home"),
+    path('home/', views.index, name="home-slash"),
+    path('editor', views.index, name="editor"),
+    path('editor/', views.index, name="editor-slash"),
+    path('login', views.index, name="login"),
+    path('login/', views.index, name="login-slash"),
     path('mazebot2d', views.mazebot2d, name="mazebot2d"),
     path('mazebot2d/', views.mazebot2d, name="mazebot2d-slash"),
     path('api/test/', views.test_api),

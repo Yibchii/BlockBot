@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
-import './IntegerConstantBlock';
+import '../IntegerConstantBlock';
 
 
 export default function BlocklyComponent() {
@@ -20,9 +20,9 @@ export default function BlocklyComponent() {
           name: 'Logic',
           colour: '#5b80a5',
           contents: [
-            { 
-              kind: 'block', 
-              type: 'controls_if' 
+            {
+              kind: 'block',
+              type: 'controls_if'
             },
             {
               kind: 'block',
@@ -51,8 +51,8 @@ export default function BlocklyComponent() {
           name: 'Loops',
           colour: '#5ba55b',
           contents: [
-            { 
-              kind: 'block', 
+            {
+              kind: 'block',
               type: 'controls_repeat_ext',
               inputs: {
                 TIMES: {
@@ -97,7 +97,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -114,9 +114,9 @@ export default function BlocklyComponent() {
           name: 'Math',
           colour: '#5b67a5',
           contents: [
-            { 
-              kind: 'block', 
-              type: 'math_number' 
+            {
+              kind: 'block',
+              type: 'math_number'
             },
             {
               kind: 'block',
@@ -142,7 +142,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -156,7 +156,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -188,7 +188,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -197,16 +197,16 @@ export default function BlocklyComponent() {
                 NUM: {
                   block: {
                     type: 'math_number',
-                    fields : {
+                    fields: {
                       NUM: 3.1
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
-              type: 'math_on_list' 
+              type: 'math_on_list'
             },
             {
               kind: 'block',
@@ -228,7 +228,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -258,7 +258,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -280,7 +280,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -293,8 +293,9 @@ export default function BlocklyComponent() {
           name: 'Text',
           colour: '#dede07',
           contents: [
-            { kind: 'block', 
-              type: 'text' 
+            {
+              kind: 'block',
+              type: 'text'
             },
             {
               kind: 'block',
@@ -312,7 +313,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -326,7 +327,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -340,7 +341,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -362,7 +363,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -376,7 +377,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -390,7 +391,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -404,7 +405,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -418,7 +419,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -440,7 +441,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -470,7 +471,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -484,7 +485,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -521,9 +522,9 @@ export default function BlocklyComponent() {
           name: 'Lists',
           colour: '#11b2b2',
           contents: [
-            { 
-              kind: 'block', 
-              type: 'lists_create_empty' 
+            {
+              kind: 'block',
+              type: 'lists_create_empty'
             },
             {
               kind: 'block',
@@ -532,7 +533,7 @@ export default function BlocklyComponent() {
             {
               kind: 'block',
               type: 'lists_repeat',
-              inputs:{
+              inputs: {
                 NUM: {
                   block: {
                     type: 'math_number',
@@ -541,7 +542,7 @@ export default function BlocklyComponent() {
                     }
                   }
                 }
-              } 
+              }
             },
             {
               kind: 'block',
@@ -707,8 +708,9 @@ export default function BlocklyComponent() {
               kind: 'block',
               type: 'mazebot2d_move'
             },
-            { kind: 'block', 
-              type: 'direction_constant' 
+            {
+              kind: 'block',
+              type: 'direction_constant'
             }
           ]
         }
@@ -768,9 +770,9 @@ export default function BlocklyComponent() {
 
   return (
     <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-      <div 
-        ref={blocklyDiv} 
-        style={{ width: '850px', height: '480px', borderRadius: '8px', overflow: 'hidden' }} 
+      <div
+        ref={blocklyDiv}
+        style={{ width: '850px', height: '480px', borderRadius: '8px', overflow: 'hidden' }}
       />
     </div>
   );
