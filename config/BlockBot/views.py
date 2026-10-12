@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from django.shortcuts import render
 
 from .utils import loadDefaultBlocks
@@ -58,4 +61,12 @@ def get_mazebot2d_grid(request):
         "header": "Mazebot2D Grid",
         "grid": _ascii_grid(Grid(), Mazebot2D(0, 0, grid=Grid())),
     }
+    return JsonResponse(response_data)
+
+def get_mazebot2d_blocks(request):
+    json_file = Path(__file__).resolve().parent / "block_files" / "mazebot2d.json"
+    print(f"Loading JSON file: {json_file}")
+    with open(json_file, "r", encoding="utf-8") as file:
+        response_data = json.load(file)
+
     return JsonResponse(response_data)
