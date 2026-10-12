@@ -3,6 +3,43 @@
   "confirmation" : "Mazebot2D Blocks Loaded",
   "blocks": {
     "languageVersion": 0,
-    "blocks": []
+    "blocks": [
+      {
+        "type": "direction_constant",
+        "message0": "direction: %1",
+        "args0": [
+          {
+            "type": "field_dropdown",
+            "name": "DIRECTION",
+            "options": [
+              ["forward", "FORWARD"],
+              ["backward", "BACKWARD"],
+              ["left", "LEFT"],
+              ["right", "RIGHT"]
+            ]
+          }
+        ],
+        "output": "String",
+        "colour": "#e67e22",
+        "tooltip": "Specifies a direction constant.",
+        "helpUrl": ""
+      },
+      {
+        "type": "mazebot2d_move",
+        "message0": "move %1",
+        "args0": [
+          {
+            "type": "input_value",
+            "name": "DIRECTION",
+            "check": "String"
+          }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": 160,
+        "tooltip": "Move the robot in the specified direction.",
+        "helpUrl": ""
+      }
+    ]
   }
 }
