@@ -15,7 +15,6 @@ export default function Editor() {
     return (
         <div>
             <h1 className="text-4xl lg:text-6xl">BlockBot</h1>
-            <h2 className="text-xl lg:text-2xl">BlockBot</h2>
             <p>{message}</p>
             <div className="flex flex-row gap-8 items-start" >
                 <div>
