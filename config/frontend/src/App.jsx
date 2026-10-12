@@ -8,7 +8,7 @@ function App() {
   return (
     <BrowserRouter>
       <NavBar />
-      <main className="mx-auto">
+      <main className="mx-auto"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
           { /* To add new pages, create a new component, add a path to BlockBot/urls.py, then add a route here */}
           <Route path="/" element={<Editor />} />
