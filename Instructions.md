@@ -9,38 +9,59 @@ see requirements.txt for exact version information, and install requirements wit
 pip install -r requirements.txt
 ```
 
-# Running The Web Server
-Create and work within a local python virtual enviornment.
-for Ubunutu, do this via:
+# 1. Running The Web Server
+## 1.1. Create and enter a Python virtual enviornment.
+If you are running Ubuntu:
 
-(If your using Visual Studio code on windows, skip the 'source venv/bin/activate' code below)
+>Open the root directory of the project, then type in your terminal:
+>```
+>python -m venv venv
+>source venv/bin/activate
+>```
 
+If you are on Windows:
+> Open the root directory of the project, then type in your terminal:
+>```
+>python -m venv venv
+>.\venv\Scripts\activate
+>```
+
+You should now see (venv) at the start of your current line in the terminal.
+
+## 1.2. Start the server(s)
+To run the Django and Vite servers, use the following script:
 ```
-python -m venv venv
-source venv/bin/activate
+python run-server.py
 ```
-do NOT include your local /venv/ folder in the repository.
 
-to run the django server, navigate into /config/ and run
-```
-python manage.py runserver
-```
-then using your browser navigate to `localhost:8000`
+>This script launches both Django and Vite and automatically handles entering dev/prod mode based on the current DEBUG setting in the Django settings.py file (prod will need some additional setup at some point, so stick to dev for now).
 
+If you need to run the services manually instead, follow these instructions:
 
-# Using Django
-When starting the server, if you get a migrations warning or have changed any database models, run the following commands
+>For development (DEBUG=True):
+>- In one terminal, run `python manage.py runserver` to start Django.
+>- In another terminal, navigate to /config/frontend/ and run `npm run dev` to start Vite.
+>
+>For production (DEBUG=False):
+>- In one terminal, navigate to /config/frontend run `npm run build` to build the frontend assets.
+>- In another terminal, run `python manage.py runserver` to start Django.
+
+You should now have both Django and Vite running and are ready to connect to the server.
+
+## 1.3 Connecting to the server
+Use your web browser to navigate to http://127.0.0.1:8000. The page should display and any changes you make should automatically be shown upon saving if you are running in development mode.
+
+# Troubleshooting
+## Migration Warnings
+When starting the server, if you get a migrations warning or have changed any database models, run the following commands:
 ```
 python manage.py makemigrations
 python manage.py migrate
 ```
-to apply migrations
-
-
-for direct userbase/databse control, navigate in your browser to `localhost:8000/admin`
-a superuser account has been created for developement purposes. Sign in as the superuser using 
-```
-username: admin
-password: password
-```
-
+To apply migrations for direct userbase/databse control:  
+>Navigate in your browser to `localhost:8000/admin`
+>a superuser account has been created for developement purposes. Sign in as the superuser using:
+>```
+>username: admin
+>password: password
+>```

@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # They are non-Django backend libraries that are referenced by Django, so are included, but do not go here.
 # Django is a middleman between frontend (html) and backend (robot simulations)
 INSTALLED_APPS = [
+    'django_vite',
     'BlockBot.apps.BlockbotConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +52,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -119,7 +123,19 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+DJANGO_VITE = {
+    'default': {
+        'dev_mode': DEBUG,
+        'static_url_prefix': 'frontend/',
+        'manifest_path': BASE_DIR / 'BlockBot' / 'static' / 'frontend' / 'manifest.json',
+    },
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
