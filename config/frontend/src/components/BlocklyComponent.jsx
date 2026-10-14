@@ -4,7 +4,9 @@ import 'blockly/blocks';
 import '../IntegerConstantBlock';
 
 
-export default function BlocklyComponent() {
+export default function BlocklyComponent({ onWorkspaceReady }) {
+  const readyCallbackRef = useRef(onWorkspaceReady);
+  readyCallbackRef.current = onWorkspaceReady;
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
 
@@ -761,7 +763,17 @@ export default function BlocklyComponent() {
     resolveVariableIds(resolvedToolbox);
     workspaceRef.current.updateToolbox(resolvedToolbox);
 
+    const workspace = workspaceRef.current;
+    readyCallbackRef.current?.(workspace);
+
+    // Blocky needs resizing when its flex/grid parent changes size
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => Blockly.svgResize(workspace)) : null;
+    observer?.observe(blocklyDiv.current);
+    Blockly.svgResize(workspace);
+
     return () => {
+      observer?.disconnect();
+      readyCallbackRef.current?.(null);
       if (workspaceRef.current) {
         workspaceRef.current.dispose();
       }
@@ -769,11 +781,6 @@ export default function BlocklyComponent() {
   }, []);
 
   return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-      <div
-        ref={blocklyDiv}
-        style={{ width: '850px', height: '480px', borderRadius: '8px', overflow: 'hidden' }}
-      />
-    </div>
+    <div ref={blocklyDiv} className="blockly-host" aria-label="Blockly programming canvas" />
   );
 }
