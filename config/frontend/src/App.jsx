@@ -11,9 +11,13 @@ function App() {
       <NavBar />
       <main className="mx-auto"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
-          { /* To add new pages, create a new component, add a path to BlockBot/urls.py, then add a route here */}
-          <Route path="/" element={<StudentWorkspace />} />
-          <Route path="/editor" element={<StudentWorkspace />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/static/frontend/editor" element={<Editor />} />
+          <Route path="/static/frontend/home" element={<Home />} />
+          <Route path="/static/frontend/login" element={<LoginPage />} />
+          <Route path="/static/frontend/student" element={<StudentWorkspace />} />
+          <Route path="/static/frontend/*" element={<Home />} />
+          <Route path="/editor" element={<Editor />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/student" element={<StudentWorkspace />} />
