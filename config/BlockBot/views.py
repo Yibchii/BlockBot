@@ -57,9 +57,11 @@ def test_api(request):
     return JsonResponse({"message" : "Django is connected"})
 
 def get_mazebot2d_grid(request):
+    x = int(request.GET.get("x", 0))
+    y = int(request.GET.get("y", 0))
     response_data = {
         "header": "Mazebot2D Grid",
-        "grid": _ascii_grid(Grid(), Mazebot2D(0, 0, grid=Grid())),
+        "grid": _ascii_grid(Grid(), Mazebot2D(x, y, grid=Grid())),
     }
     return JsonResponse(response_data)
 
