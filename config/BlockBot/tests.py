@@ -1,7 +1,20 @@
 from django.test import TestCase
+from .models import Robot
 
 
 class MazeBot2DViewTestCase(TestCase):
+	def test_robot_api_lists_database_robots(self):
+		Robot.objects.create(id=1, name="MazeBot2D", robot_type=Robot.RobotType.SIMULATED)
+
+		response = self.client.get('/api/robots/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json()["robots"], [{
+			"id": 1,
+			"name": "MazeBot2D",
+			"robot_type": "simulated",
+		}])
+
 	def test_mazebot2d_displays_ascii_grid_and_controls(self):
 		response = self.client.get('/mazebot2d')
 

@@ -1,8 +1,25 @@
 import BlocklyComponent from "../components/BlocklyComponent";
-import MazeBot2DComponent from "../components/MazeBot2DComponent";
+import { useEffect, useState } from "react";
+import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
 import "./StudentBlockProgram.css";
 
 export default function Editor() {
+	const [robot, setRobot] = useState(null);
+
+	useEffect(() => {
+		fetch("/api/robots/")
+			.then((response) => {
+				if (!response.ok) throw new Error("Unable to load available robots.");
+				return response.json();
+			})
+			.then(({ robots }) => setRobot(robots?.[0] || null))
+			.catch((error) => console.error("Error loading robots:", error));
+	}, []);
+
+	const RobotComponent = robot
+		? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
+		: null;
+
 	return (
 		<div className="standalone-editor-page">
 			<div className="standalone-editor-grid">
@@ -20,10 +37,10 @@ export default function Editor() {
 				</section>
 				<aside className="standalone-maze-panel" aria-label="MazeBot2D simulator">
 					<div className="panel-header">
-						<h2>MazeBot2D</h2>
+						<h2>{robot?.name || "Robot"}</h2>
 					</div>
 					<div className="maze-component-container">
-						<MazeBot2DComponent />
+						{RobotComponent && <RobotComponent />}
 					</div>
 				</aside>
 			</div>
