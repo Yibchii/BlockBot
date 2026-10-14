@@ -3,7 +3,7 @@ import Editor from "./pages/Editor";
 import Home from "./pages/Home";
 import NavBar from "./components/nav";
 import LoginPage from "./pages/LoginPage";
-import StudentWorkspace from "./pages/Student_Block_Program";
+import StudentWorkspace from "./pages/StudentBlockProgram";
 
 function App() {
   return (

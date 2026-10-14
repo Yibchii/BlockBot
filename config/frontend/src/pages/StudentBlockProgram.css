@@ -45,7 +45,17 @@
 .console-panel {position:relative;flex:1;min-height:160px;padding-bottom:58px;}
 .console-message {display:flex;align-items:flex-start;gap:10px;padding:17px 12px;font-size:12px;}.feedback-check {display:grid;place-items:center;flex-shrink:0;width:19px;height:19px;border-radius:50%;background:#5aab75;color:#fff;}.console-message strong {color:#499b65;font-size:12px;font-weight:600;}.console-message p {margin:4px 0 0;color:#617896;font-size:11px;}
 .ai-help-button {position:absolute;bottom:12px;right:12px;padding:9px 15px;border:0;border-radius:5px;color:#fff;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;}.ai-help-button:focus-visible {outline:3px solid #94baff;outline-offset:3px;}.help-card {margin:0 12px 12px;padding:12px;border-radius:5px;background:#edf5ff;font-size:12px;}.help-card p {margin:5px 0 0;}
-.standalone-editor-page {display:flex;flex-direction:column;width:100vw;min-height:100dvh;}.standalone-editor-panel {flex:1;min-height:500px;margin:12px;}
+.standalone-editor-page {display:flex;flex-direction:column;width:100%;min-height:100dvh;padding:clamp(9px,1.3vw,18px);background:#f5f8fe;}
+.standalone-editor-grid {display:grid;grid-template-columns:minmax(0,1fr) clamp(255px,30vw,440px);gap:clamp(9px,1vw,16px);height:calc(100dvh - clamp(18px,2.6vw,36px));min-height:520px;}
+.standalone-editor-grid .workspace-panel,.standalone-maze-panel {min-width:0;min-height:0;overflow:hidden;border:1px solid #cbdcf0;border-radius:7px;background:white;box-shadow:0 3px 12px #213e6810;}
+.standalone-editor-grid .workspace-panel {display:flex;flex-direction:column;}
+.standalone-maze-panel {display:flex;flex-direction:column;}
+.maze-component-container {flex:1;min-height:0;overflow:auto;padding:12px;color:#29436e;font:14px/1.45 'Segoe UI',system-ui,sans-serif;}
+.maze-component-container p {margin:0 0 10px;}
+.maze-component-container button {margin:0 5px 5px 0;padding:7px 10px;border:1px solid #bdcee8;border-radius:5px;background:#edf4ff;color:#29436e;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;}
+.maze-component-container button:hover {background:#dceaff;}
+.maze-component-container pre {padding:12px;margin:8px 0 0;overflow:auto;border:1px solid #d2e0f3;background:#f8fbff;color:#29436e;font:14px/1.35 ui-monospace,Consolas,monospace;}
 @media(max-width:1050px) { .student-grid {grid-template-columns:minmax(0,1fr) minmax(245px,34%);} .student-account {display:none;} }
 @media(max-width:760px) { .studio-toolbar {gap:9px;} .studio-actions {width:100%;margin:0;} .toolbar-button {flex:1;padding:0 7px;} .student-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .student-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .console-panel {min-height:210px;} .maze-board {max-width:390px;margin:10px auto;} }
 @media(max-width:520px) { .studio-brand {flex:1;} .project-name {order:3;flex-basis:100%;max-width:none;} .studio-actions {order:4;} .toolbar-button {font-size:11px;} .student-side {display:flex;} .simulator-panel,.console-panel {width:100%;} .workspace-panel {height:clamp(450px,63dvh,690px);} .workspace-hint {font-size:10px;} .editor-badge {display:none;} }
+@media(max-width:760px) { .standalone-editor-page {padding:9px;} .standalone-editor-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .standalone-editor-grid .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .standalone-maze-panel {min-height:380px;} }

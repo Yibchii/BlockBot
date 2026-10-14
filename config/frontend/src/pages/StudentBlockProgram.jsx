@@ -2,7 +2,7 @@ import { useState } from "react";
 import BlocklyComponent from "../components/BlocklyComponent";
 import Console from "./StudentProgramConsole";
 import Simulator from "./StudentProgramSimulator";
-import "./Student_Block_Program.css";
+import "./StudentBlockProgram.css";
 
 
 export default function StudentWorkspace() {
