@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import '../IntegerConstantBlock';
+import '../blockGen';
 
 
 export default function BlocklyComponent({ onWorkspaceReady }) {
