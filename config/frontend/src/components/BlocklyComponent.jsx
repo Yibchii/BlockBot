@@ -709,6 +709,10 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
           contents: [
             {
               kind: 'block',
+              type: 'mazebot2d_start_program'  
+          },
+            {
+              kind: 'block',
               type: 'mazebot2d_move'
             },
             {

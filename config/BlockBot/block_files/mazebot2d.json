@@ -39,7 +39,15 @@
         "colour": 160,
         "tooltip": "Move the robot in the specified direction.",
         "helpUrl": ""
-      }
+      },
+      {
+      "type": "mazebot2d_start_program",
+      "message0": "start program",
+      "nextStatement": null,
+      "colour": "#e67e22",
+      "tooltip": "Starting point for the robot program.",
+      "helpUrl": ""
+    }
     ]
   }
 }
