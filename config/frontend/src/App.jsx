@@ -9,7 +9,7 @@ function App() {
   return (
     <BrowserRouter>
       <NavBar />
-      <main className="mx-auto"> { /* Contains all content besides nav bar (and footer once added) */}
+      <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/static/frontend/editor" element={<Editor />} />
