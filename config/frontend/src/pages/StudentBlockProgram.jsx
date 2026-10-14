@@ -6,7 +6,7 @@ import Console from "./StudentProgramConsole";
 import "./StudentBlockProgram.css";
 
 
-export default function StudentWorkspace() {
+export default function Editor() {
   const [robot, setRobot] = useState(null);
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
