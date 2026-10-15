@@ -44,3 +44,9 @@ class MazeBot2DViewTestCase(TestCase):
 		response = self.client.get('/mazebot2d/')
 
 		self.assertEqual(response.status_code, 200)
+
+	def test_api_endpoint_succeeds(self):
+		response = self.client.get('/api/test/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json(), {'message': 'Django is connected'})
