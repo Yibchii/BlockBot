@@ -12,13 +12,9 @@ export default function NavBar() {
             <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
                 Editor
             </Link>
-            <Link to={`${basePath}/student`} className="mr-4 hover:text-gray-400">
-                workspace
-            </Link>
             <Link to={`${basePath}/login`} className="hover:text-gray-400">
                 Login
             </Link>
         </nav>
     );
 }
-
