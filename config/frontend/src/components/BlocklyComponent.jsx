@@ -713,7 +713,7 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
         },
         {
           kind: 'category',
-          name: 'Directions',
+          name: 'Robot',
           colour: '#e67e22',
           contents: [
             {
