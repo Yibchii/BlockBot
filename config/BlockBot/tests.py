@@ -50,3 +50,17 @@ class MazeBot2DViewTestCase(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(response.json(), {'message': 'Django is connected'})
+
+	def test_mazebot2d_grid_api_succeeds(self):
+		response = self.client.get('/api/mazebot2d/grid/', {'x': 0, 'y': 0})
+
+		self.assertEqual(response.status_code, 200)
+		data = response.json()
+		self.assertEqual(data['header'], 'Mazebot2D Grid')
+		self.assertIn('grid', data)
+
+		rows = data['grid'].splitlines()
+		self.assertEqual(len(rows), 12)
+		self.assertEqual(rows[0], '+----------+')
+		self.assertEqual(rows[-1], '+----------+')
+		self.assertEqual(rows[1][1], '@')
