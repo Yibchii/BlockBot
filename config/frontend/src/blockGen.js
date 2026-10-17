@@ -25,3 +25,29 @@ try {
 } catch (error) {
   console.error('Error loading Mazebot2D blocks:', error);
 }
+
+export function generateSimulatorCommands(workspace) {
+    const commands = [];
+    const topBlocks = workspace.getTopBlocks(true);
+
+    for (const block of topBlocks) {
+        let current = block;
+        while (current) {
+            switch (current.type) {
+                case 'maze_move_forward':
+                    commands.push({ type: 'FORWARD', value: 50 });
+                    break;
+                case 'maze_turn_left':
+                    commands.push({ type: 'TURN_LEFT', value: 90 });
+                    break;
+                case 'maze_turn_right':
+                    commands.push({ type: 'TURN_RIGHT', value: 90 });
+                    break;
+                default:
+                    break;
+            }
+            current = current.getNextBlock();
+        }
+    }
+    return commands;
+}

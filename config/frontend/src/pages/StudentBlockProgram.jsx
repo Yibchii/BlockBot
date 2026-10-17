@@ -4,7 +4,7 @@ import { runBlocklyProgram } from "../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
 import Console from "./StudentProgramConsole";
 import "./StudentBlockProgram.css";
-
+import { generateSimulatorCommands } from "../blockGen";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
@@ -56,6 +56,13 @@ export default function Editor() {
 
     try {
       await runtimeRef.current.reset();
+
+      // Generate commands from the active Blockly workspace and send to simulator queue
+      const commands = generateSimulatorCommands(workspace);
+      if (runtimeRef.current.enqueueCommands) {
+        runtimeRef.current.enqueueCommands(commands);
+      }
+
       await runBlocklyProgram(workspace, runtimeRef.current);
       setRunState("idle");
       setStatus({ state: "success", title: "Program complete", msg: "Your robot finished the program." });
