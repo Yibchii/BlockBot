@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./MazeBot2DComponent.css";
+
 
 const DIRECTIONS = {
     UP: "up",
@@ -32,16 +34,56 @@ async function fetchGridCoordinate(x, y, signal) {
     return data;
 }
 
+// only interprets characters for display
+function parseGrid(text) {
+    const lines = text.replace(/\r/g, "").split("\n");
+    while (lines.length && !lines[0].trim()) lines.shift();
+    while (lines.length && !lines.at(-1).trim()) lines.pop();
+    if (!lines.length) return null;
+    const width = Math.max(...lines.map((line) => [...line].length));
+    if (!width) return null;
+    return { lines: lines.map((line) => [...line]), width, height: lines.length };
+}
+
+function kind(char) {
+    if (/[#█▓▒■Xx]/u.test(char) || /[+|─│┌┐└┘┬┴├┤┼═║╔╗╚╝]/u.test(char)) return "wall";
+    if (/[GgFf⚑★]/u.test(char)) return "goal";
+    return "floor";
+}
+
+function BotFace() {
+  return (
+    <svg className="bb-maze-bot-svg" viewBox="0 0 48 48" aria-hidden="true">
+    <circle cx="24" cy="24" r="22" fill="#ff755f" stroke="#fff8ed" strokeWidth="2.5" />
+    <path d="M24 10V7" stroke="#fff8ed" strokeWidth="2.5" strokeLinecap="round" />
+    <circle cx="24" cy="6" r="3" fill="#f7c85d" />
+    <rect x="11" y="15" width="26" height="20" rx="7" fill="#fff8ed" />
+    <circle cx="19" cy="25" r="3" fill="#17334b" /><circle cx="29" cy="25" r="3" fill="#17334b" />
+    <path d="M21 31q3 3 6 0" stroke="#17334b" strokeWidth="2" fill="none" strokeLinecap="round" />
+    <rect x="7" y="22" width="5" height="8" rx="2" fill="#ffc0a8" />
+    <rect x="36" y="22" width="5" height="8" rx="2" fill="#ffc0a8" />
+    </svg>
+  );
+}
+
 export default function MazeBot2DComponent({ onRuntimeReady }) {
     const [grid, setGrid] = useState("");
     const [header, setHeader] = useState("");
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [trail, setTrail] =  useState([{ x: 0, y: 0 }]);
+    const [showRaw, setShowRaw] = useState(false);
     const runtimeRef = useRef(null);
 
     const handleStateChange = useCallback(({ header: nextHeader, grid: nextGrid, position: nextPosition }) => {
         setHeader(nextHeader);
         setGrid(nextGrid);
         setPosition(nextPosition);
+        setTrail((previous) => {
+            if (nextPosition.x === 0 && nextPosition.y === 0) return [{ x: 0, y: 0 }];
+            const last = previous[previous.length - 1];
+            if (last?.x === nextPosition.x && last?.y === nextPosition.y) return previous;
+            return [...previous, nextPosition];
+        })
     }, []);
 
     useEffect(() => {
@@ -125,10 +167,44 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
         });
     };
         
-	return (
-        <div>
-            <p>Current Position: ({position.x}, {position.y})</p>
-            <pre>{grid}</pre>
+	const parsed = useMemo(() => parseGrid(grid), [grid]);
+    // The API includes a one-cell ASCII border around the 10x10 play area.
+      const columns = parsed?.width ?? 10;
+      const rows = parsed?.height ?? 10;
+    const hasAsciiBorder = columns === GRID_MAX_INDEX + 3 && rows === GRID_MAX_INDEX + 3;
+    const gridOffset = hasAsciiBorder ? 1 : 0;
+    const cellX = (x) => (x + gridOffset + 0.5) * (100 / columns);
+    const cellY = (y) => (y + gridOffset + 0.5) * (100 / rows);
+      const goalExists = parsed?.lines.some((line) => line.some((c) => kind(c) === "goal"));
+      const trailPoints = trail.map((p) => `${cellX(p.x)},${cellY(p.y)}`).join(" ");
+    
+      return (
+        <div className="bb-maze">
+          <div className="bb-maze-topline">
+            <span className="bb-maze-label"><span className="bb-maze-live" /> Maze Simulator</span>
+            <span className="bb-maze-coordinate">Robot: ({position.x}, {position.y})</span>
+          </div>
+          <div className="bb-maze-shell">
+            <div className="bb-maze-board" role="img" aria-label={`Robot maze. Robot at x ${position.x}, y ${position.y}.`} style={{ "--bb-cols": columns, "--bb-rows": rows, aspectRatio: `${columns} / ${rows}` }}>
+              {Array.from({ length: rows * columns }, (_, index) => {
+                const x = index % columns;
+                const y = Math.floor(index / columns);
+                const type = parsed ? kind(parsed.lines[y]?.[x] ?? " ") : "floor";
+                return <div key={index} className={`bb-maze-tile bb-maze-tile-${type}`}>
+                  {type === "goal" && <span className="bb-maze-goal-flag" aria-hidden="true">⚑</span>}
+                </div>;
+              })}
+              {/* A fallback flag represents the wireframe's target, not a backend goal condition. */}
+              {!goalExists && <span className="bb-maze-corner-flag" aria-hidden="true">⚑</span>}
+              {trail.length > 1 && <svg className="bb-maze-trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points={trailPoints} /></svg>}
+              <div className="bb-maze-bot" style={{ left: `${cellX(position.x)}%`, top: `${cellY(position.y)}%` }}><BotFace /></div>
+            </div>
+          </div>
+          <div className="bb-maze-bottomline">
+            <span><span className="bb-maze-key-wall" /> Walls <span className="bb-maze-key-path" /> Open path</span>
+            <button type="button" className="bb-maze-ascii-toggle" onClick={() => setShowRaw((v) => !v)} aria-expanded={showRaw}>{showRaw ? "Hide ASCII" : "View ASCII"}</button>
+          </div>
+          {showRaw && <div className="bb-maze-raw"><div>{header}</div><pre>{grid || "Loading maze…"}</pre></div>}
         </div>
-    );
+      );
 }
