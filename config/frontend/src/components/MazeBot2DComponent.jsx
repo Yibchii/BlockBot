@@ -48,6 +48,14 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
         let positionState = { x: 0, y: 0 };
         let requestController = null;
         let stopped = false;
+        let paused = false;
+        let pausePromise = null;
+        let resolvePause = null;
+
+        const waitIfPaused = async () => {
+            if (!paused) return;
+            await pausePromise;
+        };
 
         const publish = (data) => {
             const state = { ...data, position: { ...positionState } };
@@ -59,6 +67,8 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
             if (stopped) {
                 throw new Error("Program stopped.");
             }
+
+            await waitIfPaused();
 
             const apiDirection = DIRECTIONS[direction];
             if (!apiDirection) {
@@ -79,6 +89,8 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
                 requestController.signal
             );
 
+            await waitIfPaused();
+
             if (stopped) {
                 throw new Error("Program stopped.");
             }
@@ -89,6 +101,12 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
 
         const reset = async () => {
             stopped = false;
+            if (paused && resolvePause) {
+                resolvePause();
+                paused = false;
+                pausePromise = null;
+                resolvePause = null;
+            }
             requestController?.abort();
             requestController = new AbortController();
             const data = await fetchGridCoordinate(0, 0, requestController.signal);
@@ -98,10 +116,32 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
 
         const stop = () => {
             stopped = true;
+            if (paused && resolvePause) {
+                resolvePause();
+                paused = false;
+                pausePromise = null;
+                resolvePause = null;
+            }
             requestController?.abort();
         };
 
-        const runtime = { move, reset, stop };
+        const pause = () => {
+            if (!paused) {
+                paused = true;
+                pausePromise = new Promise((resolve) => { resolvePause = resolve; });
+            }
+        };
+
+        const resume = () => {
+            if (paused && resolvePause) {
+                resolvePause();
+                paused = false;
+                pausePromise = null;
+                resolvePause = null;
+            }
+        };
+
+        const runtime = { move, reset, stop, pause, resume };
         runtimeRef.current = runtime;
         onRuntimeReady?.(runtime);
 

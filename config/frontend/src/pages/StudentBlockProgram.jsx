@@ -13,6 +13,7 @@ export default function Editor() {
   const [workspace, setWorkspace] = useState(null);
   const [robotReady, setRobotReady] = useState(false);
   const [runState, setRunState] = useState("idle");
+  const [paused, setPaused] = useState(false);
   const [status, setStatus] = useState({
     state: "idle",
     title: "Ready to edit",
@@ -51,6 +52,7 @@ export default function Editor() {
   const handleRun = async () => {
     if (!workspace || !runtimeRef.current || runState === "running") return;
 
+    setPaused(false);
     setRunState("running");
     setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
 
@@ -58,24 +60,28 @@ export default function Editor() {
       await runtimeRef.current.reset();
       await runBlocklyProgram(workspace, runtimeRef.current);
       setRunState("idle");
+      setPaused(false);
       setStatus({ state: "success", title: "Program complete", msg: "Your robot finished the program." });
     } catch (error) {
       if (error.name === "AbortError" || error.message === "Program stopped.") {
         setRunState("idle");
+        setPaused(false);
         setStatus({ state: "idle", title: "Program stopped", msg: "The robot was reset." });
         return;
       }
 
       setRunState("idle");
+      setPaused(false);
       setStatus({ state: "error", title: "Program error", msg: error.message });
     }
   };
 
   const handleStop = async () => {
-    runtimeRef.current?.stop();
+    runtimeRef.current?.stop?.();
     setRunState("idle");
+    setPaused(false);
     try {
-      await runtimeRef.current?.reset();
+      await runtimeRef.current?.reset?.();
     } catch (error) {
       if (error.name !== "AbortError") {
         setStatus({ state: "error", title: "Reset failed", msg: error.message });
@@ -85,9 +91,23 @@ export default function Editor() {
     setStatus({ state: "idle", title: "Ready to edit", msg: "The robot was reset." });
   };
 
+  const handlePauseToggle = () => {
+    if (!runtimeRef.current || runState !== "running") return;
+    if (paused) {
+      runtimeRef.current?.resume?.();
+      setPaused(false);
+      setStatus({ state: "running", title: "Resumed", msg: "Program resumed." });
+    } else {
+      runtimeRef.current?.pause?.();
+      setPaused(true);
+      setStatus({ state: "running", title: "Paused", msg: "Program paused." });
+    }
+  };
+
   const actions = [
     ["save", "save.svg", "Save", true],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
+    ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["stop", null, "Stop / Reset", false],
     ["submit", "send.svg", "Submit", true],
   ];
@@ -102,8 +122,30 @@ export default function Editor() {
         </label>
         <div className="studio-actions" aria-label="Program actions">
           {actions.map(([type, icon, label, disabled]) => (
-            <button key={type} type="button" className={`toolbar-button toolbar-${type}`} disabled={disabled} onClick={type === "run" ? handleRun : type === "stop" ? handleStop : undefined}>
-              {icon ? <img src={`/static/frontend/images/${icon}`} alt="" /> : <span aria-hidden="true">■</span>}{label}
+            <button
+              key={type}
+              type="button"
+              className={`toolbar-button toolbar-${type}`}
+              disabled={disabled}
+              onClick={
+                type === "run"
+                  ? handleRun
+                  : type === "stop"
+                  ? handleStop
+                  : type === "pause"
+                  ? handlePauseToggle
+                  : undefined
+              }
+              aria-pressed={type === "pause" ? String(paused) : undefined}
+            >
+              {type === "pause" ? (
+                <span aria-hidden="true" className="pause-glyph">{paused ? "▶" : "⏸"}</span>
+              ) : icon ? (
+                <img src={`/static/frontend/images/${icon}`} alt="" />
+              ) : (
+                <span aria-hidden="true">■</span>
+              )}
+              {label}
             </button>
           ))}
         </div>
