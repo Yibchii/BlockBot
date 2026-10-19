@@ -5,7 +5,6 @@ import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
 import Console from "./StudentProgramConsole";
 import "./StudentBlockProgram.css";
 
-
 export default function Editor() {
   const [robot, setRobot] = useState(null);
   const [projectName, setProjectName] = useState("Maze Runner");
@@ -38,11 +37,13 @@ export default function Editor() {
         }
         setRobot(selectedRobot);
       })
-      .catch((error) => setStatus({
-        state: "error",
-        title: "Robot unavailable",
-        msg: error.message,
-      }));
+      .catch((error) =>
+        setStatus({
+          state: "error",
+          title: "Robot unavailable",
+          msg: error.message,
+        })
+      );
   }, []);
 
   const RobotComponent = robot
@@ -52,11 +53,14 @@ export default function Editor() {
   const handleRun = async () => {
     if (!workspace || !runtimeRef.current || runState === "running") return;
 
-    setPaused(false);
+    setPaused(false); // ensure not paused when starting
     setRunState("running");
     setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
 
     try {
+      // Ensure runtime is active (clear stopped/pause) before resetting and running
+      runtimeRef.current?.start?.();
+
       await runtimeRef.current.reset();
       await runBlocklyProgram(workspace, runtimeRef.current);
       setRunState("idle");
@@ -115,11 +119,16 @@ export default function Editor() {
   return (
     <div className="student-page">
       <header className="studio-toolbar">
-        <div className="studio-brand"><img src="/static/frontend/images/robot.svg" alt="" /><strong>BlockBot Studio</strong></div>
+        <div className="studio-brand">
+          <img src="/static/frontend/images/robot.svg" alt="" />
+          <strong>BlockBot Studio</strong>
+        </div>
+
         <label className="project-name">
           <img src="/static/frontend/images/folder.svg" alt="" />
           <input aria-label="Project name" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
         </label>
+
         <div className="studio-actions" aria-label="Program actions">
           {actions.map(([type, icon, label, disabled]) => (
             <button
@@ -149,24 +158,38 @@ export default function Editor() {
             </button>
           ))}
         </div>
-        <div className="student-account"><img src="/static/frontend/images/profile-silhouette.svg" alt="" /><span>Student</span></div>
+
+        <div className="student-account">
+          <img src="/static/frontend/images/profile-silhouette.svg" alt="" />
+          <span>Student</span>
+        </div>
       </header>
+
       <div className="student-content">
         <div className="student-grid">
           <section className="workspace-panel" aria-label="Interactive Blockly programming editor">
             <div className="panel-header workspace-editor-header">
-              <div><h2>Blockly Workspace</h2><span className="workspace-hint">Select a toolbox category, then drag blocks onto the canvas</span></div>
+              <div>
+                <h2>Blockly Workspace</h2>
+                <span className="workspace-hint">Select a toolbox category, then drag blocks onto the canvas</span>
+              </div>
               <span className="editor-badge">Interactive editor</span>
             </div>
-            <div className="blockly-container"><BlocklyComponent onWorkspaceReady={setWorkspace} /></div>
+            <div className="blockly-container">
+              <BlocklyComponent onWorkspaceReady={setWorkspace} />
+            </div>
           </section>
+
           <div className="student-side">
             <section className="student-panel simulator-panel">
-              <div className="panel-header"><h2>{robot?.name || "Robot"}</h2></div>
+              <div className="panel-header">
+                <h2>{robot?.name || "Robot"}</h2>
+              </div>
               <div className="maze-component-container">
                 {RobotComponent && <RobotComponent onRuntimeReady={handleRuntimeReady} />}
               </div>
             </section>
+
             <Console status={status} showHelp={showHelp} onToggleHelp={() => setShowHelp(v => !v)} />
           </div>
         </div>
