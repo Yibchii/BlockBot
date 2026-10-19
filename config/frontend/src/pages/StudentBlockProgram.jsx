@@ -53,12 +53,11 @@ export default function Editor() {
   const handleRun = async () => {
     if (!workspace || !runtimeRef.current || runState === "running") return;
 
-    setPaused(false); // ensure not paused when starting
+    setPaused(false);
     setRunState("running");
     setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
 
     try {
-      // Ensure runtime is active (clear stopped/pause) before resetting and running
       runtimeRef.current?.start?.();
 
       await runtimeRef.current.reset();

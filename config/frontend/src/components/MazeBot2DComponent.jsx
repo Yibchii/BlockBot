@@ -48,8 +48,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     let positionState = { x: 0, y: 0 };
     let requestController = null;
     let stopped = false;
-
-    // Pause support
     let paused = false;
     let pausePromise = null;
     let resolvePause = null;
@@ -70,7 +68,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
         throw new Error("Program stopped.");
       }
 
-      // Wait if paused before starting the move
       await waitIfPaused();
 
       const apiDirection = DIRECTIONS[direction];
@@ -92,7 +89,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
         requestController.signal
       );
 
-      // Check paused again after the network step before committing position
       await waitIfPaused();
 
       if (stopped) {
@@ -104,8 +100,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     };
 
     const reset = async () => {
-      // NOTE: do NOT change `stopped` here. reset should not re-enable execution after stop().
-      // clear pause state so reset always proceeds
       if (paused && resolvePause) {
         resolvePause();
         paused = false;
@@ -121,7 +115,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
 
     const stop = () => {
       stopped = true;
-      // resume any paused waiters so cleanup proceeds
       if (paused && resolvePause) {
         resolvePause();
         paused = false;
@@ -147,7 +140,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       }
     };
 
-    // new: explicitly enable execution (clears stopped and any pause)
     const start = () => {
       stopped = false;
       if (paused && resolvePause) {
