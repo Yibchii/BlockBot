@@ -1,29 +1,42 @@
-/* Visual treatment only — no movement or robot program logic here. */
-.bb-maze{--ink:#17334b;--muted:#8ca2ae;--panel:#203f55;--line:#396176;width:100%;min-width:0;padding:16px;color:#f6f0df;background:radial-gradient(circle at 90% 0,#2e5966 0,transparent 38%),linear-gradient(145deg,#17334b,#122a3e);border:1px solid #31576a;border-radius:14px;box-shadow:0 14px 30px #122a3e2e;font:12px/1.4 'Segoe UI',system-ui,sans-serif}
-.bb-maze *{box-sizing:border-box}
-.bb-maze-topline,.bb-maze-bottomline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.bb-maze-topline{margin:0 0 12px}
-.bb-maze-label{font-size:13px;font-weight:800;letter-spacing:.04em;color:#fff8ed;display:flex;align-items:center;gap:8px}
-.bb-maze-live{width:8px;height:8px;background:#8dd9a8;border-radius:50%;display:inline-block;box-shadow:0 0 0 4px #8dd9a81f}
-.bb-maze-coordinate{padding:5px 8px;color:#f7c85d;background:#132c40;border:1px solid #396176;border-radius:6px;font:700 11px ui-monospace,Consolas,monospace}
-.bb-maze-shell{padding:7px;background:#132c40;border:1px solid #396176;border-radius:9px;min-width:0;box-shadow:inset 0 1px #ffffff0b}
-.bb-maze-board{--bb-cols:10;--bb-rows:10;position:relative;width:100%;display:grid;grid-template-columns:repeat(var(--bb-cols),minmax(0,1fr));grid-template-rows:repeat(var(--bb-rows),minmax(0,1fr));background:#f8f2e5;border:3px solid #f7c85d;overflow:hidden;max-height:min(53dvh,520px);margin:0 auto}
-.bb-maze-tile{min-width:0;min-height:0;background:#f8f2e5;border-right:1px solid #e4dcca;border-bottom:1px solid #e4dcca;position:relative}
-.bb-maze-tile-wall{background:linear-gradient(135deg,#466575,#2d5063);border-color:#2a4b5d;box-shadow:inset 0 1px #71909a33}
-.bb-maze-tile-goal{background:#dff0d9}
-.bb-maze-goal-flag{position:absolute;inset:0;display:grid;place-items:center;color:#28936c;font-size:clamp(12px,1.5vw,22px);font-weight:900}
-.bb-maze-corner-flag{position:absolute;right:1.5%;top:1%;font-size:clamp(15px,2vw,24px);color:#28936c;line-height:1;pointer-events:none;z-index:1}
-.bb-maze-trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
-.bb-maze-trail polyline{fill:none;stroke:#ff755f;stroke-width:.75;stroke-dasharray:2 1.4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.bb-maze-bot{position:absolute;width:clamp(20px,9%,36px);aspect-ratio:1;transform:translate(-50%,-50%);z-index:3;pointer-events:none;filter:drop-shadow(0 3px 4px #122a3e66);transition:left .17s ease,top .17s ease}
-.bb-maze-bot-svg{width:100%;height:100%;display:block}
-.bb-maze-bottomline{margin-top:10px;color:var(--muted);font-size:10px}
-.bb-maze-bottomline>span{display:flex;align-items:center;gap:4px}
-.bb-maze-key-wall,.bb-maze-key-path{width:10px;height:10px;display:inline-block;border:1px solid #6f8c96;margin-left:6px}
-.bb-maze-key-wall{background:#466575}.bb-maze-key-path{background:#f8f2e5}
-.bb-maze-ascii-toggle{background:#f7c85d;color:#17334b;border:1px solid #f7c85d;border-radius:5px;padding:5px 10px;font:800 11px 'Segoe UI',sans-serif;cursor:pointer;transition:background .15s ease,transform .15s ease}
-.bb-maze-ascii-toggle:hover{background:#ffda7b;transform:translateY(-1px)}
-.bb-maze-raw{margin-top:10px;padding:9px;background:#132c40;border:1px solid #396176;border-radius:7px;color:#e9e3d4;overflow:auto}
-.bb-maze-raw pre{white-space:pre;font:12px/1.2 ui-monospace,monospace;overflow:auto;margin:6px 0 0;color:#f7c85d}
-@media(max-width:760px){.bb-maze{padding:12px}.bb-maze-board{max-height:none;max-width:440px}.bb-maze-shell{max-width:470px;margin:auto}}
-@media(prefers-reduced-motion:reduce){.bb-maze-bot{transition:none}}
+/* Wireframe-inspired visual skin. Robot movement, API handling, and Blockly runtime are in JSX. */
+.bb-maze {
+  --bb-blue: #2878f0;
+  width: 100%; min-width: 0; padding: clamp(8px, 1.3vw, 14px);
+  color: #244065; background: #fff; border: 1px solid #d5e3f3;
+  border-radius: 8px; font: 12px/1.4 'Segoe UI', system-ui, sans-serif;
+}
+.bb-maze * { box-sizing: border-box; }
+.bb-maze-topline, .bb-maze-bottomline { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.bb-maze-topline { margin-bottom: 10px; }
+.bb-maze-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: #234369; }
+.bb-maze-live { width: 8px; height: 8px; border-radius: 50%; background: #54b57a; box-shadow: 0 0 0 3px #54b57a22; }
+.bb-maze-coordinate { padding: 5px 8px; border: 1px solid #dbe7f5; border-radius: 5px; background: #f3f7fd; color: #47688f; font: 600 11px ui-monospace, Consolas, monospace; }
+.bb-maze-shell { background: #f8fbff; padding: 6px; border: 1px solid #d2dfef; border-radius: 5px; }
+.bb-maze-board {
+  --bb-cols: 10; --bb-rows: 10;
+  position: relative; display: grid; width: 100%; margin: 0 auto;
+  grid-template-columns: repeat(var(--bb-cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--bb-rows), minmax(0, 1fr));
+  background: #fff; border: 3px solid #697b94; overflow: hidden;
+  max-height: min(52dvh, 520px);
+}
+.bb-maze-tile { min-width: 0; min-height: 0; position: relative; background: #fff; border-right: 1px solid #e2eaf4; border-bottom: 1px solid #e2eaf4; }
+.bb-maze-tile-wall { background: #7c8899; border-right-color: #718093; border-bottom-color: #718093; }
+/* Goal remains passable / white; only flag distinguishes it. */
+.bb-maze-tile-goal { background: #fff; }
+.bb-maze-goal-flag { position: absolute; inset: 0; display: grid; place-items: center; color: #35a16a; font-size: clamp(12px, 1.7vw, 21px); z-index: 1; }
+.bb-maze-corner-flag { position: absolute; transform: translate(-50%, -50%); color: #35a16a; font-size: clamp(16px, 2vw, 25px); z-index: 1; pointer-events: none; line-height: 1; }
+.bb-maze-trail { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.bb-maze-trail polyline { fill: none; stroke: #458dff; stroke-width: 1; stroke-dasharray: 3 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.bb-maze-bot { position: absolute; width: clamp(20px, 8.5%, 38px); aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 3; pointer-events: none; background: #377ff2; border: 2px solid white; border-radius: 50%; padding: 2px; box-shadow: 0 2px 7px #41689b55; transition: left .17s ease, top .17s ease; display: grid; place-items: center; }
+.bb-maze-bot-logo { display: block; width: 100%; height: 100%; object-fit: contain; }
+.bb-maze-bottomline { margin-top: 10px; color: #637b99; font-size: 11px; }
+.bb-maze-bottomline > span { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.bb-maze-key-wall, .bb-maze-key-path { display: inline-block; width: 12px; height: 12px; margin-left: 5px; border: 1px solid #bfcede; }
+.bb-maze-key-wall { background: #7c8899; } .bb-maze-key-path { background: #fff; }
+.bb-maze-ascii-toggle { border: 1px solid #b8cfea; border-radius: 5px; background: #f1f6ff; color: #2366bd; font: 600 11px 'Segoe UI', system-ui, sans-serif; padding: 5px 9px; cursor: pointer; }
+.bb-maze-ascii-toggle:hover { background: #e3efff; }
+.bb-maze-raw { padding: 8px; margin-top: 10px; background: #f7faff; border: 1px solid #d5e3f3; border-radius: 5px; overflow: auto; }
+.bb-maze-raw pre { margin: 7px 0 0; font: 12px/1.25 ui-monospace, monospace; white-space: pre; overflow: auto; color: #2c4667; }
+@media (max-width: 760px) { .bb-maze-board { max-height: none; max-width: 440px; } .bb-maze-shell { max-width: 470px; margin: auto; } }
+@media (prefers-reduced-motion: reduce) { .bb-maze-bot { transition: none; } }

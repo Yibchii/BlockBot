@@ -52,18 +52,8 @@ function kind(char) {
 }
 
 function BotFace() {
-  return (
-    <svg className="bb-maze-bot-svg" viewBox="0 0 48 48" aria-hidden="true">
-    <circle cx="24" cy="24" r="22" fill="#ff755f" stroke="#fff8ed" strokeWidth="2.5" />
-    <path d="M24 10V7" stroke="#fff8ed" strokeWidth="2.5" strokeLinecap="round" />
-    <circle cx="24" cy="6" r="3" fill="#f7c85d" />
-    <rect x="11" y="15" width="26" height="20" rx="7" fill="#fff8ed" />
-    <circle cx="19" cy="25" r="3" fill="#17334b" /><circle cx="29" cy="25" r="3" fill="#17334b" />
-    <path d="M21 31q3 3 6 0" stroke="#17334b" strokeWidth="2" fill="none" strokeLinecap="round" />
-    <rect x="7" y="22" width="5" height="8" rx="2" fill="#ffc0a8" />
-    <rect x="36" y="22" width="5" height="8" rx="2" fill="#ffc0a8" />
-    </svg>
-  );
+    // Files in public/ are served from the Vite base URL without the public/ prefix.
+    return <img className="bb-maze-bot-logo" src={`${import.meta.env.BASE_URL}images/robot.svg`} alt="" draggable="false" />;
 }
 
 export default function MazeBot2DComponent({ onRuntimeReady }) {
@@ -168,14 +158,16 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     };
         
 	const parsed = useMemo(() => parseGrid(grid), [grid]);
-    // The API includes a one-cell ASCII border around the 10x10 play area.
-      const columns = parsed?.width ?? 10;
-      const rows = parsed?.height ?? 10;
-    const hasAsciiBorder = columns === GRID_MAX_INDEX + 3 && rows === GRID_MAX_INDEX + 3;
-    const gridOffset = hasAsciiBorder ? 1 : 0;
-    const cellX = (x) => (x + gridOffset + 0.5) * (100 / columns);
-    const cellY = (y) => (y + gridOffset + 0.5) * (100 / rows);
-      const goalExists = parsed?.lines.some((line) => line.some((c) => kind(c) === "goal"));
+        const hasAsciiBorder = parsed?.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+        // ASCII borders are framing characters, not playable rows or columns.
+        const gridLines = hasAsciiBorder
+                ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+                : parsed?.lines;
+        const columns = gridLines ? Math.max(...gridLines.map((line) => line.length)) : GRID_MAX_INDEX + 1;
+        const rows = gridLines?.length ?? GRID_MAX_INDEX + 1;
+        const cellX = (x) => (x + 0.5) * (100 / columns);
+        const cellY = (y) => (y + 0.5) * (100 / rows);
+            const goalExists = gridLines?.some((line) => line.some((c) => kind(c) === "goal"));
       const trailPoints = trail.map((p) => `${cellX(p.x)},${cellY(p.y)}`).join(" ");
     
       return (
@@ -189,13 +181,13 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
               {Array.from({ length: rows * columns }, (_, index) => {
                 const x = index % columns;
                 const y = Math.floor(index / columns);
-                const type = parsed ? kind(parsed.lines[y]?.[x] ?? " ") : "floor";
+                const type = gridLines ? kind(gridLines[y]?.[x] ?? " ") : "floor";
                 return <div key={index} className={`bb-maze-tile bb-maze-tile-${type}`}>
                   {type === "goal" && <span className="bb-maze-goal-flag" aria-hidden="true">⚑</span>}
                 </div>;
               })}
               {/* A fallback flag represents the wireframe's target, not a backend goal condition. */}
-              {!goalExists && <span className="bb-maze-corner-flag" aria-hidden="true">⚑</span>}
+              {!goalExists && <span className="bb-maze-corner-flag" style={{ left: `${cellX(GRID_MAX_INDEX)}%`, top: `${cellY(0)}%` }} aria-hidden="true">⚑</span>}
               {trail.length > 1 && <svg className="bb-maze-trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points={trailPoints} /></svg>}
               <div className="bb-maze-bot" style={{ left: `${cellX(position.x)}%`, top: `${cellY(position.y)}%` }}><BotFace /></div>
             </div>
