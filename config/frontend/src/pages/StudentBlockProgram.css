@@ -17,6 +17,9 @@
 .toolbar-save,.toolbar-submit,.ai-help-button {background:#2671ec;}
 .toolbar-run {background:#46a464;}
 .toolbar-stop {background:#ee5965;}
+.toolbar-pause {background: #f4b400;}
+.toolbar-pause:hover {filter: brightness(0.95);}
+.pause-glyph {display: inline-grid;place-items: center;width: 15px;height: 15px;font-size: 14px;line-height: 1;}
 .student-account {display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;}
 .student-account img {width:30px;height:30px;border-radius:50%;background:#eaf0f8;}
 .student-content {width:100%;max-width:2000px;margin:auto;padding:clamp(9px,1.3vw,18px);}

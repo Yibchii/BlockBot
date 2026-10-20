@@ -3,35 +3,35 @@ import "./MazeBot2DComponent.css";
 
 
 const DIRECTIONS = {
-    UP: "up",
-    DOWN: "down",
-    LEFT: "left",
-    RIGHT: "right",
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right",
 };
 
 const OFFSETS = {
-    up: [0, -1],
-    down: [0, 1],
-    left: [-1, 0],
-    right: [1, 0],
+  up: [0, -1],
+  down: [0, 1],
+  left: [-1, 0],
+  right: [1, 0],
 };
 const GRID_MAX_INDEX = 9;
 
 async function fetchGridCoordinate(x, y, signal) {
-    const response = await fetch(`/api/mazebot2d/grid/?x=${x}&y=${y}`, { signal });
-    let data;
+  const response = await fetch(`/api/mazebot2d/grid/?x=${x}&y=${y}`, { signal });
+  let data;
 
-    try {
-        data = await response.json();
-    } catch {
-        throw new Error("MazeBot2D returned an invalid response.");
-    }
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("MazeBot2D returned an invalid response.");
+  }
 
-    if (!response.ok || typeof data.grid !== "string") {
-        throw new Error(data.error || "MazeBot2D could not update the robot position.");
-    }
+  if (!response.ok || typeof data.grid !== "string") {
+    throw new Error(data.error || "MazeBot2D could not update the robot position.");
+  }
 
-    return data;
+  return data;
 }
 
 // only interprets characters for display
@@ -57,97 +57,146 @@ function BotFace() {
 }
 
 export default function MazeBot2DComponent({ onRuntimeReady }) {
-    const [grid, setGrid] = useState("");
-    const [header, setHeader] = useState("");
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [trail, setTrail] =  useState([{ x: 0, y: 0 }]);
-    const [showRaw, setShowRaw] = useState(false);
-    const runtimeRef = useRef(null);
+  const [grid, setGrid] = useState("");
+  const [header, setHeader] = useState("");
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [trail, setTrail] =  useState([{ x: 0, y: 0 }]);
+  const [showRaw, setShowRaw] = useState(false);
+  const runtimeRef = useRef(null);
 
-    const handleStateChange = useCallback(({ header: nextHeader, grid: nextGrid, position: nextPosition }) => {
-        setHeader(nextHeader);
-        setGrid(nextGrid);
-        setPosition(nextPosition);
+  const handleStateChange = useCallback(({ header: nextHeader, grid: nextGrid, position: nextPosition }) => {
+    setHeader(nextHeader);
+    setGrid(nextGrid);
+    setPosition(nextPosition);
         setTrail((previous) => {
             if (nextPosition.x === 0 && nextPosition.y === 0) return [{ x: 0, y: 0 }];
             const last = previous[previous.length - 1];
             if (last?.x === nextPosition.x && last?.y === nextPosition.y) return previous;
             return [...previous, nextPosition];
         })
-    }, []);
+  }, []);
 
-    useEffect(() => {
-        let positionState = { x: 0, y: 0 };
-        let requestController = null;
-        let stopped = false;
+  useEffect(() => {
+    let positionState = { x: 0, y: 0 };
+    let requestController = null;
+    let stopped = false;
+    let paused = false;
+    let pausePromise = null;
+    let resolvePause = null;
 
-        const publish = (data) => {
-            const state = { ...data, position: { ...positionState } };
-            handleStateChange(state);
-            return state;
-        };
+    const waitIfPaused = async () => {
+      if (!paused) return;
+      await pausePromise;
+    };
 
-        const move = async (direction) => {
-            if (stopped) {
-                throw new Error("Program stopped.");
-            }
+    const publish = (data) => {
+      const state = { ...data, position: { ...positionState } };
+      handleStateChange(state);
+      return state;
+    };
 
-            const apiDirection = DIRECTIONS[direction];
-            if (!apiDirection) {
-                throw new Error(`Unsupported direction: ${String(direction)}`);
-            }
+    const move = async (direction) => {
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
 
-            const [xOffset, yOffset] = OFFSETS[apiDirection];
-            const nextPosition = {
-                x: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.x + xOffset)),
-                y: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.y + yOffset)),
-            };
+      await waitIfPaused();
 
-            requestController?.abort();
-            requestController = new AbortController();
-            const data = await fetchGridCoordinate(
-                nextPosition.x,
-                nextPosition.y,
-                requestController.signal
-            );
+      const apiDirection = DIRECTIONS[direction];
+      if (!apiDirection) {
+        throw new Error(`Unsupported direction: ${String(direction)}`);
+      }
 
-            if (stopped) {
-                throw new Error("Program stopped.");
-            }
+      const [xOffset, yOffset] = OFFSETS[apiDirection];
+      const nextPosition = {
+        x: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.x + xOffset)),
+        y: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.y + yOffset)),
+      };
 
-            positionState = nextPosition;
-            return publish(data);
-        };
+      requestController?.abort();
+      requestController = new AbortController();
+      const data = await fetchGridCoordinate(
+        nextPosition.x,
+        nextPosition.y,
+        requestController.signal
+      );
 
-        const reset = async () => {
-            stopped = false;
-            requestController?.abort();
-            requestController = new AbortController();
-            const data = await fetchGridCoordinate(0, 0, requestController.signal);
-            positionState = { x: 0, y: 0 };
-            return publish(data);
-        };
+      await waitIfPaused();
 
-        const stop = () => {
-            stopped = true;
-            requestController?.abort();
-        };
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
 
-        const runtime = { move, reset, stop };
-        runtimeRef.current = runtime;
-        onRuntimeReady?.(runtime);
+      positionState = nextPosition;
+      return publish(data);
+    };
 
-        runtime.reset().catch((error) => {
-            if (error.name !== "AbortError") {
-                console.error("Error initializing MazeBot2D:", error);
-            }
-        });
+    const reset = async () => {
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+      requestController?.abort();
+      requestController = new AbortController();
+      const data = await fetchGridCoordinate(0, 0, requestController.signal);
+      positionState = { x: 0, y: 0 };
+      return publish(data);
+    };
 
-        return () => {
-            runtime.stop();
-            onRuntimeReady?.(null);
-        };
-    }, [handleStateChange, onRuntimeReady]);
+    const stop = () => {
+      stopped = true;
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+      requestController?.abort();
+    };
+
+    const pause = () => {
+      if (!paused) {
+        paused = true;
+        pausePromise = new Promise((resolve) => { resolvePause = resolve; });
+      }
+    };
+
+    const resume = () => {
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+    };
+
+    const start = () => {
+      stopped = false;
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+    };
+
+    const runtime = { move, reset, stop, pause, resume, start };
+    runtimeRef.current = runtime;
+    onRuntimeReady?.(runtime);
+
+    runtime.reset().catch((error) => {
+      if (error.name !== "AbortError") {
+        console.error("Error initializing MazeBot2D:", error);
+      }
+    });
+
+    return () => {
+      runtime.stop();
+      onRuntimeReady?.(null);
+    };
+  }, [handleStateChange, onRuntimeReady]);
 
     const handleMove = (direction) => {
         runtimeRef.current?.move(direction.toUpperCase()).catch((error) => {
