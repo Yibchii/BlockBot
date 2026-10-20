@@ -6,6 +6,7 @@ from django.shortcuts import render
 from .utils import loadDefaultBlocks
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
+from .models import Robot
 
 # Web Pages
 def index(request):
@@ -55,6 +56,12 @@ def _ascii_grid(grid, robot):
 # API Endpoints
 def test_api(request):
     return JsonResponse({"message" : "Django is connected"})
+
+def get_robots(request):
+    robots = list(
+        Robot.objects.values("id", "name", "robot_type")
+    )
+    return JsonResponse({"robots": robots})
 
 def get_mazebot2d_grid(request):
     x = int(request.GET.get("x", 0))

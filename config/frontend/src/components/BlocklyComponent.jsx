@@ -1,14 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import '../IntegerConstantBlock';
+import '../coreBlocks';
+import '../blockGen';
+import '../generators/mazeBotGenerators';
 
 
 export default function BlocklyComponent({ onWorkspaceReady }) {
   const readyCallbackRef = useRef(onWorkspaceReady);
-  readyCallbackRef.current = onWorkspaceReady;
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
+
+  useEffect(() => {
+    readyCallbackRef.current = onWorkspaceReady;
+  }, [onWorkspaceReady]);
 
   useEffect(() => {
     if (!blocklyDiv.current) return;
@@ -22,6 +28,10 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
           name: 'Logic',
           colour: '#5b80a5',
           contents: [
+            {
+              kind: 'block',
+              type: 'start_program'
+            },
             {
               kind: 'block',
               type: 'controls_if'
@@ -703,7 +713,7 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
         },
         {
           kind: 'category',
-          name: 'Directions',
+          name: 'Robot',
           colour: '#e67e22',
           contents: [
             {

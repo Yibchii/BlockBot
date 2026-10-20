@@ -125,7 +125,7 @@ STATIC_URL = 'static/'
 
 DJANGO_VITE = {
     'default': {
-        'dev_mode': DEBUG,
+        'dev_mode': False,
         'static_url_prefix': 'frontend/',
         'manifest_path': BASE_DIR / 'BlockBot' / 'static' / 'frontend' / 'manifest.json',
     },
