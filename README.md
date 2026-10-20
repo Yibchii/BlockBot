@@ -27,6 +27,6 @@ A web-based, block-based programming environment where pre-college students can 
 * Roshan Inaganti - Tools & Infrastructure | Artificial Intelligence
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
-* Tin Nguyen - Architecture & Design | UI/UX
+* Tin Nguyen (@tng2412-bit)- Architecture & Design | UI/UX
 * Neako Ramos - Architecture & Design | UI/UX
 * Awad Aljaidi - Artificial Intelligence | Quality Assurance 
