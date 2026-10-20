@@ -19,7 +19,7 @@ A web-based, block-based programming environment where pre-college students can 
 * Andres Renteria - Quality Assurance | Project Management
 * Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
 * Daniel Ejimadu (@Dejimadu) - Quality Assurance | User Experience (UX)
-* Janak Karki - Tools & Infrastructure | QA
+* Janak Karki (@JKarki7770)- Tools & Infrastructure | QA
 * Jason Karuma - Artificial Intelligence | User Experience (UX)
 * Jessica Clark - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
