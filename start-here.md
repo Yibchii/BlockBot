@@ -27,4 +27,7 @@ git push -u origin feature/taskname
 
 ### Finishing a Task
 
-Create a Pull Request from your feature branch into the main branch for review before merging.
+Create a Pull Request from your feature branch into the main branch for review before merging by going to the Github Website and pressing the button in the image below.
+Please comment on the changes that you have done in the description!
+
+<img width="199" height="48" alt="image" src="https://github.com/user-attachments/assets/31c5d1da-d677-49db-afd0-d7a680343b39" />
