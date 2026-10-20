@@ -17,16 +17,16 @@ A web-based, block-based programming environment where pre-college students can 
 ## Team Members
 
 * Andres Renteria - Quality Assurance | Project Management
-* Brianna Mmbaga (@Yibchii)- Architecture & Design | Project Management
+* Brianna Mmbaga (@Yibchii) - Architecture & Design | Project Management
 * Daniel Ejimadu (@Dejimadu) - Quality Assurance | User Experience (UX)
-* Janak Karki (@JKarki7770)- Tools & Infrastructure | QA
+* Janak Karki (@JKarki7770) - Tools & Infrastructure | QA
 * Jason Karuma - Artificial Intelligence | User Experience (UX)
-* Jessica Clark - Architecture & Design | Project Management
+* Jessica Clark (@Yessica-C) - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
 * Logan Brewer - Architecture & Design | Project Management
 * Roshan Inaganti - Tools & Infrastructure | Artificial Intelligence
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
-* Tin Nguyen (@tng2412-bit)- Architecture & Design | UI/UX
+* Tin Nguyen (@tng2412-bit) - Architecture & Design | UI/UX
 * Neako Ramos - Architecture & Design | UI/UX
 * Awad Aljaidi - Artificial Intelligence | Quality Assurance 
