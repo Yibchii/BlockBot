@@ -243,7 +243,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
           </div>
           <div className="bb-maze-bottomline">
             <span><span className="bb-maze-key-wall" /> Walls <span className="bb-maze-key-path" /> Open path</span>
-            <button type="button" className="bb-maze-ascii-toggle" onClick={() => setShowRaw((v) => !v)} aria-expanded={showRaw}>{showRaw ? "Hide ASCII" : "View ASCII"}</button>
           </div>
           {showRaw && <div className="bb-maze-raw"><div>{header}</div><pre>{grid || "Loading maze…"}</pre></div>}
         </div>
