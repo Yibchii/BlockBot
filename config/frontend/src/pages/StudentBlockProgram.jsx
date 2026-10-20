@@ -58,9 +58,8 @@ export default function Editor() {
     setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
 
     try {
-      runtimeRef.current?.start?.();
-
       await runtimeRef.current.reset();
+      runtimeRef.current?.start?.();
       await runBlocklyProgram(workspace, runtimeRef.current);
       setRunState("idle");
       setPaused(false);
@@ -79,8 +78,7 @@ export default function Editor() {
     }
   };
 
-  const handleStop = async () => {
-    runtimeRef.current?.stop?.();
+  const handleReset = async () => {
     setRunState("idle");
     setPaused(false);
     try {
@@ -111,7 +109,7 @@ export default function Editor() {
     ["save", "save.svg", "Save", true],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
-    ["stop", null, "Stop / Reset", false],
+    ["reset", null, "Reset", false],
     ["submit", "send.svg", "Submit", true],
   ];
 
@@ -138,8 +136,8 @@ export default function Editor() {
               onClick={
                 type === "run"
                   ? handleRun
-                  : type === "stop"
-                  ? handleStop
+                  : type === "reset"
+                  ? handleReset
                   : type === "pause"
                   ? handlePauseToggle
                   : undefined

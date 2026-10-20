@@ -102,6 +102,10 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
 
       await waitIfPaused();
 
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
+
       const apiDirection = DIRECTIONS[direction];
       if (!apiDirection) {
         throw new Error(`Unsupported direction: ${String(direction)}`);
@@ -132,6 +136,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     };
 
     const reset = async () => {
+      stopped = true;
       if (paused && resolvePause) {
         resolvePause();
         paused = false;
