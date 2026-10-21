@@ -1,6 +1,6 @@
 # BlockBot
 
-A web-based, block-based programming environment where pre-college students can program robots using visual blocks. The robot can be simulated (maze/field with obstacles) or connected to a real robot (Sphero, etc.). Students learn programming through hands-on, immediate visual feedback.
+A web-based, block-based programming environment where pre-college students can program robots using visual blocks. Students can simulate the robot (maze/field with obstacles) or connect it to a real robot (Sphero, etc.). Students learn programming through hands-on, immediate visual feedback.
 
 ## Features/Needs
 
@@ -25,7 +25,7 @@ A web-based, block-based programming environment where pre-college students can 
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
 * Logan Brewer - Architecture & Design | Project Management
 * Roshan Inaganti - (@roshanzammerinaganti-hue) Tools & Infrastructure | Artificial Intelligence
-* Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
+* Temitayo Oluwaseun- (@tgo0012) Tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
 * Tin Nguyen (@tng2412-bit) - Architecture & Design | UI/UX
 * Neako Ramos - Architecture & Design | UI/UX
