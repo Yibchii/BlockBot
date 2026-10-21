@@ -29,4 +29,4 @@ A web-based, block-based programming environment where pre-college students can 
 * Terry Nicks - PM/AI
 * Tin Nguyen (@tng2412-bit) - Architecture & Design | UI/UX
 * Neako Ramos - Architecture & Design | UI/UX
-* Awad Aljaidi - Artificial Intelligence | Quality Assurance 
+* Awad Aljaidi - (@Awad9990) Artificial Intelligence | Quality Assurance 
