@@ -24,7 +24,7 @@ A web-based, block-based programming environment where pre-college students can 
 * Jessica Clark (@Yessica-C) - Architecture & Design | Project Management
 * Josiah Hugo (@josiahhugo) - Artificial Intelligence | User Experience (UX)
 * Logan Brewer - Architecture & Design | Project Management
-* Roshan Inaganti - Tools & Infrastructure | Artificial Intelligence
+* Roshan Inaganti - (@@roshanzammerinaganti-hue) Tools & Infrastructure | Artificial Intelligence
 * Temitayo Oluwaseun- tools and infrastructure | Quality and testing 
 * Terry Nicks - PM/AI
 * Tin Nguyen (@tng2412-bit) - Architecture & Design | UI/UX
