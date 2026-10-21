@@ -2,9 +2,7 @@ import { javascriptGenerator } from "blockly/javascript";
 import "../generators/mazeBotGenerators";
 
 const MAX_LOOP_CHECKS = 10000;
-const MAX_RUN_TIME_MS = 30000;
 
-// Keep student variable names from conflicting with runtime helpers.
 javascriptGenerator.addReservedWords("robot,__blockbotCheckLoop");
 
 export function generateBlocklyProgram(workspace) {
@@ -23,7 +21,6 @@ export function generateBlocklyProgram(workspace) {
   const previousTrap = javascriptGenerator.INFINITE_LOOP_TRAP;
 
   try {
-    // Add a safety check inside generated loops and functions.
     javascriptGenerator.INFINITE_LOOP_TRAP =
       "__blockbotCheckLoop();\n";
 
@@ -42,18 +39,14 @@ export function generateBlocklyProgram(workspace) {
 
 export async function runBlocklyProgram(workspace, robot) {
   const code = generateBlocklyProgram(workspace);
-  const startedAt = Date.now();
   let loopChecks = 0;
 
   const checkLoop = () => {
     loopChecks += 1;
 
-    if (
-      loopChecks > MAX_LOOP_CHECKS ||
-      Date.now() - startedAt >= MAX_RUN_TIME_MS
-    ) {
+    if (loopChecks > MAX_LOOP_CHECKS) {
       throw new Error(
-        "Your program repeated too many times or ran too long. " +
+        "Your program exceeded the loop safety limit and was stopped. " +
         "Check your loop condition or use a smaller repeat count, then try again."
       );
     }
@@ -65,6 +58,17 @@ export async function runBlocklyProgram(workspace, robot) {
     `"use strict"; return (async () => { ${code} })();`
   );
 
-  await execute(robot, checkLoop);
-  return code;
+  try {
+    await execute(robot, checkLoop);
+    return code;
+  } catch (error) {
+    // Stop the robot and abort any pending movement request.
+    try {
+      await robot.stop();
+    } catch (stopError) {
+      console.error("Could not stop the robot:", stopError);
+    }
+
+    throw error;
+  }
 }
