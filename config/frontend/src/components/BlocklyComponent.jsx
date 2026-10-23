@@ -738,8 +738,8 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
         controls: true,
         wheel: true,
         startScale: 1.0,
-        maxScale: 3.0,
-        minScale: 0.3,
+        maxScale: 2.0,
+        minScale: 0.5,
         scaleSpeed: 1.2,
         pinch: true
       }
