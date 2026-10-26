@@ -19,7 +19,7 @@ class MazeBot2DViewTestCase(TestCase):
 		response = self.client.get('/mazebot2d')
 
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, "@# #      ")
+		self.assertContains(response, "@# #G     ")
 		self.assertContains(response, 'name="command" value="left"')
 		self.assertContains(response, 'name="command" value="right"')
 		self.assertContains(response, 'name="command" value="up"')
@@ -38,7 +38,7 @@ class MazeBot2DViewTestCase(TestCase):
 		response = self.client.post('/mazebot2d', {"command": "reset"})
 
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, "@# #      ")
+		self.assertContains(response, "@# #G     ")
 
 	def test_trailing_slash_url_displays_page(self):
 		response = self.client.get('/mazebot2d/')
@@ -66,8 +66,8 @@ class MazeBot2DViewTestCase(TestCase):
 		self.assertEqual(rows[1][1], '@')
 
 	def test_mazebot2d_grid_api_marks_robot_on_goal(self):
-		response = self.client.get('/api/mazebot2d/grid/', {'x': 0, 'y': 7})
+		response = self.client.get('/api/mazebot2d/grid/', {'x': 4, 'y': 0})
 
 		self.assertEqual(response.status_code, 200)
 		rows = response.json()['grid'].splitlines()
-		self.assertEqual(rows[8][1], '*')
+		self.assertEqual(rows[1][5], '*')
