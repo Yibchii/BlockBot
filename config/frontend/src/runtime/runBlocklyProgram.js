@@ -20,7 +20,7 @@ export function generateBlocklyProgram(workspace) {
     throw new Error("Add at least one instruction to the program.");
   }
 
-  return code;
+  return javascriptGenerator.finish(code);
 }
 
 export async function runBlocklyProgram(workspace, robot) {
