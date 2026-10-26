@@ -2,7 +2,7 @@
 """Launch Django and Vite together, with dev/prod behavior based on DEBUG.
 
 This script is designed for local development and a simple production-style check:
-- DEBUG=True -> run Vite in dev mode and Django's runserver
+- DEBUG=True -> build frontend assets, then run Vite in dev mode and Django's runserver
 - DEBUG=False -> run a Vite production build, then run Django's runserver
 
 It also:
@@ -255,19 +255,19 @@ def main() -> int:
     vite_proc: Optional[subprocess.Popen] = None
 
     try:
+        vite_build_proc = run_vite_build()
+        build_rc = vite_build_proc.wait()
+        if build_rc != 0:
+            print(f"Vite build failed with exit code {build_rc}. Servers were not started.")
+            return build_rc
+        print("Vite build completed successfully.")
+
         if using_debug:
             print("Running in DEBUG mode: Vite dev server + Django runserver")
             django_proc = start_django()
             vite_proc = start_vite_dev()
         else:
-            print("Running in non-debug mode: Vite production build + Django runserver")
-            vite_build_proc = run_vite_build()
-            if vite_build_proc is not None:
-                build_rc = vite_build_proc.wait()
-                if build_rc != 0:
-                    print(f"Vite build failed with exit code {build_rc}.")
-                    return build_rc
-                print("Vite build completed successfully.")
+            print("Running in non-debug mode: Django runserver with built frontend assets")
             django_proc = start_django()
 
         if django_proc is None and vite_proc is None:
