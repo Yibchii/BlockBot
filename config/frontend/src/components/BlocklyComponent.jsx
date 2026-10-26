@@ -722,6 +722,10 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
             },
             {
               kind: 'block',
+              type: 'mazebot2d_can_move'
+            },
+            {
+              kind: 'block',
               type: 'direction_constant'
             }
           ]
