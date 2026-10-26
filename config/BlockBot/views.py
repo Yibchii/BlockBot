@@ -45,6 +45,8 @@ def _ascii_grid(grid, robot):
                 row.append("@")
             elif grid.get_cell(x, y) == CellType.BLOCKED:
                 row.append("#")
+            elif grid.get_cell(x, y) == CellType.GOAL:
+                row.append("G")
             else:
                 row.append(" ")
         row.append("|")
