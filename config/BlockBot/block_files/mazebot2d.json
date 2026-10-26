@@ -53,6 +53,14 @@
         "colour": "#e67e22",
         "tooltip": "Check if the robot can move in the specified direction.",
         "helpUrl": ""
+      },
+      {
+        "type": "mazebot2d_on_goal",
+        "message0": "on goal",
+        "output": "Boolean",
+        "colour": "#e67e22",
+        "tooltip": "Check if the robot is on the goal.",
+        "helpUrl": ""
       }
     ]
   }

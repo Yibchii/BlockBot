@@ -47,7 +47,7 @@ function parseGrid(text) {
 
 function kind(char) {
     if (/[#█▓▒■Xx]/u.test(char) || /[+|─│┌┐└┘┬┴├┤┼═║╔╗╚╝]/u.test(char)) return "wall";
-    if (/[GgFf⚑★]/u.test(char)) return "goal";
+    if (/[GgFf⚑★*]/u.test(char)) return "goal";
     return "floor";
 }
 
@@ -175,6 +175,21 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       return cellType === "floor" || cellType === "goal";
     };
 
+    const on_goal = () => {
+      if (!currentGrid) return false;
+
+      const parsed = parseGrid(currentGrid);
+      if (!parsed) return false;
+
+      const hasAsciiBorder = parsed.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+      const gridLines = hasAsciiBorder
+        ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+        : parsed.lines;
+      const cell = gridLines[positionState.y]?.[positionState.x];
+      const cellType = kind(cell ?? "#");
+      return cellType === "goal";
+    };
+
     const stop = () => {
       stopped = true;
       if (paused && resolvePause) {
@@ -212,7 +227,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       }
     };
 
-    const runtime = { move, reset, stop, pause, resume, start, can_move };
+    const runtime = { move, reset, stop, pause, resume, start, can_move, on_goal };
     runtimeRef.current = runtime;
     onRuntimeReady?.(runtime);
 

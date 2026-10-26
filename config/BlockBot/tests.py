@@ -64,3 +64,10 @@ class MazeBot2DViewTestCase(TestCase):
 		self.assertEqual(rows[0], '+----------+')
 		self.assertEqual(rows[-1], '+----------+')
 		self.assertEqual(rows[1][1], '@')
+
+	def test_mazebot2d_grid_api_marks_robot_on_goal(self):
+		response = self.client.get('/api/mazebot2d/grid/', {'x': 0, 'y': 7})
+
+		self.assertEqual(response.status_code, 200)
+		rows = response.json()['grid'].splitlines()
+		self.assertEqual(rows[8][1], '*')
