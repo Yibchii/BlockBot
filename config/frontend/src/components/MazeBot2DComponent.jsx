@@ -69,7 +69,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     setGrid(nextGrid);
     setPosition(nextPosition);
         setTrail((previous) => {
-            if (nextPosition.x === 0 && nextPosition.y === 0) return [{ x: 0, y: 0 }];
             const last = previous[previous.length - 1];
             if (last?.x === nextPosition.x && last?.y === nextPosition.y) return previous;
             return [...previous, nextPosition];
@@ -149,6 +148,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       requestController = new AbortController();
       const data = await fetchGridCoordinate(0, 0, requestController.signal);
       positionState = { x: 0, y: 0 };
+      setTrail([{ x: 0, y: 0 }]);
       return publish(data);
     };
 
