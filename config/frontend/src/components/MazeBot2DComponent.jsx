@@ -280,8 +280,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
                   {type === "goal" && <span className="bb-maze-goal-flag" aria-hidden="true">⚑</span>}
                 </div>;
               })}
-              {/* A fallback flag represents the wireframe's tar , not a backend goal condition. */}
-              {!goalExists && <span className="bb-maze-corner-flag" style={{ left: `${cellX(GRID_MAX_INDEX)}%`, top: `${cellY(0)}%` }} aria-hidden="true">⚑</span>}
               {trail.length > 1 && <svg className="bb-maze-trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points={trailPoints} /></svg>}
               <div className="bb-maze-bot" style={{ left: `${cellX(position.x)}%`, top: `${cellY(position.y)}%` }}><BotFace /></div>
             </div>
