@@ -47,7 +47,7 @@ function parseGrid(text) {
 
 function kind(char) {
     if (/[#█▓▒■Xx]/u.test(char) || /[+|─│┌┐└┘┬┴├┤┼═║╔╗╚╝]/u.test(char)) return "wall";
-    if (/[GgFf⚑★]/u.test(char)) return "goal";
+    if (/[GgFf⚑★*]/u.test(char)) return "goal";
     return "floor";
 }
 
@@ -83,6 +83,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     let paused = false;
     let pausePromise = null;
     let resolvePause = null;
+    let currentGrid = "";
 
     const waitIfPaused = async () => {
       if (!paused) return;
@@ -90,6 +91,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
     };
 
     const publish = (data) => {
+      currentGrid = data.grid;
       const state = { ...data, position: { ...positionState } };
       handleStateChange(state);
       return state;
@@ -150,6 +152,44 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       return publish(data);
     };
 
+    const can_move = (direction) => {
+      const apiDirection = DIRECTIONS[String(direction).toUpperCase()];
+      if (!apiDirection || !currentGrid) return false;
+
+      const [xOffset, yOffset] = OFFSETS[apiDirection];
+      const nextX = positionState.x + xOffset;
+      const nextY = positionState.y + yOffset;
+      if (nextX < 0 || nextX > GRID_MAX_INDEX || nextY < 0 || nextY > GRID_MAX_INDEX) {
+        return false;
+      }
+
+      const parsed = parseGrid(currentGrid);
+      if (!parsed) return false;
+
+      const hasAsciiBorder = parsed.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+      const gridLines = hasAsciiBorder
+        ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+        : parsed.lines;
+      const cell = gridLines[nextY]?.[nextX];
+      const cellType = kind(cell ?? "#");
+      return cellType === "floor" || cellType === "goal";
+    };
+
+    const on_goal = () => {
+      if (!currentGrid) return false;
+
+      const parsed = parseGrid(currentGrid);
+      if (!parsed) return false;
+
+      const hasAsciiBorder = parsed.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+      const gridLines = hasAsciiBorder
+        ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+        : parsed.lines;
+      const cell = gridLines[positionState.y]?.[positionState.x];
+      const cellType = kind(cell ?? "#");
+      return cellType === "goal";
+    };
+
     const stop = () => {
       stopped = true;
       if (paused && resolvePause) {
@@ -187,7 +227,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       }
     };
 
-    const runtime = { move, reset, stop, pause, resume, start };
+    const runtime = { move, reset, stop, pause, resume, start, can_move, on_goal };
     runtimeRef.current = runtime;
     onRuntimeReady?.(runtime);
 
@@ -240,8 +280,6 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
                   {type === "goal" && <span className="bb-maze-goal-flag" aria-hidden="true">⚑</span>}
                 </div>;
               })}
-              {/* A fallback flag represents the wireframe's target, not a backend goal condition. */}
-              {!goalExists && <span className="bb-maze-corner-flag" style={{ left: `${cellX(GRID_MAX_INDEX)}%`, top: `${cellY(0)}%` }} aria-hidden="true">⚑</span>}
               {trail.length > 1 && <svg className="bb-maze-trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points={trailPoints} /></svg>}
               <div className="bb-maze-bot" style={{ left: `${cellX(position.x)}%`, top: `${cellY(position.y)}%` }}><BotFace /></div>
             </div>
