@@ -8,7 +8,7 @@ function StudentDashboard({user}) {
                      className="avatar w-20 h-20 rounded-full object-cover" 
                 />
                 <div>
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-2xl font-bold text-black">
                         Welcome back, {user.first_name}!
                     </h1>
                     <p className="text-gray-600">
