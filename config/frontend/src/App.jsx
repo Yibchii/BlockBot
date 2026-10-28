@@ -1,13 +1,13 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
-import NavBar from "./components/nav";
+import TopNavBarComponent from "./components/TopNavBarComponent";
 import LoginPage from "./pages/LoginPage";
 import Editor from "./pages/StudentBlockProgram";
 
 function App() {
   return (
     <BrowserRouter>
-      <NavBar />
+      <TopNavBarComponent />
       <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
           <Route path="/" element={<Home />} />
