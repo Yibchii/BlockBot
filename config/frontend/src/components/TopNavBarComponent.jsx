@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-export default function NavBar() {
+export default function TopNavBarComponent() {
     const location = useLocation();
     const basePath = location.pathname.startsWith("/static/frontend") ? "/static/frontend" : "";
 
