@@ -1,10 +1,10 @@
-import StudentDashboard from '../components/StudentDashboard';
-import InstructorDashboard from '../components/InstructorDashboard';
+import StudentDashboard from '../pages/StudentDashboard';
+import InstructorDashboard from '../pages/InstructorDashboard';
 
 function Home() {
 
     return (
-        <div >
+        <div>
             <StudentDashboard user={{first_name: "John"}} />
             
         </div>
