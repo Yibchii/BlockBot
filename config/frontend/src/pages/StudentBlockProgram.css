@@ -54,3 +54,5 @@
 @media(max-width:760px) { .studio-toolbar {gap:9px;} .studio-actions {width:100%;margin:0;} .toolbar-button {flex:1;padding:0 7px;} .student-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .student-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .console-panel {min-height:210px;} }
 @media(max-width:520px) { .studio-brand {flex:1;} .project-name {order:3;flex-basis:100%;max-width:none;} .studio-actions {order:4;} .toolbar-button {font-size:11px;} .student-side {display:flex;} .simulator-panel,.console-panel {width:100%;} .workspace-panel {height:clamp(450px,63dvh,690px);} .workspace-hint {font-size:10px;} .editor-badge {display:none;} }
 @media(max-width:760px) { .standalone-editor-page {padding:9px;} .standalone-editor-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .standalone-editor-grid .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .standalone-maze-panel {min-height:380px;} }
+.console-error .feedback-check {background:#dc3545;color:#ffffff;}
+.console-error .console-message strong {color:#b42332;}
