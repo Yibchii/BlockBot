@@ -722,7 +722,15 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
             },
             {
               kind: 'block',
+              type: 'mazebot2d_can_move'
+            },
+            {
+              kind: 'block',
               type: 'direction_constant'
+            },
+            {
+              kind: 'block',
+              type: 'mazebot2d_on_goal'
             }
           ]
         }
@@ -764,7 +772,13 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
 
       if (value.VAR?.id) {
         const variable = variableMap.getVariable(value.VAR.id);
-        if (variable) value.VAR.id = variable.getId();
+        if (variable) {
+          value.VAR = {
+            id: variable.getId(),
+            name: variable.getName(),
+            type: variable.getType(),
+          };
+        }
       }
 
       Object.values(value).forEach(resolveVariableIds);
