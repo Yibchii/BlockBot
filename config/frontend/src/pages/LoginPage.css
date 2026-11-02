@@ -1,0 +1,56 @@
+.bb-page { min-height: 100vh; position: relative; isolation: isolate; display: grid; place-items: center; overflow: hidden; padding: 48px 22px; background: #fff; color: #1e3169; font-family: Inter, system-ui, Arial, sans-serif; }
+.bb-page * { box-sizing: border-box; }
+.bb-gears { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.bb-gear { position: absolute; width: clamp(210px, 27vw, 420px); height: auto; animation: bb-spin var(--gear-duration) linear infinite; }
+.bb-gear--reverse { animation-name: bb-spin-reverse; }
+.bb-gear--top-left { top: -165px; left: -100px; }
+.bb-gear--top-right { top: -155px; right: -135px; }
+.bb-gear--bottom-left { bottom: -155px; left: -150px; }
+.bb-gear--bottom-center { bottom: -260px; left: 43%; width: clamp(280px, 32vw, 480px); }
+.bb-gear--bottom-right { bottom: -170px; right: -160px; }
+@keyframes bb-spin { to { transform: rotate(360deg); } }
+@keyframes bb-spin-reverse { to { transform: rotate(-360deg); } }
+.bb-layout { width: min(100%, 1060px); display: grid; grid-template-columns: minmax(330px, 440px) 1fr; align-items: center; gap: clamp(28px, 5vw, 76px); }
+.bb-auth-card { background: rgba(255,255,255,.96); border: 1px solid #dfe5f1; box-shadow: 0 12px 32px rgba(25,45,92,.16); border-radius: 19px; padding: clamp(22px, 3vw, 38px); text-align: center; }
+.bb-logo { display: block; object-fit: contain; max-width: 100%; margin-inline: auto; }
+.bb-logo--form { width: min(100%, 290px); max-height: 92px; }
+.bb-logo--welcome { width: min(100%, 410px); max-height: 135px; }
+.bb-card-subtitle { font-size: 14px; color: #5f6b89; margin: 4px 0 22px; }
+.bb-role-switch { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #dce3f2; border-radius: 13px; overflow: hidden; margin-bottom: 20px; }
+.bb-role-switch button { border: none; min-height: 42px; padding: 10px; background: #fff; color: #334467; font-weight: 650; cursor: pointer; }
+.bb-role-switch button.active { color: #fff; background: #4266f0; }
+.bb-form { display: grid; gap: 13px; text-align: left; }
+.bb-field { display: grid; gap: 5px; color: #3a4b77; font-size: 12px; font-weight: 650; }
+.bb-required { color: #d73d4c; }
+.bb-field input { width: 100%; height: 43px; border: 1px solid #d5deed; border-radius: 9px; padding: 0 12px; font: inherit; font-size: 14px; background: #fff; color: #1c2c51; outline-offset: 2px; }
+.bb-field input:focus { outline: 2px solid #8ca5ff; border-color: #4266f0; }
+.bb-name-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bb-options { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; }
+.bb-check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #536383; cursor: pointer; }
+.bb-check input { accent-color: #4266f0; }
+.bb-link, .bb-back { padding: 0; border: none; background: transparent; color: #345bed; cursor: pointer; font-size: 12px; font-weight: 650; text-decoration: underline; }
+.bb-back { display: block; margin: 0 0 16px; text-decoration: none; }
+.bb-primary, .bb-outline, .bb-guest { width: 100%; border-radius: 11px; min-height: 43px; font-size: 14px; font-weight: 750; cursor: pointer; }
+.bb-primary { border: 0; background: #4366ee; color: white; margin-top: 5px; }
+.bb-primary--green { background: #2d9b4d; }
+.bb-outline { border: 1.5px solid #4266f0; color: #345bed; background: white; }
+.bb-guest { border: 1px solid #d3dced; color: #31446e; background: #f8faff; margin-top: 10px; }
+.bb-separator { display: flex; align-items: center; gap: 10px; color: #71809f; margin: 15px 0; font-size: 12px; }
+.bb-separator::before, .bb-separator::after { content: ""; height: 1px; background: #d9e0ed; flex: 1; }
+.bb-form-title { font-size: clamp(20px, 2vw, 24px); margin: 0 0 9px; color: #192f70; }
+.bb-bottom-note { color: #5f6b89; font-size: 12px; margin: 17px 0 0; }
+.bb-message { padding: 12px; border: 1px solid #bed0ff; border-radius: 8px; background: #f1f5ff; color: #284bb0; font-size: 12px; text-align: left; line-height: 1.5; margin: 16px 0 0; }
+.bb-welcome { text-align: center; }
+.bb-welcome h2 { font-size: clamp(28px, 3.4vw, 43px); line-height: 1.1; margin: 0 0 6px; font-weight: 750; }
+.bb-tagline { margin: 5px 0 25px; font-size: 19px; color: #607096; }
+.bb-tagline span { padding-inline: 9px; }
+.bb-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+.bb-info { padding: 22px 15px; border-radius: 15px; min-height: 188px; }
+.bb-info--student { background: #e9f2ff; }
+.bb-info--teacher { background: #eaf8ed; }
+.bb-info-icon { font-size: 34px; }
+.bb-info h3 { color: #1c3677; margin: 9px 0; font-size: 17px; }
+.bb-info p { color: #435478; font-size: 13px; line-height: 1.5; margin: 0; }
+@media (max-width: 780px) { .bb-layout { grid-template-columns: 1fr; max-width: 470px; gap: 35px; } .bb-welcome { grid-row: 1; } .bb-gear--top-left { top: -145px; left: -145px; } .bb-gear--top-right { right: -165px; } .bb-info { min-height: 0; } }
+@media (max-width: 400px) { .bb-page { padding-inline: 12px; } .bb-name-row, .bb-info-grid { grid-template-columns: 1fr; } .bb-auth-card { padding: 20px 16px; } }
+@media (prefers-reduced-motion: reduce) { .bb-gear { animation: none; } }
