@@ -3,6 +3,7 @@ import BlocklyComponent from "../components/BlocklyComponent";
 import Console from "./StudentProgramConsole";
 import Simulator from "./StudentProgramSimulator";
 import "./StudentBlockProgram.css";
+import { imageUrl } from "../utils/assets";
 
 
 export default function StudentWorkspace() {
@@ -13,19 +14,19 @@ export default function StudentWorkspace() {
   return (
     <div className="student-page">
       <header className="studio-toolbar">
-        <div className="studio-brand"><img src="/static/frontend/images/robot.svg" alt="" /><strong>BlockBot Studio</strong></div>
+        <div className="studio-brand"><img src={imageUrl("robot.svg")} alt="" /><strong>BlockBot Studio</strong></div>
         <label className="project-name">
-          <img src="/static/frontend/images/folder.svg" alt="" />
+          <img src={imageUrl("folder.svg")} alt="" />
           <input aria-label="Project name" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
         </label>
         <div className="studio-actions" aria-label="Program actions">
           {[["save", "save.svg", "Save"], ["run", "play-icon.svg", "Run"], ["stop", null, "Stop / Reset"], ["submit", "send.svg", "Submit"]].map(([type, icon, label]) => (
             <button key={type} type="button" className={`toolbar-button toolbar-${type}`} disabled title="Preview only — not connected yet">
-              {icon ? <img src={`/static/frontend/images/${icon}`} alt="" /> : <span aria-hidden="true">■</span>}{label}
+              {icon ? <img src={imageUrl(icon)} alt="" /> : <span aria-hidden="true">■</span>}{label}
             </button>
           ))}
         </div>
-        <div className="student-account"><img src="/static/frontend/images/profile-silhouette.svg" alt="" /><span>Student</span></div>
+        <div className="student-account"><img src={imageUrl("profile-silhouette.svg")} alt="" /><span>Student</span></div>
       </header>
       <div className="student-content">
         <div className="student-grid">
