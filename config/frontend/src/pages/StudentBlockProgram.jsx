@@ -1,44 +1,193 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import BlocklyComponent from "../components/BlocklyComponent";
+import { runBlocklyProgram } from "../runtime/runBlocklyProgram";
+import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
 import Console from "./StudentProgramConsole";
-import Simulator from "./StudentProgramSimulator";
 import "./StudentBlockProgram.css";
 import { imageUrl } from "../utils/assets";
 
-
-export default function StudentWorkspace() {
+export default function Editor() {
+  const [robot, setRobot] = useState(null);
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
-  const status = { state: "idle", title: "Ready to edit", msg: "Drag blocks into the workspace to build your program." };
+  const [workspace, setWorkspace] = useState(null);
+  const [robotReady, setRobotReady] = useState(false);
+  const [runState, setRunState] = useState("idle");
+  const [paused, setPaused] = useState(false);
+  const [status, setStatus] = useState({
+    state: "idle",
+    title: "Ready to edit",
+    msg: "Drag blocks into the workspace to build your program.",
+  });
+  const runtimeRef = useRef(null);
+  const handleRuntimeReady = useCallback((runtime) => {
+    runtimeRef.current = runtime;
+    setRobotReady(Boolean(runtime));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/robots/")
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load available robots.");
+        return response.json();
+      })
+      .then(({ robots }) => {
+        const selectedRobot = robots?.[0];
+        if (!selectedRobot || !ROBOT_IMPLEMENTATIONS[selectedRobot.name]) {
+          throw new Error("No supported robot is available.");
+        }
+        setRobot(selectedRobot);
+      })
+      .catch((error) =>
+        setStatus({
+          state: "error",
+          title: "Robot unavailable",
+          msg: error.message,
+        })
+      );
+  }, []);
+
+  const RobotComponent = robot
+    ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
+    : null;
+
+  const handleRun = async () => {
+    if (!workspace || !runtimeRef.current || runState === "running") return;
+
+    setPaused(false);
+    setRunState("running");
+    setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
+
+    try {
+      await runtimeRef.current.reset();
+      runtimeRef.current?.start?.();
+      await runBlocklyProgram(workspace, runtimeRef.current);
+      setRunState("idle");
+      setPaused(false);
+      setStatus({ state: "success", title: "Program complete", msg: "Your robot finished the program." });
+    } catch (error) {
+      if (error.name === "AbortError" || error.message === "Program stopped.") {
+        setRunState("idle");
+        setPaused(false);
+        setStatus({ state: "idle", title: "Program stopped", msg: "The robot was reset." });
+        return;
+      }
+
+      setRunState("idle");
+      setPaused(false);
+      setStatus({ state: "error", title: "Program error", msg: error.message });
+    }
+  };
+
+  const handleReset = async () => {
+    setRunState("idle");
+    setPaused(false);
+    try {
+      await runtimeRef.current?.reset?.();
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        setStatus({ state: "error", title: "Reset failed", msg: error.message });
+        return;
+      }
+    }
+    setStatus({ state: "idle", title: "Ready to edit", msg: "The robot was reset." });
+  };
+
+  const handlePauseToggle = () => {
+    if (!runtimeRef.current || runState !== "running") return;
+    if (paused) {
+      runtimeRef.current?.resume?.();
+      setPaused(false);
+      setStatus({ state: "running", title: "Resumed", msg: "Program resumed." });
+    } else {
+      runtimeRef.current?.pause?.();
+      setPaused(true);
+      setStatus({ state: "running", title: "Paused", msg: "Program paused." });
+    }
+  };
+
+  const actions = [
+    ["save", "save.svg", "Save", true],
+    ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
+    ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
+    ["reset", null, "Reset", false],
+    ["submit", "send.svg", "Submit", true],
+  ];
 
   return (
     <div className="student-page">
       <header className="studio-toolbar">
-        <div className="studio-brand"><img src={imageUrl("robot.svg")} alt="" /><strong>BlockBot Studio</strong></div>
+        <div className="studio-brand">
+          <img src={imageUrl("robot.svg")} alt="" />
+          <strong>BlockBot Studio</strong>
+        </div>
+
         <label className="project-name">
           <img src={imageUrl("folder.svg")} alt="" />
           <input aria-label="Project name" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
         </label>
+
         <div className="studio-actions" aria-label="Program actions">
-          {[["save", "save.svg", "Save"], ["run", "play-icon.svg", "Run"], ["stop", null, "Stop / Reset"], ["submit", "send.svg", "Submit"]].map(([type, icon, label]) => (
-            <button key={type} type="button" className={`toolbar-button toolbar-${type}`} disabled title="Preview only — not connected yet">
-              {icon ? <img src={imageUrl(icon)} alt="" /> : <span aria-hidden="true">■</span>}{label}
+          {actions.map(([type, icon, label, disabled]) => (
+            <button
+              key={type}
+              type="button"
+              className={`toolbar-button toolbar-${type}`}
+              disabled={disabled}
+              onClick={
+                type === "run"
+                  ? handleRun
+                  : type === "reset"
+                  ? handleReset
+                  : type === "pause"
+                  ? handlePauseToggle
+                  : undefined
+              }
+              aria-pressed={type === "pause" ? String(paused) : undefined}
+            >
+              {type === "pause" ? (
+                <span aria-hidden="true" className="pause-glyph">{paused ? "▶" : "⏸"}</span>
+              ) : icon ? (
+                <img src={imageUrl(icon)} alt="" />
+              ) : (
+                <span aria-hidden="true">■</span>
+              )}
+              {label}
             </button>
           ))}
         </div>
-        <div className="student-account"><img src={imageUrl("profile-silhouette.svg")} alt="" /><span>Student</span></div>
+
+        <div className="student-account">
+          <img src={imageUrl("profile-silhouette.svg")} alt="" />
+          <span>Student</span>
+        </div>
       </header>
+
       <div className="student-content">
         <div className="student-grid">
           <section className="workspace-panel" aria-label="Interactive Blockly programming editor">
             <div className="panel-header workspace-editor-header">
-              <div><h2>Blockly Workspace</h2><span className="workspace-hint">Select a toolbox category, then drag blocks onto the canvas</span></div>
+              <div>
+                <h2>Blockly Workspace</h2>
+                <span className="workspace-hint">Select a toolbox category, then drag blocks onto the canvas</span>
+              </div>
               <span className="editor-badge">Interactive editor</span>
             </div>
-            <div className="blockly-container"><BlocklyComponent /></div>
+            <div className="blockly-container">
+              <BlocklyComponent onWorkspaceReady={setWorkspace} />
+            </div>
           </section>
+
           <div className="student-side">
-            <Simulator robotPos={{ x: 38, y: 55 }} />
+            <section className="student-panel simulator-panel">
+              <div className="panel-header">
+                <h2>{robot?.name || "Robot"}</h2>
+              </div>
+              <div className="maze-component-container">
+                {RobotComponent && <RobotComponent onRuntimeReady={handleRuntimeReady} />}
+              </div>
+            </section>
+
             <Console status={status} showHelp={showHelp} onToggleHelp={() => setShowHelp(v => !v)} />
           </div>
         </div>

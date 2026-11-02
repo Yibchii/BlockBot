@@ -1,14 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import '../IntegerConstantBlock';
+import '../coreBlocks';
+import '../blockGen';
+import '../generators/mazeBotGenerators';
 
 
 export default function BlocklyComponent({ onWorkspaceReady }) {
   const readyCallbackRef = useRef(onWorkspaceReady);
-  readyCallbackRef.current = onWorkspaceReady;
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
+
+  useEffect(() => {
+    readyCallbackRef.current = onWorkspaceReady;
+  }, [onWorkspaceReady]);
 
   useEffect(() => {
     if (!blocklyDiv.current) return;
@@ -22,6 +28,10 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
           name: 'Logic',
           colour: '#5b80a5',
           contents: [
+            {
+              kind: 'block',
+              type: 'start_program'
+            },
             {
               kind: 'block',
               type: 'controls_if'
@@ -703,7 +713,7 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
         },
         {
           kind: 'category',
-          name: 'Directions',
+          name: 'Robot',
           colour: '#e67e22',
           contents: [
             {
@@ -712,7 +722,15 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
             },
             {
               kind: 'block',
+              type: 'mazebot2d_can_move'
+            },
+            {
+              kind: 'block',
               type: 'direction_constant'
+            },
+            {
+              kind: 'block',
+              type: 'mazebot2d_on_goal'
             }
           ]
         }
@@ -728,8 +746,8 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
         controls: true,
         wheel: true,
         startScale: 1.0,
-        maxScale: 3.0,
-        minScale: 0.3,
+        maxScale: 2.0,
+        minScale: 0.5,
         scaleSpeed: 1.2,
         pinch: true
       }
@@ -754,7 +772,13 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
 
       if (value.VAR?.id) {
         const variable = variableMap.getVariable(value.VAR.id);
-        if (variable) value.VAR.id = variable.getId();
+        if (variable) {
+          value.VAR = {
+            id: variable.getId(),
+            name: variable.getName(),
+            type: variable.getType(),
+          };
+        }
       }
 
       Object.values(value).forEach(resolveVariableIds);

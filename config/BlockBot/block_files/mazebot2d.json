@@ -1,6 +1,5 @@
 {
   "comment": "store json definition of all blocks specific to mazebot2d here",
-  "confirmation" : "Mazebot2D Blocks Loaded",
   "blocks": {
     "languageVersion": 0,
     "blocks": [
@@ -12,8 +11,8 @@
             "type": "field_dropdown",
             "name": "DIRECTION",
             "options": [
-              ["forward", "FORWARD"],
-              ["backward", "BACKWARD"],
+              ["up", "UP"],
+              ["down", "DOWN"],
               ["left", "LEFT"],
               ["right", "RIGHT"]
             ]
@@ -36,8 +35,31 @@
         ],
         "previousStatement": null,
         "nextStatement": null,
-        "colour": 160,
+        "colour": "#e67e22",
         "tooltip": "Move the robot in the specified direction.",
+        "helpUrl": ""
+      },
+      {
+        "type": "mazebot2d_can_move",
+        "message0": "can move %1",
+        "args0": [
+          {
+            "type": "input_value",
+            "name": "DIRECTION",
+            "check": "String"
+          }
+        ],
+        "output": "Boolean",
+        "colour": "#e67e22",
+        "tooltip": "Check if the robot can move in the specified direction.",
+        "helpUrl": ""
+      },
+      {
+        "type": "mazebot2d_on_goal",
+        "message0": "on goal",
+        "output": "Boolean",
+        "colour": "#e67e22",
+        "tooltip": "Check if the robot is on the goal.",
         "helpUrl": ""
       }
     ]

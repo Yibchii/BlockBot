@@ -1,105 +1,293 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./MazeBot2DComponent.css";
 
-async function fetchGridCoordinate(nextX, nextY) {
-    const response = await fetch(`/api/mazebot2d/grid/?x=${nextX}&y=${nextY}`);
-    const data = await response.json();
 
-    if (!response.ok || typeof data.grid !== "string") {
-        return null;
-    }
+const DIRECTIONS = {
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right",
+};
 
-    return data;
+const OFFSETS = {
+  up: [0, -1],
+  down: [0, 1],
+  left: [-1, 0],
+  right: [1, 0],
+};
+const GRID_MAX_INDEX = 9;
+
+async function fetchGridCoordinate(x, y, signal) {
+  const response = await fetch(`/api/mazebot2d/grid/?x=${x}&y=${y}`, { signal });
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("MazeBot2D returned an invalid response.");
+  }
+
+  if (!response.ok || typeof data.grid !== "string") {
+    throw new Error(data.error || "MazeBot2D could not update the robot position.");
+  }
+
+  return data;
 }
 
-export function move(direction) {
-    const offsets = {
-        up: [0, -1],
-        down: [0, 1],
-        left: [-1, 0],
-        right: [1, 0],
+// only interprets characters for display
+function parseGrid(text) {
+    const lines = text.replace(/\r/g, "").split("\n");
+    while (lines.length && !lines[0].trim()) lines.shift();
+    while (lines.length && !lines.at(-1).trim()) lines.pop();
+    if (!lines.length) return null;
+    const width = Math.max(...lines.map((line) => [...line].length));
+    if (!width) return null;
+    return { lines: lines.map((line) => [...line]), width, height: lines.length };
+}
+
+function kind(char) {
+    if (/[#█▓▒■Xx]/u.test(char) || /[+|─│┌┐└┘┬┴├┤┼═║╔╗╚╝]/u.test(char)) return "wall";
+    if (/[GgFf⚑★*]/u.test(char)) return "goal";
+    return "floor";
+}
+
+function BotFace() {
+    // Files in public/ are served from the Vite base URL without the public/ prefix.
+    return <img className="bb-maze-bot-logo" src={`${import.meta.env.BASE_URL}images/robot.svg`} alt="" draggable="false" />;
+}
+
+export default function MazeBot2DComponent({ onRuntimeReady }) {
+  const [grid, setGrid] = useState("");
+  const [header, setHeader] = useState("");
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [trail, setTrail] =  useState([{ x: 0, y: 0 }]);
+  const [showRaw, setShowRaw] = useState(false);
+  const runtimeRef = useRef(null);
+
+  const handleStateChange = useCallback(({ header: nextHeader, grid: nextGrid, position: nextPosition }) => {
+    setHeader(nextHeader);
+    setGrid(nextGrid);
+    setPosition(nextPosition);
+        setTrail((previous) => {
+            const last = previous[previous.length - 1];
+            if (last?.x === nextPosition.x && last?.y === nextPosition.y) return previous;
+            return [...previous, nextPosition];
+        })
+  }, []);
+
+  useEffect(() => {
+    let positionState = { x: 0, y: 0 };
+    let requestController = null;
+    let stopped = false;
+    let paused = false;
+    let pausePromise = null;
+    let resolvePause = null;
+    let currentGrid = "";
+
+    const waitIfPaused = async () => {
+      if (!paused) return;
+      await pausePromise;
     };
-    const offset = offsets[direction];
 
-    if (!offset) {
-        return null;
-    }
+    const publish = (data) => {
+      currentGrid = data.grid;
+      const state = { ...data, position: { ...positionState } };
+      handleStateChange(state);
+      return state;
+    };
 
-    return offset;
-}
+    const move = async (direction) => {
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
 
-export default function MazeBot2DComponent() 
-{
-    const [grid, setGrid] = useState("");
-    const [header, setHeader] = useState("");
-    const [blocksConfirmation, setBlocksConfirmation] = useState("");
-    const [x, setX] = useState(0);
-    const [y, setY] = useState(0);
+      await waitIfPaused();
 
-    const updateGridCoordinate = useCallback(async (nextX, nextY) => {
-        try {
-            const data = await fetchGridCoordinate(nextX, nextY);
-            if (!data) {
-                return false;
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
+
+      const apiDirection = DIRECTIONS[direction];
+      if (!apiDirection) {
+        throw new Error(`Unsupported direction: ${String(direction)}`);
+      }
+
+      const [xOffset, yOffset] = OFFSETS[apiDirection];
+      const nextPosition = {
+        x: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.x + xOffset)),
+        y: Math.max(0, Math.min(GRID_MAX_INDEX, positionState.y + yOffset)),
+      };
+
+      requestController?.abort();
+      requestController = new AbortController();
+      const data = await fetchGridCoordinate(
+        nextPosition.x,
+        nextPosition.y,
+        requestController.signal
+      );
+
+      await waitIfPaused();
+
+      if (stopped) {
+        throw new Error("Program stopped.");
+      }
+
+      positionState = nextPosition;
+      return publish(data);
+    };
+
+    const reset = async () => {
+      stopped = true;
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+      requestController?.abort();
+      requestController = new AbortController();
+      const data = await fetchGridCoordinate(0, 0, requestController.signal);
+      positionState = { x: 0, y: 0 };
+      setTrail([{ x: 0, y: 0 }]);
+      return publish(data);
+    };
+
+    const can_move = (direction) => {
+      const apiDirection = DIRECTIONS[String(direction).toUpperCase()];
+      if (!apiDirection || !currentGrid) return false;
+
+      const [xOffset, yOffset] = OFFSETS[apiDirection];
+      const nextX = positionState.x + xOffset;
+      const nextY = positionState.y + yOffset;
+      if (nextX < 0 || nextX > GRID_MAX_INDEX || nextY < 0 || nextY > GRID_MAX_INDEX) {
+        return false;
+      }
+
+      const parsed = parseGrid(currentGrid);
+      if (!parsed) return false;
+
+      const hasAsciiBorder = parsed.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+      const gridLines = hasAsciiBorder
+        ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+        : parsed.lines;
+      const cell = gridLines[nextY]?.[nextX];
+      const cellType = kind(cell ?? "#");
+      return cellType === "floor" || cellType === "goal";
+    };
+
+    const on_goal = () => {
+      if (!currentGrid) return false;
+
+      const parsed = parseGrid(currentGrid);
+      if (!parsed) return false;
+
+      const hasAsciiBorder = parsed.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+      const gridLines = hasAsciiBorder
+        ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+        : parsed.lines;
+      const cell = gridLines[positionState.y]?.[positionState.x];
+      const cellType = kind(cell ?? "#");
+      return cellType === "goal";
+    };
+
+    const stop = () => {
+      stopped = true;
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+      requestController?.abort();
+    };
+
+    const pause = () => {
+      if (!paused) {
+        paused = true;
+        pausePromise = new Promise((resolve) => { resolvePause = resolve; });
+      }
+    };
+
+    const resume = () => {
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+    };
+
+    const start = () => {
+      stopped = false;
+      if (paused && resolvePause) {
+        resolvePause();
+        paused = false;
+        pausePromise = null;
+        resolvePause = null;
+      }
+    };
+
+    const runtime = { move, reset, stop, pause, resume, start, can_move, on_goal };
+    runtimeRef.current = runtime;
+    onRuntimeReady?.(runtime);
+
+    runtime.reset().catch((error) => {
+      if (error.name !== "AbortError") {
+        console.error("Error initializing MazeBot2D:", error);
+      }
+    });
+
+    return () => {
+      runtime.stop();
+      onRuntimeReady?.(null);
+    };
+  }, [handleStateChange, onRuntimeReady]);
+
+    const handleMove = (direction) => {
+        runtimeRef.current?.move(direction.toUpperCase()).catch((error) => {
+            if (error.name !== "AbortError" && error.message !== "Program stopped.") {
+                console.error("Error moving MazeBot2D:", error);
             }
-
-            setHeader(data.header);
-            setGrid(data.grid);
-            setX(nextX);
-            setY(nextY);
-            return true;
-        } catch (error) {
-            console.error("Error:", error);
-            return false;
-        }
-    }, []);
-
-    const handleMove = useCallback((direction) => {
-        const offset = move(direction);
-        if (!offset) {
-            return false;
-        }
-
-        return updateGridCoordinate(x + offset[0], y + offset[1]);
-    }, [updateGridCoordinate, x, y]);
-
-    useEffect(() => {
-        fetchGridCoordinate(0, 0)
-        .then((data) => {
-            if (data) {
-                setHeader(data.header);
-                setGrid(data.grid);
-            }
-        })
-        .catch((error) => console.error("Error:", error));
-
-        fetch("/api/mazebot2d/blocks")
-        .then((response) => response.json())
-        .then((data) => {
-            setBlocksConfirmation(data.confirmation);
-        })
-        .catch((error) => console.error("Error:", error));
-    }, [updateGridCoordinate]);
+        });
+    };
         
-	return (
-        <div>
-            <p>{header}</p>
-            <p>{blocksConfirmation}</p>
-            <p>Current Position: ({x}, {y})</p>
-            <div>
-                <button type="button" onClick={() => handleMove("up")}>
-                    Up
-                </button>
-                <button type="button" onClick={() => handleMove("down")}>
-                    Down
-                </button>
-                <button type="button" onClick={() => handleMove("left")}>
-                    Left
-                </button>
-                <button type="button" onClick={() => handleMove("right")}>
-                    Right
-                </button>
+	const parsed = useMemo(() => parseGrid(grid), [grid]);
+        const hasAsciiBorder = parsed?.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
+        // ASCII borders are framing characters, not playable rows or columns.
+        const gridLines = hasAsciiBorder
+                ? parsed.lines.slice(1, -1).map((line) => line.slice(1, -1))
+                : parsed?.lines;
+        const columns = gridLines ? Math.max(...gridLines.map((line) => line.length)) : GRID_MAX_INDEX + 1;
+        const rows = gridLines?.length ?? GRID_MAX_INDEX + 1;
+        const cellX = (x) => (x + 0.5) * (100 / columns);
+        const cellY = (y) => (y + 0.5) * (100 / rows);
+            const goalExists = gridLines?.some((line) => line.some((c) => kind(c) === "goal"));
+      const trailPoints = trail.map((p) => `${cellX(p.x)},${cellY(p.y)}`).join(" ");
+    
+      return (
+        <div className="bb-maze">
+          <div className="bb-maze-topline">
+            <span className="bb-maze-label"><span className="bb-maze-live" /> Maze Simulator</span>
+            <span className="bb-maze-coordinate">Robot: ({position.x}, {position.y})</span>
+          </div>
+          <div className="bb-maze-shell">
+            <div className="bb-maze-board" role="img" aria-label={`Robot maze. Robot at x ${position.x}, y ${position.y}.`} style={{ "--bb-cols": columns, "--bb-rows": rows, aspectRatio: `${columns} / ${rows}` }}>
+              {Array.from({ length: rows * columns }, (_, index) => {
+                const x = index % columns;
+                const y = Math.floor(index / columns);
+                const type = gridLines ? kind(gridLines[y]?.[x] ?? " ") : "floor";
+                return <div key={index} className={`bb-maze-tile bb-maze-tile-${type}`}>
+                  {type === "goal" && <span className="bb-maze-goal-flag" aria-hidden="true">⚑</span>}
+                </div>;
+              })}
+              {trail.length > 1 && <svg className="bb-maze-trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points={trailPoints} /></svg>}
+              <div className="bb-maze-bot" style={{ left: `${cellX(position.x)}%`, top: `${cellY(position.y)}%` }}><BotFace /></div>
             </div>
-            <pre>{grid}</pre>
+          </div>
+          <div className="bb-maze-bottomline">
+            <span><span className="bb-maze-key-wall" /> Walls <span className="bb-maze-key-path" /> Open path</span>
+          </div>
+          {showRaw && <div className="bb-maze-raw"><div>{header}</div><pre>{grid || "Loading maze…"}</pre></div>}
         </div>
-    );
+      );
 }
