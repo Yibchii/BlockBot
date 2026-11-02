@@ -1,9 +1,11 @@
+import { imageUrl } from "../utils/assets";
+
 function StudentDashboard({user}) {
     return (
         <div className="student-dashboard p-5">
             {/* Student Avatar Section */}
             <section className="avatar-section bg-blue-100 p-6 rounded-lg flex items-center gap-">
-                <img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} 
+                <img src={imageUrl("profile-silhouette.svg")}
                      alt="Student Avatar" 
                      className="avatar w-20 h-20 rounded-full object-cover" 
                 />

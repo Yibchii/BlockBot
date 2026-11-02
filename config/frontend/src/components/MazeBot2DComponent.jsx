@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./MazeBot2DComponent.css";
+import { imageUrl } from "../utils/assets";
 
 
 const DIRECTIONS = {
@@ -53,7 +54,7 @@ function kind(char) {
 
 function BotFace() {
     // Files in public/ are served from the Vite base URL without the public/ prefix.
-    return <img className="bb-maze-bot-logo" src={`${import.meta.env.BASE_URL}images/robot.svg`} alt="" draggable="false" />;
+    return <img className="bb-maze-bot-logo" src={imageUrl("robot.svg")} alt="" draggable="false" />;
 }
 
 export default function MazeBot2DComponent({ onRuntimeReady }) {

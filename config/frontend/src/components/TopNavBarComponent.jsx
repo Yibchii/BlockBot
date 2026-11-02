@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { imageUrl } from "../utils/assets";
 
 export default function TopNavBarComponent() {
     const location = useLocation();
@@ -8,7 +9,7 @@ export default function TopNavBarComponent() {
         <nav className="site-nav bg-gray-800 text-white p-1 flex items-center gap-6">
             {/* Logo */}
             <a href="/" className="logo">   
-                <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Blockbot Logo" className="h-auto w-54 mr-1" />
+                <img src={imageUrl("logo.png")} alt="Blockbot Logo" className="h-auto w-54 mr-1" />
             </a>
 
             {/* Navigation links */}
