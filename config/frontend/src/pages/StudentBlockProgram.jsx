@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import BlocklyComponent from "../components/BlocklyComponent";
+import { loadBlocksFromApi } from "../blockGen";
 import { runBlocklyProgram } from "../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
 import Console from "./StudentProgramConsole";
@@ -7,6 +8,7 @@ import "./StudentBlockProgram.css";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
+  const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
@@ -45,6 +47,35 @@ export default function Editor() {
         })
       );
   }, []);
+
+  // Register the selected robot's blocks and expose them in the toolbox.
+  useEffect(() => {
+    const blocksUrl = robot && ROBOT_IMPLEMENTATIONS[robot.name]?.blocksUrl;
+    if (!blocksUrl) {
+      setRobotBlockTypes([]);
+      return;
+    }
+
+    let cancelled = false;
+    loadBlocksFromApi(blocksUrl)
+      .then((data) => {
+        if (cancelled) return;
+        setRobotBlockTypes((data.blocks?.blocks ?? []).map((def) => def.type));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setRobotBlockTypes([]);
+        setStatus({
+          state: "error",
+          title: "Robot blocks unavailable",
+          msg: error.message,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [robot]);
 
   const RobotComponent = robot
     ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
@@ -173,7 +204,7 @@ export default function Editor() {
               <span className="editor-badge">Interactive editor</span>
             </div>
             <div className="blockly-container">
-              <BlocklyComponent onWorkspaceReady={setWorkspace} />
+              <BlocklyComponent onWorkspaceReady={setWorkspace} robotBlockTypes={robotBlockTypes} />
             </div>
           </section>
 
