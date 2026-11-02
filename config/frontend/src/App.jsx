@@ -10,7 +10,7 @@ function App() {
       <TopNavBarComponent />
       <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/static/frontend/editor" element={<Editor />} />
           <Route path="/static/frontend/home" element={<Home />} />
           <Route path="/static/frontend/login" element={<LoginPage />} />
