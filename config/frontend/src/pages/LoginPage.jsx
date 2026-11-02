@@ -36,59 +36,76 @@ function Gear({color, position, reverse = false, duration = "26s"}) {
     );
 }
 
-function Field({label, name, value, onChange, type = "text", autoComplete, required = true, minLength}){
-    return (
-        <label className = "bb-field">
-            <span>{label}{required && <span className = "bb-required"> *</span>}</span>
-            <input
-                name={name}
-                value={value}
-                onChange={onChange}
-                type={type}
-                autoComplete={autoComplete}
-                required={required}
-                minLength={minLength}
-            />
-        </label>
-    );
+function TeacherIcon({ className = "" }) {
+  return (
+    <span className={className} aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="17" y="5" width="28" height="24" rx="3" stroke="currentColor" strokeWidth="3" />
+        <path d="M24 34H40M32 29V34" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="11" cy="29" r="6" fill="currentColor" />
+        <path d="M2 44V41C2 36 6 33 11 33C16 33 20 36 20 41V44" fill="currentColor" />
+        <path d="M24 15L30 20L39 11" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
+function Field({ label, name, value, onChange, type = "text", autoComplete, required = true, minLength }) {
+  return (
+    <label className="bb-field">
+      <span>{label}{required && <span className="bb-required"> *</span>}</span>
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        type={type}
+        autoComplete={autoComplete}
+        required={required}
+        minLength={minLength}
+      />
+    </label>
+  );
 }
 
 export default function LoginPage() {
-    const [role, setRole] = useState("student");
-    const [screen, setScreen] = useState("login");
-    const [form, setForm] = useState(initialForm);
-    const [remember, setRememberMe] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [message, setMessage] = useState("");
+  const [role, setRole] = useState("student");
+  const [screen, setScreen] = useState("login");
+  const [form, setForm] = useState(initialForm);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
 
-    const updateForm = (event) => {
-        const {name, value} = event.target;
-        setForm((previous) => ({... previous, [name]: value}));
-        setMessage("");
-    };
+  const updateForm = (event) => {
+    const { name, value } = event.target;
+    setForm((previous) => ({ ...previous, [name]: value }));
+    setMessage("");
+  };
 
-    const changeScreen = (nextScreen) => {
-        setScreen(nextScreen);
-        setForm(initialForm);
-        setMessage("");
-        setShowPassword(false);
-    };
+  const changeScreen = (nextScreen) => {
+    setScreen(nextScreen);
+    setForm(initialForm);
+    setMessage("");
+    setShowPassword(false);
+  };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-        if (screen === "register") {
-            if (form.password !== form.confirmPassword) {
-                setMessage("Passwords do not match.");
-                return;
-            }
-            // TODO: sent data to django and do not create real account in client state
-            setMessage(`The ${role} form is read. Connect the Django registration endpoint to create accounts.`);
-            return;
-        }
-        // TODO: authenticate with django and let server establish reaul user's role
-        setMessage(`Login form is read. Connect the Django authentication endpoint to sign in.`);
-    };
+    if (screen === "register") {
+      if (form.password !== form.confirmPassword) {
+        setMessage("Passwords do not match.");
+        return;
+      }
+      // TODO: Send this data to Django. Do NOT create a real account in client state.
+      // POST /api/auth/register/ (endpoint to agree on with backend team)
+      setMessage(`The ${role} form is ready. Connect the Django registration endpoint to create accounts.`);
+      return;
+    }
+
+    // TODO: Authenticate with Django and let the server establish the real user's role.
+    // POST /api/auth/login/ (endpoint to agree on with backend team)
+    setMessage("Login form is ready. Connect the Django authentication endpoint to sign in.");
+  };
 
     const student = role === "student";
     return (
@@ -109,13 +126,13 @@ export default function LoginPage() {
               <p className="bb-card-subtitle">Log in to your account</p>
               <div className="bb-role-switch" role="group" aria-label="Account type">
                 <button className={student ? "active" : ""} type="button" aria-pressed={student} onClick={() => { setRole("student"); setMessage(""); }}>🎓 Student</button>
-                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}>▣ Teacher</button>
+                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}><TeacherIcon className="bb-switch-icon" /> Teacher</button>
               </div>
               <form className="bb-form" onSubmit={handleSubmit}>
                 <Field label={student ? "Username or School ID" : "Username"} name="username" value={form.username} onChange={updateForm} autoComplete="username" />
                 <Field label="Password" name="password" value={form.password} onChange={updateForm} type={showPassword ? "text" : "password"} autoComplete="current-password" />
                 <div className="bb-options">
-                  <label className="bb-check"><input type="checkbox" checked={remember} onChange={(event) => setRememberMe(event.target.checked)} /> Remember me</label>
+                  <label className="bb-check"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} /> Remember me</label>
                   <button type="button" className="bb-link" onClick={() => changeScreen("forgot")}>Forgot password?</button>
                 </div>
                 <button className="bb-primary" type="submit">Log In →</button>
@@ -131,7 +148,7 @@ export default function LoginPage() {
               <p className="bb-card-subtitle">{student ? "Join your classroom and start building!" : "Set up your classroom and start teaching!"}</p>
               <div className="bb-role-switch" role="group" aria-label="Registration account type">
                 <button className={student ? "active" : ""} type="button" aria-pressed={student} onClick={() => { setRole("student"); setMessage(""); }}>🎓 Student</button>
-                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}>▣ Teacher</button>
+                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}><TeacherIcon className="bb-switch-icon" /> Teacher</button>
               </div>
               <form className="bb-form" onSubmit={handleSubmit}>
                 <Field label={student ? "School ID or Username" : "Username"} name="username" value={form.username} onChange={updateForm} autoComplete="username" />
@@ -173,7 +190,7 @@ export default function LoginPage() {
               <p>Join your classroom, complete assignments and challenges, create projects, and track your progress.</p>
             </article>
             <article className="bb-info bb-info--teacher">
-              <span className="bb-info-icon" aria-hidden="true">▣</span>
+              <TeacherIcon className="bb-info-icon" />
               <h3>Teacher Account</h3>
               <p>Create and manage classrooms, assignments, and challenges, monitor progress, and provide feedback.</p>
             </article>
@@ -181,5 +198,5 @@ export default function LoginPage() {
         </section>
       </div>
     </main>
-  );
+    );
 }
