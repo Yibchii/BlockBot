@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
+import { installBlocklyPrompt } from './blocklyPrompt';
 import '../IntegerConstantBlock';
 import '../coreBlocks';
 import '../blockGen';
@@ -11,6 +12,8 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
   const readyCallbackRef = useRef(onWorkspaceReady);
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
+
+  useEffect(() => installBlocklyPrompt(), []);
 
   useEffect(() => {
     readyCallbackRef.current = onWorkspaceReady;
