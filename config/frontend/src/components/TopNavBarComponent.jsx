@@ -16,7 +16,7 @@ export default function TopNavBarComponent() {
     useEffect(() => {
         const controller = new AbortController();
 
-        fetch("/api/user/info/", { signal: controller.signal })
+        const refreshUser = () => fetch("/api/user/info/", { signal: controller.signal })
             .then((response) => {
                 if (response.status === 401) {
                     return null;
@@ -34,7 +34,13 @@ export default function TopNavBarComponent() {
                 }
             });
 
-        return () => controller.abort();
+        refreshUser();
+        window.addEventListener("blockbot:login", refreshUser);
+
+        return () => {
+            controller.abort();
+            window.removeEventListener("blockbot:login", refreshUser);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -49,6 +55,7 @@ export default function TopNavBarComponent() {
                     throw new Error(`Unable to log out (${response.status})`);
                 }
                 setUser(null);
+                window.location.assign("/");
             })
             .catch((error) => console.error(error));
     };

@@ -50,6 +50,13 @@ function TeacherIcon({ className = "" }) {
   );
 }
 
+function getCookie(name) {
+  return document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(`${name}=`))
+    ?.split("=")[1];
+}
+
 function Field({ label, name, value, onChange, type = "text", autoComplete, required = true, minLength }) {
   return (
     <label className="bb-field">
@@ -74,6 +81,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateForm = (event) => {
     const { name, value } = event.target;
@@ -88,7 +96,7 @@ export default function LoginPage() {
     setShowPassword(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (screen === "register") {
@@ -102,9 +110,36 @@ export default function LoginPage() {
       return;
     }
 
-    // TODO: Authenticate with Django and let the server establish the real user's role.
-    // POST /api/auth/login/ (endpoint to agree on with backend team)
-    setMessage("Login form is ready. Connect the Django authentication endpoint to sign in.");
+    setIsSubmitting(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/user/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCookie("csrftoken") || "",
+        },
+        credentials: "same-origin",
+        body: new URLSearchParams({
+          username: form.username,
+          password: form.password,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Unable to log in (${response.status})`);
+      }
+
+      window.dispatchEvent(new Event("blockbot:login"));
+      setMessage(data.message || "Login successful.");
+      window.location.assign("/home");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to log in.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
     const student = role === "student";
@@ -135,11 +170,13 @@ export default function LoginPage() {
                   <label className="bb-check"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} /> Remember me</label>
                   <button type="button" className="bb-link" onClick={() => changeScreen("forgot")}>Forgot password?</button>
                 </div>
-                <button className="bb-primary" type="submit">Log In →</button>
+                <button className="bb-primary" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Logging In..." : "Log In →"}
+                </button>
               </form>
               <div className="bb-separator"><span>or</span></div>
               <button className="bb-outline" type="button" onClick={() => changeScreen("register")}>Create an Account</button>
-              <button className="bb-guest" type="button" onClick={() => setMessage("Guest access should open your public Blockly editor route once it is connected.")}>Continue as Guest</button>
+              <button className="bb-guest" type="button" onClick={() => window.location.assign("/editor")}>Continue as Guest</button>
             </>
           ) : screen === "register" ? (
             <>
@@ -176,7 +213,11 @@ export default function LoginPage() {
               <p className="bb-card-subtitle">Password recovery will be available when it is implemented in Django.</p>
             </>
           )}
-          {message && <p role="status" className="bb-message">{message}</p>}
+          {message && (
+            <p role="status" className={`bb-message ${message === "Login failed" ? "bb-message--error" : ""}`}>
+              {message}
+            </p>
+          )}
         </section>
 
         <section className="bb-welcome" aria-label="About BlockBot">
