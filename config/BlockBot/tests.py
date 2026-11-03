@@ -6,6 +6,20 @@ from .models import UserProfile
 
 
 class MazeBot2DViewTestCase(TestCase):
+	def test_register_user_uses_email_when_username_is_missing(self):
+		response = self.client.post('/api/user/register/student', {
+			"email": "jane@example.com",
+			"password": "password",
+			"first_name": "Jane",
+			"last_name": "Doe",
+		})
+
+		self.assertEqual(response.status_code, 201)
+		user = User.objects.get(username="jane@example.com")
+		profile = UserProfile.objects.get(user=user)
+		self.assertEqual(user.username, "jane@example.com")
+		self.assertEqual(profile.email, "jane@example.com")
+
 	def test_user_info_api_rejects_anonymous_users(self):
 		response = self.client.get('/api/user/info/')
 

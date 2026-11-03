@@ -10,8 +10,6 @@ const initialForm = {
     lastName: "",
     password: "",
     confirmPassword: "",
-    classroomCode: "",
-    classroomName: "",
 };
 
 function Gear({color, position, reverse = false, duration = "26s"}) {
@@ -104,45 +102,90 @@ export default function LoginPage() {
         setMessage("Passwords do not match.");
         return;
       }
-      // TODO: Send this data to Django. Do NOT create a real account in client state.
-      // POST /api/auth/register/ (endpoint to agree on with backend team)
-      setMessage(`The ${role} form is ready. Connect the Django registration endpoint to create accounts.`);
-      return;
     }
 
     setIsSubmitting(true);
     setMessage("");
 
     try {
-      const response = await fetch("/api/user/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-CSRFToken": getCookie("csrftoken") || "",
+      const isRegistration = screen === "register";
+      const response = await fetch(
+        isRegistration
+          ? `/api/user/register/${role}`
+          : "/api/user/login/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken") || "",
+          },
+          credentials: "same-origin",
+          body: new URLSearchParams(
+            isRegistration
+              ? {
+                  ...(role === "student" && { username: form.username }),
+                  first_name: form.firstName,
+                  last_name: form.lastName,
+                  ...(role === "instructor" && { email: form.email }),
+                  password: form.password,
+                }
+              : {
+                  username: form.username,
+                  password: form.password,
+                },
+          ),
         },
-        credentials: "same-origin",
-        body: new URLSearchParams({
-          username: form.username,
-          password: form.password,
-        }),
-      });
+      );
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || `Unable to log in (${response.status})`);
+        throw new Error(
+          data.message ||
+            `Unable to ${isRegistration ? "create the account" : "log in"} (${response.status})`,
+        );
+      }
+
+      if (isRegistration) {
+        const loginResponse = await fetch("/api/user/login/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken") || "",
+          },
+          credentials: "same-origin",
+          body: new URLSearchParams({
+            username: role === "instructor" ? form.email : form.username,
+            password: form.password,
+          }),
+        });
+        const loginData = await loginResponse.json();
+
+        if (!loginResponse.ok) {
+          throw new Error(
+            loginData.message || `Unable to log in (${loginResponse.status})`,
+          );
+        }
+
+        window.dispatchEvent(new Event("blockbot:login"));
+        window.location.assign("/home");
+        return;
       }
 
       window.dispatchEvent(new Event("blockbot:login"));
       setMessage(data.message || "Login successful.");
       window.location.assign("/home");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to log in.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : `Unable to ${screen === "register" ? "create the account" : "log in"}.`,
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-    const student = role === "student";
+    const student = screen === "login" || role === "student";
     return (
     <main className="bb-page">
       <div className="bb-gears" aria-hidden="true">
@@ -159,12 +202,8 @@ export default function LoginPage() {
           {screen === "login" ? (
             <>
               <p className="bb-card-subtitle">Log in to your account</p>
-              <div className="bb-role-switch" role="group" aria-label="Account type">
-                <button className={student ? "active" : ""} type="button" aria-pressed={student} onClick={() => { setRole("student"); setMessage(""); }}>🎓 Student</button>
-                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}><TeacherIcon className="bb-switch-icon" /> Teacher</button>
-              </div>
               <form className="bb-form" onSubmit={handleSubmit}>
-                <Field label={student ? "Username or School ID" : "Username"} name="username" value={form.username} onChange={updateForm} autoComplete="username" />
+                <Field label="Username or Email" name="username" value={form.username} onChange={updateForm} autoComplete="username" />
                 <Field label="Password" name="password" value={form.password} onChange={updateForm} type={showPassword ? "text" : "password"} autoComplete="current-password" />
                 <div className="bb-options">
                   <label className="bb-check"><input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} /> Remember me</label>
@@ -181,15 +220,18 @@ export default function LoginPage() {
           ) : screen === "register" ? (
             <>
               <button className="bb-back" type="button" onClick={() => changeScreen("login")}>← Back to Login</button>
-              <h1 className="bb-form-title">Create a {student ? "Student" : "Teacher"} Account</h1>
+              <h1 className="bb-form-title">Create a {student ? "Student" : "Instructor"} Account</h1>
               <p className="bb-card-subtitle">{student ? "Join your classroom and start building!" : "Set up your classroom and start teaching!"}</p>
               <div className="bb-role-switch" role="group" aria-label="Registration account type">
                 <button className={student ? "active" : ""} type="button" aria-pressed={student} onClick={() => { setRole("student"); setMessage(""); }}>🎓 Student</button>
-                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("teacher"); setMessage(""); }}><TeacherIcon className="bb-switch-icon" /> Teacher</button>
+                <button className={!student ? "active" : ""} type="button" aria-pressed={!student} onClick={() => { setRole("instructor"); setMessage(""); }}><TeacherIcon className="bb-switch-icon" /> Instructor</button>
               </div>
               <form className="bb-form" onSubmit={handleSubmit}>
-                <Field label={student ? "School ID or Username" : "Username"} name="username" value={form.username} onChange={updateForm} autoComplete="username" />
-                {!student && <Field label="Email" name="email" value={form.email} onChange={updateForm} type="email" autoComplete="email" />}
+                {student ? (
+                  <Field label="Username" name="username" value={form.username} onChange={updateForm} autoComplete="username" />
+                ) : (
+                  <Field label="Email" name="email" value={form.email} onChange={updateForm} type="email" autoComplete="email" />
+                )}
                 <div className="bb-name-row">
                   <Field label="First Name" name="firstName" value={form.firstName} onChange={updateForm} autoComplete="given-name" />
                   <Field label="Last Name" name="lastName" value={form.lastName} onChange={updateForm} autoComplete="family-name" />
@@ -197,12 +239,9 @@ export default function LoginPage() {
                 <Field label="Password" name="password" value={form.password} onChange={updateForm} type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} />
                 <Field label="Confirm Password" name="confirmPassword" value={form.confirmPassword} onChange={updateForm} type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} />
                 <label className="bb-check"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} /> Show passwords</label>
-                {student ? (
-                  <Field label="Classroom Code" name="classroomCode" value={form.classroomCode} onChange={updateForm} />
-                ) : (
-                  <Field label="Classroom Name" name="classroomName" value={form.classroomName} onChange={updateForm} />
-                )}
-                <button className={`bb-primary ${!student ? "bb-primary--green" : ""}`} type="submit">Create Account</button>
+                <button className={`bb-primary ${!student ? "bb-primary--green" : ""}`} type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                </button>
               </form>
               <p className="bb-bottom-note">Already have an account? <button type="button" className="bb-link" onClick={() => changeScreen("login")}>Log In</button></p>
             </>
@@ -232,7 +271,7 @@ export default function LoginPage() {
             </article>
             <article className="bb-info bb-info--teacher">
               <TeacherIcon className="bb-info-icon" />
-              <h3>Teacher Account</h3>
+              <h3>Instructor Account</h3>
               <p>Create and manage classrooms, assignments, and challenges, monitor progress, and provide feedback.</p>
             </article>
           </div>

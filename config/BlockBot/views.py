@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.shortcuts import render
 
-from .utils import loadDefaultBlocks
+from .utils import _register_user, loadDefaultBlocks
 from .models import Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
@@ -86,8 +86,12 @@ def get_mazebot2d_blocks(request):
     return JsonResponse(response_data)
 
 # User API endpoints
+def register_student_user(request):
+    return _register_user(request, "Student")
 
-# todo - login from form
+def register_instructor_user(request):
+    return _register_user(request, "Instructor")
+
 def login_user(request):
     if request.method == "POST":
         username = request.POST.get("username")
