@@ -22,4 +22,5 @@ urlpatterns = [
     # User API endpoints
     path('api/user/info/', views.get_user_info),
     path('api/user/login/', views.login_user),
+    path('api/user/logout/', views.logout_user),
 ]

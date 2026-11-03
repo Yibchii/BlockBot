@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
+function getCookie(name) {
+    return document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith(`${name}=`))
+        ?.split("=")[1];
+}
+
 export default function TopNavBarComponent() {
     const location = useLocation();
     const basePath = location.pathname.startsWith("/static/frontend") ? "/static/frontend" : "";
@@ -30,6 +37,22 @@ export default function TopNavBarComponent() {
         return () => controller.abort();
     }, []);
 
+    const handleLogout = () => {
+        fetch("/api/user/logout/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Unable to log out (${response.status})`);
+                }
+                setUser(null);
+            })
+            .catch((error) => console.error(error));
+    };
+
     return (
         <nav className="site-nav bg-gray-800 text-white p-1 flex items-center gap-6">
             {/* Logo */}
@@ -45,8 +68,13 @@ export default function TopNavBarComponent() {
                 <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
                     Editor
                 </Link>
-                {user ? (
+                {user && (
                     <span aria-label="Logged in user">{user.display_name || user.username}</span>
+                )}
+                {user ? (
+                    <button type="button" onClick={handleLogout} className="hover:text-gray-400">
+                        Logout
+                    </button>
                 ) : (
                     <Link to={`${basePath}/login`} className="hover:text-gray-400">
                         Login

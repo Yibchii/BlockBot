@@ -8,6 +8,7 @@ from .models import Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, logout, login
+from django.middleware.csrf import get_token
 
 # Web Pages
 def index(request):
@@ -99,8 +100,15 @@ def login_user(request):
             return JsonResponse({"message": "Login failed"}, status=401)
     return JsonResponse({"message": "Invalid request method"}, status=400)
 
-# todo - fetch user info
+def logout_user(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    logout(request)
+    return JsonResponse({"message": "Logout successful"})
+
 def get_user_info(request):
+    get_token(request)
     if not request.user.is_authenticated:
         return JsonResponse({"message": "No user is logged in"}, status=401)
 
