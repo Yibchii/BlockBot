@@ -4,9 +4,10 @@ from pathlib import Path
 from django.shortcuts import render
 
 from .utils import loadDefaultBlocks
+from .models import Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
-from .models import Robot
+from django.contrib.auth import authenticate, logout, login
 
 # Web Pages
 def index(request):
@@ -65,6 +66,7 @@ def get_robots(request):
     )
     return JsonResponse({"robots": robots})
 
+# Mazebot 2D API endpoints
 def get_mazebot2d_grid(request):
     x = int(request.GET.get("x", 0))
     y = int(request.GET.get("y", 0))
@@ -81,3 +83,30 @@ def get_mazebot2d_blocks(request):
         response_data = json.load(file)
 
     return JsonResponse(response_data)
+
+# User API endpoints
+
+# todo - login from form
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"message": "Login successful"})
+        else:
+            return JsonResponse({"message": "Login failed"}, status=401)
+    return JsonResponse({"message": "Invalid request method"}, status=400)
+
+# todo - fetch user info
+def get_user_info(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    return JsonResponse({
+        "username": request.user.username,
+        "display_name": user_profile.display_name if user_profile else request.user.username,
+    })
+    

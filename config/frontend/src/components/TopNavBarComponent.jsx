@@ -1,8 +1,34 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function TopNavBarComponent() {
     const location = useLocation();
     const basePath = location.pathname.startsWith("/static/frontend") ? "/static/frontend" : "";
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        fetch("/api/user/info/", { signal: controller.signal })
+            .then((response) => {
+                if (response.status === 401) {
+                    return null;
+                }
+                if (!response.ok) {
+                    throw new Error(`Unable to fetch user info (${response.status})`);
+                }
+                return response.json();
+            })
+            .then(setUser)
+            .catch((error) => {
+                if (error.name !== "AbortError") {
+                    console.error(error);
+                    setUser(null);
+                }
+            });
+
+        return () => controller.abort();
+    }, []);
 
     return (
         <nav className="site-nav bg-gray-800 text-white p-1 flex items-center gap-6">
@@ -19,9 +45,13 @@ export default function TopNavBarComponent() {
                 <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
                     Editor
                 </Link>
-                <Link to={`${basePath}/login`} className="hover:text-gray-400">
-                    Login
-                </Link>
+                {user ? (
+                    <span aria-label="Logged in user">{user.display_name || user.username}</span>
+                ) : (
+                    <Link to={`${basePath}/login`} className="hover:text-gray-400">
+                        Login
+                    </Link>
+                )}
             </div>
         </nav>
     );

@@ -16,6 +16,10 @@ urlpatterns = [
     path('mazebot2d/', views.mazebot2d, name="mazebot2d-slash"),
     path('api/test/', views.test_api),
     path('api/robots/', views.get_robots),
+    # Mazebot 2D API endpoints
     path('api/mazebot2d/grid/', views.get_mazebot2d_grid),
     path('api/mazebot2d/blocks', views.get_mazebot2d_blocks),
+    # User API endpoints
+    path('api/user/info/', views.get_user_info),
+    path('api/user/login/', views.login_user),
 ]
