@@ -75,9 +75,6 @@ export default function TopNavBarComponent() {
                 <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
                     Editor
                 </Link>
-                {user && (
-                    <span aria-label="Logged in user">{user.display_name || user.username}</span>
-                )}
                 {user ? (
                     <button type="button" onClick={handleLogout} className="hover:text-gray-400">
                         Logout
