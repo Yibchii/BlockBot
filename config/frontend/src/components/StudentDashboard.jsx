@@ -9,7 +9,7 @@ function StudentDashboard({user}) {
                 />
                 <div>
                     <h1 className="text-2xl font-bold text-black">
-                        Welcome back, {user.first_name}!
+                        Welcome back, {user?.display_name || user?.username || "student"}!
                     </h1>
                     <p className="text-gray-600">
                         Keep learning and build something amazing with your robot!
