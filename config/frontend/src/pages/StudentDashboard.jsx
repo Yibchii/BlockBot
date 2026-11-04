@@ -3,25 +3,26 @@ import DashboardListItem from '../components/DashboardListItem';
 
 function StudentDashboard({user}) {
     return (
-        <div className="student-dashboard p-5">
+        <div className="student-dashboard p-3">
             {/* Student Avatar Section */}
-            <section className="avatar-section h-30 p-8 bg-gray-200 rounded-lg flex items-center gap-5">
+            <section className="avatar-section h-25 p-8 bg-gray-200 rounded-lg flex items-center gap-5">
                 <img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} 
-                     alt="Student Avatar" 
-                     className="avatar w-20 h-20 rounded-full" 
+                    alt="Student Avatar" 
+                    className="avatar bg-gray-400 w-20 h-20 rounded-full" 
                 />
                 <div className="welcome-banner">
-                    <h1>
+                    <h1 className="m-1 text-3xl font-bold text-left">
                         Welcome back, {user.first_name}!
                     </h1>
                     <p>
                         Keep learning and build something amazing with your robot!
                     </p>
                 </div>
-                <button className="ml-auto bg-blue-500 text-white p-2 w-35 rounded-lg"> + New Project 
+                <button className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
+                    + New Project 
                 </button>
             </section>
-        {/* Student Dashboard Cards */}
+        {/* Student Continue Learning Dashboard Card */}
         <section className="continue-learning mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             
             {/* Continue Learning Card */}
@@ -31,7 +32,7 @@ function StudentDashboard({user}) {
             <div className="dashboard-card p-2 bg-gray-100 rounded-lg shadow-md gap-3">
                 <div className="flex items-center justify-between mb-3">
                     <h1 className="text-xl font-bold mb-1">Recent Projects</h1>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">
                         + View All
                     </button>
                 </div>
