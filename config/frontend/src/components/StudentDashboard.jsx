@@ -1,27 +1,55 @@
+import DashboardCard from '../components/DashboardCard';
+import DashboardListItem from '../components/DashboardListItem';
+
 function StudentDashboard({user}) {
     return (
-        <div className="student-dashboard p-5">
+        <div className="student-dashboard p-3">
             {/* Student Avatar Section */}
-            <section className="avatar-section bg-blue-100 p-6 rounded-lg flex items-center gap-">
+            <section className="avatar-section h-25 p-8 bg-gray-200 rounded-lg flex items-center gap-5">
                 <img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} 
-                     alt="Student Avatar" 
-                     className="avatar w-20 h-20 rounded-full object-cover" 
+                    alt="Student Avatar" 
+                    className="avatar bg-gray-400 w-20 h-20 rounded-full" 
                 />
-                <div>
-                    <h1 className="text-2xl font-bold text-black">
-                        Welcome back, {user?.display_name || user?.username || "student"}!
+                <div className="welcome-banner">
+                    <h1 className="m-1 text-3xl font-bold text-left">
+                        Welcome back, {user.first_name}!
                     </h1>
-                    <p className="text-gray-600">
+                    <p>
                         Keep learning and build something amazing with your robot!
                     </p>
                 </div>
-                <button className="ml-auto bg-blue-500 text-white p-2 rounded-full"> + New Project </button>
-
+                <button className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
+                    + New Project 
+                </button>
             </section>
+        {/* Student Continue Learning Dashboard Card */}
+        <section className="continue-learning mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            
+            {/* Continue Learning Card */}
+            <DashboardCard src={`${import.meta.env.BASE_URL}images/RobotDancing.gif`} title="Continue Learning" content="Continue where you left off." progress={60} button={true} />
 
+            {/* Recent Projects Card */}
+            <div className="dashboard-card p-2 bg-gray-100 rounded-lg shadow-md gap-3">
+                <div className="flex items-center justify-between mb-3">
+                    <h1 className="text-xl font-bold mb-1">Recent Projects</h1>
+                    <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">
+                        + View All
+                    </button>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                    <DashboardListItem title="Maze Runner" description="Your latest project.">
+                    </DashboardListItem>
+                    <DashboardListItem title="Maze Runner" description="Your latest project." />
+                    <DashboardListItem title="Maze Runner" description="Your latest project." />
+                </div>  
+            </div>
+            
+            <DashboardCard title="Available Challenges" content="You have 2 upcoming deadlines." />
+        </section>
                 
             
         </div>
+        
     );
 }
 
