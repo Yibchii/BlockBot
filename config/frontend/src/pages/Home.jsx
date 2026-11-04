@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import StudentDashboard from '../components/StudentDashboard';
-import InstructorDashboard from '../components/InstructorDashboard';
 
 function Home() {
     const [user, setUser] = useState(null);
@@ -31,8 +30,11 @@ function Home() {
 
     return (
         <div >
-            <StudentDashboard user={user} />
-            
+            {user ? (
+                <StudentDashboard user={user} />
+            ) : (
+                <p>Loading dashboard...</p>
+            )}
         </div>
     );
 }
