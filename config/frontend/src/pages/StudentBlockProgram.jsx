@@ -13,6 +13,7 @@ export default function Editor() {
   const [robotReady, setRobotReady] = useState(false);
   const [runState, setRunState] = useState("idle");
   const [paused, setPaused] = useState(false);
+  const [displayName, setDisplayName] = useState("not logged in");
   const [status, setStatus] = useState({
     state: "idle",
     title: "Ready to edit",
@@ -44,6 +45,32 @@ export default function Editor() {
           msg: error.message,
         })
       );
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/user/info/", { signal: controller.signal })
+      .then((response) => {
+        if (response.status === 401) {
+          return null;
+        }
+        if (!response.ok) {
+          throw new Error(`Unable to fetch user info (${response.status})`);
+        }
+        return response.json();
+      })
+      .then((user) => {
+        setDisplayName(user?.display_name || user?.username || "not logged in");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error(error);
+          setDisplayName("not logged in");
+        }
+      });
+
+    return () => controller.abort();
   }, []);
 
   const RobotComponent = robot
@@ -158,7 +185,7 @@ export default function Editor() {
 
         <div className="student-account">
           <img src="/static/frontend/images/profile-silhouette.svg" alt="" />
-          <span>Student</span>
+          <span>{displayName}</span>
         </div>
       </header>
 
