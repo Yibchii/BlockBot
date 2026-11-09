@@ -7,6 +7,7 @@ import "./StudentBlockProgram.css";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
+  const [availableRobots, setAvailableRobots] = useState([]);
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
@@ -32,7 +33,11 @@ export default function Editor() {
         return response.json();
       })
       .then(({ robots }) => {
-        const selectedRobot = robots?.[0];
+        const supportedRobots = (robots || []).filter(
+          (item) => ROBOT_IMPLEMENTATIONS[item.name]?.Component
+        );
+        setAvailableRobots(supportedRobots);
+        const selectedRobot = supportedRobots[0];
         if (!selectedRobot || !ROBOT_IMPLEMENTATIONS[selectedRobot.name]) {
           throw new Error("No supported robot is available.");
         }
@@ -207,10 +212,41 @@ export default function Editor() {
           <div className="student-side">
             <section className="student-panel simulator-panel">
               <div className="panel-header">
-                <h2>{robot?.name || "Robot"}</h2>
+                <label>
+                  Robot
+                  <select
+                    aria-label="Choose robot"
+                    value={robot?.id ?? ""}
+                    disabled={!availableRobots.length || runState === "running"}
+                    onChange={(event) => {
+                      const selected = availableRobots.find(
+                        (item) => String(item.id) === event.target.value
+                      );
+                      if (!selected || selected.id === robot?.id) return;
+                      runtimeRef.current = null;
+                      setRobotReady(false);
+                      setPaused(false);
+                      setRobot(selected);
+                      setStatus({
+                        state: "idle",
+                        title: "Robot selected",
+                        msg: `${selected.name} selected. Your blocks are preserved.`,
+                      });
+                    }}
+                  >
+                    {!availableRobots.length && (
+                      <option value="">No supported robots available</option>
+                    )}
+                    {availableRobots.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name} ({item.robot_type})
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <div className="maze-component-container">
-                {RobotComponent && <RobotComponent onRuntimeReady={handleRuntimeReady} />}
+                {RobotComponent && <RobotComponent key={robot.id} onRuntimeReady={handleRuntimeReady} />}
               </div>
             </section>
 
