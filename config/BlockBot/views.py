@@ -3,10 +3,12 @@ from pathlib import Path
 
 from django.shortcuts import render
 
-from .utils import loadDefaultBlocks
+from .utils import _register_user, loadDefaultBlocks
+from .models import Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
-from .models import Robot
+from django.contrib.auth import authenticate, logout, login
+from django.middleware.csrf import get_token
 
 # Web Pages
 def index(request):
@@ -42,9 +44,11 @@ def _ascii_grid(grid, robot):
         row.append("|")
         for x in range(grid.SIZE):
             if (x, y) == robot.position:
-                row.append("@")
+                row.append("*" if grid.get_cell(x, y) == CellType.GOAL else "@")
             elif grid.get_cell(x, y) == CellType.BLOCKED:
                 row.append("#")
+            elif grid.get_cell(x, y) == CellType.GOAL:
+                row.append("G")
             else:
                 row.append(" ")
         row.append("|")
@@ -63,6 +67,7 @@ def get_robots(request):
     )
     return JsonResponse({"robots": robots})
 
+# Mazebot 2D API endpoints
 def get_mazebot2d_grid(request):
     x = int(request.GET.get("x", 0))
     y = int(request.GET.get("y", 0))
@@ -79,3 +84,41 @@ def get_mazebot2d_blocks(request):
         response_data = json.load(file)
 
     return JsonResponse(response_data)
+
+# User API endpoints
+def register_student_user(request):
+    return _register_user(request, "Student")
+
+def register_instructor_user(request):
+    return _register_user(request, "Instructor")
+
+def login_user(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"message": "Login successful"})
+        else:
+            return JsonResponse({"message": "Login failed"}, status=401)
+    return JsonResponse({"message": "Invalid request method"}, status=400)
+
+def logout_user(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    logout(request)
+    return JsonResponse({"message": "Logout successful"})
+
+def get_user_info(request):
+    get_token(request)
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    return JsonResponse({
+        "username": request.user.username,
+        "display_name": user_profile.display_name if user_profile else request.user.username,
+    })
+    

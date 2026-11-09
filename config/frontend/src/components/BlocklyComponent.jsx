@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
+import { installBlocklyPrompt } from './blocklyPrompt';
 import '../IntegerConstantBlock';
 import '../coreBlocks';
 import '../generators/mazeBotGenerators';
@@ -12,6 +13,8 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
   const updateToolboxRef = useRef(null);
+
+  useEffect(() => installBlocklyPrompt(), []);
 
   useEffect(() => {
     readyCallbackRef.current = onWorkspaceReady;
@@ -693,6 +696,11 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
           colour: '#995ba5',
           contents: [
             {
+                kind: 'button',
+                text: 'Create function...',
+                callbackKey: 'CREATE_FUNCTION'
+            },
+            {
               kind: 'block',
               type: 'procedures_defnoreturn',
               fields: {
@@ -731,6 +739,69 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
       }
     });
 
+    workspaceRef.current.registerButtonCallback(
+      'CREATE_FUNCTION',
+      (button) => {
+        const workspace = button.getTargetWorkspace();
+
+        Blockly.dialog.prompt('Enter a function name:', '', (input) => {
+          if (input === null) return;
+
+          const name = input.trim();
+
+          if (!name) {
+            Blockly.dialog.alert('Please enter a function name.');
+            return;
+          }
+
+          const nameExists = workspace.getAllBlocks(false).some((block) => {
+            const isFunction =
+              block.type === 'procedures_defnoreturn' ||
+              block.type === 'procedures_defreturn';
+
+            return (
+              isFunction &&
+              String(block.getFieldValue('NAME')).toLowerCase() ===
+                name.toLowerCase()
+            );
+          });
+
+          if (nameExists) {
+            Blockly.dialog.alert(
+              'A function with this name already exists.'
+            );
+            return;
+          }
+
+          Blockly.Events.setGroup(true);
+
+          try {
+            const otherBlocks = workspace.getTopBlocks(false);
+
+            const bottom = otherBlocks.reduce((maximum, block) => {
+              const position = block.getRelativeToSurfaceXY();
+              const size = block.getHeightWidth();
+              return Math.max(maximum, position.y + size.height);
+            }, 0);
+
+            const functionBlock = workspace.newBlock(
+              'procedures_defnoreturn'
+            );
+
+            functionBlock.setFieldValue(name, 'NAME');
+            functionBlock.initSvg();
+            functionBlock.render();
+            functionBlock.moveBy(40, bottom + 40);
+            functionBlock.select();
+            workspace.centerOnBlock(functionBlock.id);
+          } finally {
+            Blockly.Events.setGroup(false);
+          }
+        });
+      }
+    );
+
+   
     // using blocky's built-in dynamic variables category
     ['i', 'j', 'k', 'm', 'n', 'o'].forEach((name) => {
       workspaceRef.current.getVariableMap().createVariable(name);
@@ -749,7 +820,13 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
 
       if (value.VAR?.id) {
         const variable = variableMap.getVariable(value.VAR.id);
-        if (variable) value.VAR.id = variable.getId();
+        if (variable) {
+          value.VAR = {
+            id: variable.getId(),
+            name: variable.getName(),
+            type: variable.getType(),
+          };
+        }
       }
 
       Object.values(value).forEach(resolveVariableIds);

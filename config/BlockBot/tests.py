@@ -1,8 +1,43 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
+
 from .models import Robot
+from .models import UserProfile
 
 
 class MazeBot2DViewTestCase(TestCase):
+	def test_register_user_uses_email_when_username_is_missing(self):
+		response = self.client.post('/api/user/register/student', {
+			"email": "jane@example.com",
+			"password": "password",
+			"first_name": "Jane",
+			"last_name": "Doe",
+		})
+
+		self.assertEqual(response.status_code, 201)
+		user = User.objects.get(username="jane@example.com")
+		profile = UserProfile.objects.get(user=user)
+		self.assertEqual(user.username, "jane@example.com")
+		self.assertEqual(profile.email, "jane@example.com")
+
+	def test_user_info_api_rejects_anonymous_users(self):
+		response = self.client.get('/api/user/info/')
+
+		self.assertEqual(response.status_code, 401)
+
+	def test_user_info_api_returns_display_name_for_logged_in_users(self):
+		user = User.objects.create_user(username="jane", password="password")
+		UserProfile.objects.create(user=user, display_name="Jane Doe")
+		self.client.force_login(user)
+
+		response = self.client.get('/api/user/info/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json(), {
+			"username": "jane",
+			"display_name": "Jane Doe",
+		})
+
 	def test_robot_api_lists_database_robots(self):
 		Robot.objects.create(id=1, name="MazeBot2D", robot_type=Robot.RobotType.SIMULATED)
 
@@ -19,7 +54,7 @@ class MazeBot2DViewTestCase(TestCase):
 		response = self.client.get('/mazebot2d')
 
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, "@# #      ")
+		self.assertContains(response, "@# #G     ")
 		self.assertContains(response, 'name="command" value="left"')
 		self.assertContains(response, 'name="command" value="right"')
 		self.assertContains(response, 'name="command" value="up"')
@@ -38,7 +73,7 @@ class MazeBot2DViewTestCase(TestCase):
 		response = self.client.post('/mazebot2d', {"command": "reset"})
 
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, "@# #      ")
+		self.assertContains(response, "@# #G     ")
 
 	def test_trailing_slash_url_displays_page(self):
 		response = self.client.get('/mazebot2d/')
@@ -64,3 +99,10 @@ class MazeBot2DViewTestCase(TestCase):
 		self.assertEqual(rows[0], '+----------+')
 		self.assertEqual(rows[-1], '+----------+')
 		self.assertEqual(rows[1][1], '@')
+
+	def test_mazebot2d_grid_api_marks_robot_on_goal(self):
+		response = self.client.get('/api/mazebot2d/grid/', {'x': 4, 'y': 0})
+
+		self.assertEqual(response.status_code, 200)
+		rows = response.json()['grid'].splitlines()
+		self.assertEqual(rows[1][5], '*')

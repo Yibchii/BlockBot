@@ -4,10 +4,11 @@ from enum import Enum
 class CellType(Enum):
     NAVIGABLE = "navigable"
     BLOCKED = "blocked"
+    GOAL = "goal"
 
 
 MAZE_LAYOUT = [
-    [" ", "#", " ", "#", " ", " ", " ", " ", " ", " "],
+    [" ", "#", " ", "#", "G", " ", " ", " ", " ", " "],
     [" ", "#", " ", "#", "#", "#", "#", "#", " ", " "],
     [" ", "#", " ", " ", " ", " ", "#", " ", " ", " "],
     [" ", "#", " ", "#", " ", " ", "#", " ", " ", " "],
@@ -22,6 +23,7 @@ MAZE_LAYOUT = [
 CELL_TYPES = {
     " ": CellType.NAVIGABLE,
     "#": CellType.BLOCKED,
+    "G": CellType.GOAL,
 }
 
 
@@ -51,7 +53,7 @@ class Grid:
         self._cells[y][x] = cell_type
 
     def can_navigate(self, x, y):
-        return self.get_cell(x, y) == CellType.NAVIGABLE
+        return self.get_cell(x, y) != CellType.BLOCKED
 
     @classmethod
     def _validate_position(cls, x, y):

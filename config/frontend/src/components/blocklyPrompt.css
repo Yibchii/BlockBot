@@ -1,0 +1,58 @@
+.blockbot-prompt {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #cbdcf0;
+  border-radius: 12px;
+  background: #fff;
+  color: #29436e;
+  box-shadow: 0 20px 60px #17356c40;
+  font: 16px/1.5 "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+.blockbot-prompt::backdrop { background: #172b4d80; }
+.blockbot-prompt h2 { margin: 0 0 16px; font-size: 22px; color: #17356c; }
+.blockbot-prompt label { display: block; margin-bottom: 8px; }
+.blockbot-prompt input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bdcee8;
+  border-radius: 6px;
+  background: white;
+  color: #29436e;
+  font: inherit;
+}
+.blockbot-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.blockbot-prompt button {
+  min-height: 44px;
+  padding: 9px 18px;
+  border: 1px solid #bdcee8;
+  border-radius: 6px;
+  background: #edf4ff;
+  color: #29436e;
+  font: inherit;
+  cursor: pointer;
+}
+.blockbot-prompt .blockbot-prompt-save {
+  border-color: #2671ec;
+  background: #2671ec;
+  color: white;
+}
+.blockbot-prompt button:hover { filter: brightness(.95); }
+.blockbot-prompt input:focus-visible,
+.blockbot-prompt button:focus-visible {
+  outline: 3px solid #83b1ff;
+  outline-offset: 3px;
+}
