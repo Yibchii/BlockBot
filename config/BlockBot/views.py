@@ -134,3 +134,19 @@ def all_save_files_of_user(request):
         CloudSavedProjects.objects.filter(oowner=user_profile).values("name", "robot")
     )
     return JsonResponse({"save_files": save_files})
+
+def fetch_save_file(request, save_file_name):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
+    try:
+        save_file = CloudSavedProjects.objects.get(owner=user_profile, name=save_file_name)
+        with open(save_file.savefile.path, "r", encoding="utf-8") as file:
+            content = file.read()
+        return JsonResponse({"content": content})
+    except CloudSavedProjects.DoesNotExist:
+        return JsonResponse({"message": "Save file not found"}, status=404)
