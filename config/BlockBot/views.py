@@ -4,7 +4,7 @@ from pathlib import Path
 from django.shortcuts import render
 
 from .utils import _register_user, loadDefaultBlocks
-from .models import Robot, UserProfile
+from .models import CloudSavedProjects, Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, logout, login
@@ -121,4 +121,16 @@ def get_user_info(request):
         "username": request.user.username,
         "display_name": user_profile.display_name if user_profile else request.user.username,
     })
-    
+
+#savefile API endpoints
+def all_save_files_of_user(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    save_files = list(
+        CloudSavedProjects.objects.filter(oowner=user_profile).values("name", "robot")
+    )
+    return JsonResponse({"save_files": save_files})
