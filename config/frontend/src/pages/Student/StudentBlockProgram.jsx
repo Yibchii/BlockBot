@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import BlocklyComponent from "../../components/BlocklyComponents/BlocklyComponent";
+import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
 import Console from "./StudentProgramConsole";

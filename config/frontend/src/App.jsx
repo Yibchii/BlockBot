@@ -1,8 +1,8 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
-import TopNavBarComponent from "./components/InstructorComponents/TopNavBarComponent.instructor";
-import LoginPage from "./pages/LoginPage";
-import Editor from "./pages/StudentPages/StudentBlockProgram";
+import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
+import LoginPage from "./pages/Login/LoginPage";
+import Editor from "./pages/Student/StudentBlockProgram";
 
 function AppContent() {
   const location = useLocation();
