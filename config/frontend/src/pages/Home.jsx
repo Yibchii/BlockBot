@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import StudentDashboard from './StudentDashboard';
-import InstructorDashboard from './InstructorDashboard';
+import StudentDashboard from './StudentPages/StudentDashboard';
+import InstructorDashboard from './InstructorPages/InstructorDashboard';
 
 function Home() {
     const [user, setUser] = useState(null);

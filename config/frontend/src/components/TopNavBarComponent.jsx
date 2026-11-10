@@ -60,6 +60,16 @@ export default function TopNavBarComponent() {
             .catch((error) => console.error(error));
     };
 
+    // Do not display the navigation bar on the login page
+    const hideNavbar =
+        location.pathname === "/" ||
+        location.pathname === "/login" ||
+        location.pathname === "/static/frontend/login";
+
+    if (hideNavbar) {
+        return null;
+    }
+
     return (
         <nav className="site-nav bg-gray-200 text-black flex items-center gap-4 shadow-md">
             {/* Logo */}

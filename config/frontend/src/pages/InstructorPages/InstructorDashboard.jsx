@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import './InstructorDashboard.css';
 
-// dummy data for demo purposes
+// dummy data for demo purposes --> replace with API calls to fetch real data
 const initialAssignments = [
     { id: 1, title: 'Intro to Robotics', due: '2025-09-26', status: 'Active', submitted: 18, total: 20, icon: '♙' },
     { id: 2, title: 'Maze Challenge', due: '2025-10-03', status: 'Active', submitted: 16, total: 20, icon: '♜' },
@@ -11,7 +11,7 @@ const initialAssignments = [
 
 const formatDate = (date) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-// dummy data for demo purposes
+// dummy data for demo purposes --> replace with API calls to fetch real data
 const initialSubmissions = [
     { id: 1, student: 'Taylor M.', assignment: 'Maze Challenge', submitted: 'Sep 23, 10:42 AM', status: 'Submitted', grade: '' },
     { id: 2, student: 'Alexis C.', assignment: 'Intro to Robotics', submitted: 'Sep 22, 04:17 PM', status: 'Submitted', grade: '' },
@@ -33,20 +33,6 @@ export default function InstructorDashboard({user}) {
     const activeCount = assignments.filter((item) => item.status === 'Active').length;
     const gradedCount = submissions.filter((item) => item.grade !== '').length;
     const visibleSubmissions = useMemo(() => showAll ? submissions : submissions.slice(0, 3), [showAll, submissions]);
-
-    async function handleLogout() {
-        try {
-            const response = await fetch('/api/user/logout/', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {'X-CSRFToken': getCookie('csrftoken') || ''},
-            });
-            if (!response.ok) throw new Error('Unable to log out.');
-            window.location.assign('/');
-        } catch (error) {
-            setNotice(error.message || 'Unable to log out.');
-        }
-    }
 
     function createAssignment(event) {
         event.preventDefault();
@@ -74,12 +60,7 @@ export default function InstructorDashboard({user}) {
     }
 
     return (
-        <main className="instructor-dashboard">
-            <div className="id-topbar">
-                <a className="id-brand" href="/home" aria-label="BlockBot Studio home"><img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="BlockBot Studio" /></a>
-                <nav className="id-nav" aria-label="Instructor navigation"><a className="id-current" href="/home">Dashboard</a><a href="/editor">Learn</a><a href="/editor">Projects</a><span className="id-nav-disabled">Classroom</span><span className="id-nav-disabled">Help</span></nav>
-                <div className="id-profile"><img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} alt="" /><span>{user?.first_name || 'Instructor'}</span><button type="button" className="id-logout" onClick={handleLogout}>Logout</button></div>
-            </div>
+        <main className="instructor-dashboard" aria-label={`${user?.display_name || user?.first_name || 'Instructor'} dashboard`}>
             <div className="id-body">
                 <div className="id-controls"><label htmlFor="id-class">Class:</label><select id="id-class" value={classroom} onChange={(event) => { setClassroom(event.target.value); setNotice('Showing sample data; classroom-specific data requires an API.'); }}><option>CS101 - Period 3</option><option>CS101 - Period 4</option></select><button className="id-primary" onClick={() => setModal({ type: 'create' })}>＋ Create Assignment</button></div>
                 {notice && <div className="id-notice" role="status">{notice}<button aria-label="Dismiss notice" onClick={() => setNotice('')}>×</button></div>}
