@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import './InstructorDashboard.css';
 
 // dummy data for demo purposes --> replace with API calls to fetch real data
@@ -19,7 +19,7 @@ const initialSubmissions = [
 ];
 
 export default function InstructorDashboard({user}) {
-    const [classroom, setClassroom] = useState('CS101 - Period 3');
+    const [classroom, setClassroom] = useState('');
     const [classrooms, setClassrooms] = useState([]);
     const [assignments, setAssignments] = useState(initialAssignments);
     const [submissions, setSubmissions] = useState(initialSubmissions);
@@ -29,15 +29,11 @@ export default function InstructorDashboard({user}) {
     const [showAll, setShowAll] = useState(false);
     const [menuId, setMenuId] = useState(null);
     const [notice, setNotice] = useState('');
-    const totalStudents = 20; // DEMO data
+    const [totalStudents, setTotalStudents] = useState(0);
     const progress = 72; // DEMO DATA
     const activeCount = assignments.filter((item) => item.status === 'Active').length;
     const gradedCount = submissions.filter((item) => item.grade !== '').length;
     const visibleSubmissions = useMemo(() => showAll ? submissions : submissions.slice(0, 3), [showAll, submissions]);
-
-    useEffect(() => {
-        getOwnedClassrooms();
-    }, []);
 
     function createAssignment(event) {
         event.preventDefault();
@@ -77,12 +73,44 @@ export default function InstructorDashboard({user}) {
                 setClassrooms(ownedClassrooms);
                 if (ownedClassrooms.length) {
                     const firstClassroom = ownedClassrooms[0];
-                    setClassroom(firstClassroom.name || firstClassroom.title || firstClassroom.code || String(firstClassroom));
+                    setClassroom(String(firstClassroom.id));
                 }
             })
             .catch(() => setNotice('Unable to load your classrooms.'));
     }
-    
+
+    const getClassroomMemberCount = useCallback((classroomId) => {
+        return fetch(`/api/classroom/${classroomId}/info/`, { credentials: 'include' })
+            .then((response) => {
+                if (!response.ok) throw new Error('Unable to load classroom info');
+                return response.json();
+            })
+            .then((data) => {
+                return data.classroom.members.length;
+            })
+            .catch(() => {
+                setNotice('Unable to load classroom info.');
+                return 0;
+            });
+    }, []);
+
+    useEffect(() => {
+        getOwnedClassrooms();
+    }, []);
+
+    useEffect(() => {
+        if (!classroom) return;
+
+        let cancelled = false;
+        getClassroomMemberCount(classroom).then((count) => {
+            if (!cancelled) setTotalStudents(count);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [classroom, getClassroomMemberCount]);
+
     return (
         <main
             className="instructor-dashboard"
@@ -96,13 +124,14 @@ export default function InstructorDashboard({user}) {
                         value={classroom}
                         onChange={(event) => {
                             setClassroom(event.target.value);
-                            setNotice('Showing sample data; classroom-specific data requires an API.');
+                            setTotalStudents(0);
+                            setNotice('');
                         }}
                     >
                         {classrooms.length ? classrooms.map((ownedClassroom) => {
-                            const value = ownedClassroom.name || ownedClassroom.title || ownedClassroom.code || String(ownedClassroom);
-                            return <option key={ownedClassroom.id || value} value={value}>{value}</option>;
-                        }) : <option>CS101 - Period 3</option>}
+                            const label = ownedClassroom.name || ownedClassroom.title || ownedClassroom.code || String(ownedClassroom.id);
+                            return <option key={ownedClassroom.id} value={String(ownedClassroom.id)}>{label}</option>;
+                        }) : <option value="">No classrooms available</option>}
                     </select>
                     <button className="id-primary" onClick={() => setModal({ type: 'create' })}>
                         ＋ Create Assignment
