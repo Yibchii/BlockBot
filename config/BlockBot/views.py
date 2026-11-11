@@ -4,7 +4,7 @@ from pathlib import Path
 from django.shortcuts import render
 
 from .utils import _register_user, loadDefaultBlocks
-from .models import Robot, UserProfile
+from .models import Classroom, Robot, UserProfile
 from Mazebot2D import CellType, Grid, Mazebot2D
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, logout, login
@@ -130,4 +130,106 @@ def get_user_info(request):
         response_data["groups"] = groups
         response_data["is_instructor"] = "Instructor" in groups
     return JsonResponse(response_data)
+
+# Classroom API endpoints
+def create_classroom(request, name=None):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if not name:
+            return JsonResponse({"message": "Classroom name is required"}, status=400)
+        classroom = Classroom.objects.create(name=name, owner=user_profile)
+        classroom.members.add(user_profile)  # Add owner as a member
+        return JsonResponse({"message": "Classroom created", "classroom_id": classroom.id})
+
+    return JsonResponse({"message": "Invalid request method"}, status=400)
+
+def join_classroom(request, classroom_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+        classroom.members.add(user_profile)
+        return JsonResponse({"message": "User added to classroom", "classroom_id": classroom.id})
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+
+def remove_classroom_member(request, classroom_id, member_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+        if classroom.owner != user_profile:
+            return JsonResponse({"message": "Only the owner can remove members"}, status=403)
+        member_to_remove = UserProfile.objects.get(id=member_id)
+        classroom.members.remove(member_to_remove)
+        return JsonResponse({"message": "Member removed from classroom", "classroom_id": classroom.id})
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({"message": "Member not found"}, status=404)
     
+def get_owned_classrooms(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    
+    # get each classroom user is owner of
+    classrooms = list(
+        Classroom.objects.filter(owner=user_profile).values("id", "name")
+    )
+    return JsonResponse({"classrooms": classrooms})
+
+def get_member_classrooms(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    
+    # get each classroom user is member of
+    classrooms = list(
+        Classroom.objects.filter(members=user_profile).values("id", "name")
+    )
+    return JsonResponse({"classrooms": classrooms})
+
+def get_classroom_info(request, classroom_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+    #if user is not owner or member of classroom, return 403
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+    if classroom.owner != user_profile and user_profile not in classroom.members.all():
+        return JsonResponse({"message": "User is not a member of this classroom"}, status=403)
+    classroom_info = {
+        "id": classroom.id,
+        "name": classroom.name,
+        "owner": classroom.owner.display_name,
+        "members": [member.display_name for member in classroom.members.all()],
+    }
+    return JsonResponse({"classroom": classroom_info})
