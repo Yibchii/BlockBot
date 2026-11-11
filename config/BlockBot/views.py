@@ -131,7 +131,7 @@ def all_save_files_of_user(request):
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
     save_files = list(
-        CloudSavedProject.objects.filter(oowner=user_profile).values("name", "robot")
+        CloudSavedProject.objects.filter(owner=user_profile).values("name", "robot")
     )
     return JsonResponse({"save_files": save_files})
 
