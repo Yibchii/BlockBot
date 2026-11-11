@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
+import { loadBlocksFromApi } from "../../blockGen";
 import Console from "./StudentProgramConsole";
 import { generateCodePreview } from "./blockbotCodePreview";
 import "./StudentBlockProgram.css";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
+  const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [availableRobots, setAvailableRobots] = useState([]);
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
@@ -57,6 +59,73 @@ export default function Editor() {
         })
       );
   }, []);
+
+  // Register the selected robot's blocks and expose them in the toolbox.
+  useEffect(() => {
+    const blocksUrl = robot && ROBOT_IMPLEMENTATIONS[robot.name]?.blocksUrl;
+    if (!blocksUrl) {
+      setRobotBlockTypes([]);
+      return;
+    }
+
+    let cancelled = false;
+    loadBlocksFromApi(blocksUrl)
+      .then((data) => {
+        if (cancelled) return;
+        setRobotBlockTypes((data.blocks?.blocks ?? []).map((def) => def.type));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setRobotBlockTypes([]);
+        setStatus({
+          state: "error",
+          title: "Robot blocks unavailable",
+          msg: error.message,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [robot]);
+
+  useEffect(() => {
+    if (!workspace || !codeOpen) return;
+
+    const refresh = () => setCodePreview(generateCodePreview(workspace, codeLanguage));
+    refresh();
+    workspace.addChangeListener(refresh);
+    return () => workspace.removeChangeListener(refresh);
+  }, [workspace, codeOpen, codeLanguage]);
+  
+  // Register the selected robot's blocks and expose them in the toolbox.
+  useEffect(() => {
+    const blocksUrl = robot && ROBOT_IMPLEMENTATIONS[robot.name]?.blocksUrl;
+    if (!blocksUrl) {
+      setRobotBlockTypes([]);
+      return;
+    }
+
+    let cancelled = false;
+    loadBlocksFromApi(blocksUrl)
+      .then((data) => {
+        if (cancelled) return;
+        setRobotBlockTypes((data.blocks?.blocks ?? []).map((def) => def.type));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setRobotBlockTypes([]);
+        setStatus({
+          state: "error",
+          title: "Robot blocks unavailable",
+          msg: error.message,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [robot]);
 
   useEffect(() => {
     if (!workspace || !codeOpen) return;
@@ -215,7 +284,7 @@ export default function Editor() {
               <span className="editor-badge">Interactive editor</span>
             </div>
             <div className="blockly-container">
-              <BlocklyComponent onWorkspaceReady={setWorkspace} />
+              <BlocklyComponent onWorkspaceReady={setWorkspace} robotBlockTypes={robotBlockTypes} />
             </div>
           </section>
 

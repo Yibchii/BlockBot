@@ -4,6 +4,7 @@ import MazeBot2DComponent from "../components/MazeBot/MazeBot2DComponent";
 export const ROBOT_IMPLEMENTATIONS = {
   MazeBot2D: {
     Component: MazeBot2DComponent,
+    blocksUrl: "/api/mazebot2d/blocks",
   },
 };
 
