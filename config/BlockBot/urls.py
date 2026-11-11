@@ -26,4 +26,11 @@ urlpatterns = [
     path('api/user/logout/', views.logout_user),
     path('api/user/register/student', views.register_student_user),
     path('api/user/register/instructor', views.register_instructor_user),
+    # Classroom API endpoints
+    path('api/classroom/create/', views.create_classroom),
+    path('api/classroom/join/', views.join_classroom),
+    path('api/classroom/remove/', views.remove_classroom_member),
+    path('api/classroom/owned/', views.get_owned_classrooms),
+    path('api/classroom/member/', views.get_member_classrooms),
+    path('api/classroom/<int:classroom_id>/info/', views.get_classroom_info),
 ]
