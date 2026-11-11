@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import { installBlocklyPrompt } from './blocklyPrompt';
-import '../IntegerConstantBlock';
-import '../coreBlocks';
-import '../generators/mazeBotGenerators';
+import '../../IntegerConstantBlock';
+import '../../coreBlocks';
+import '../../blockGen';
+import '../../generators/mazeBotGenerators';
 
 const NO_ROBOT_BLOCKS = [];
 

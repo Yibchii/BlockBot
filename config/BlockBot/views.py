@@ -117,8 +117,17 @@ def get_user_info(request):
         return JsonResponse({"message": "No user is logged in"}, status=401)
 
     user_profile = getattr(request.user, "profile", None)
-    return JsonResponse({
+    groups = list(request.user.groups.values_list("name", flat=True))
+    response_data = {
         "username": request.user.username,
         "display_name": user_profile.display_name if user_profile else request.user.username,
-    })
+    }
+    if request.user.first_name:
+        response_data["first_name"] = request.user.first_name
+    if request.user.last_name:
+        response_data["last_name"] = request.user.last_name
+    if groups:
+        response_data["groups"] = groups
+        response_data["is_instructor"] = "Instructor" in groups
+    return JsonResponse(response_data)
     
