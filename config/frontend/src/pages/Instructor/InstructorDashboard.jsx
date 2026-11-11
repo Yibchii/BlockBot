@@ -3,19 +3,19 @@ import './InstructorDashboard.css';
 
 // dummy data for demo purposes --> replace with API calls to fetch real data
 const initialAssignments = [
-    { id: 1, title: 'Intro to Robotics', due: '2025-09-26', status: 'Active', submitted: 18, total: 20, icon: '♙' },
-    { id: 2, title: 'Maze Challenge', due: '2025-10-03', status: 'Active', submitted: 16, total: 20, icon: '♜' },
-    { id: 3, title: 'Sensor Challenge', due: '2025-10-10', status: 'Active', submitted: 12, total: 20, icon: '♟' },
-    { id: 4, title: 'Final Project', due: '2025-10-24', status: 'Draft', submitted: 0, total: 20, icon: '♙' },
+    { id: 1, title: 'Temp 1', due: '2025-09-26', status: 'Active', submitted: 18, total: 20, icon: '♙' },
+    { id: 2, title: 'Temp 2', due: '2025-10-03', status: 'Active', submitted: 16, total: 20, icon: '♜' },
+    { id: 3, title: 'Temp 3', due: '2025-10-10', status: 'Active', submitted: 12, total: 20, icon: '♟' },
+    { id: 4, title: 'Temp 4', due: '2025-10-24', status: 'Draft', submitted: 0, total: 20, icon: '♙' },
 ];
 
 const formatDate = (date) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 // dummy data for demo purposes --> replace with API calls to fetch real data
 const initialSubmissions = [
-    { id: 1, student: 'Taylor M.', assignment: 'Maze Challenge', submitted: 'Sep 23, 10:42 AM', status: 'Submitted', grade: '' },
-    { id: 2, student: 'Alexis C.', assignment: 'Intro to Robotics', submitted: 'Sep 22, 04:17 PM', status: 'Submitted', grade: '' },
-    { id: 3, student: 'Sophia D.', assignment: 'Maze Challenge', submitted: 'Sep 21, 02:33 PM', status: 'Needs Review', grade: '' },
+    { id: 1, student: 'Placeholder 1', assignment: 'Assignment 1', submitted: 'Sep 23, 10:42 AM', status: 'Submitted', grade: '' },
+    { id: 2, student: 'Placeholder 2', assignment: 'Assignment 2', submitted: 'Sep 22, 04:17 PM', status: 'Submitted', grade: '' },
+    { id: 3, student: 'Placeholder 3', assignment: 'Assignment 3', submitted: 'Sep 21, 02:33 PM', status: 'Needs Review', grade: '' },
 ];
 
 export default function InstructorDashboard({user}) {
@@ -147,7 +147,7 @@ export default function InstructorDashboard({user}) {
                 )}
                 <div className="id-main-grid">
                     <section className="id-panel">
-                        <h2>Assignment Management</h2>
+                        <h2>Assignment Management (Placeholder)</h2>
                         <div className="id-table-scroll">
                             <table>
                                 <thead>
@@ -249,7 +249,7 @@ export default function InstructorDashboard({user}) {
                 </div>
                 <section className="id-panel id-submissions">
                     <div className="id-section-title">
-                        <h2>Recent Submissions (Grading Queue)</h2>
+                        <h2>Recent Submissions (Placeholder)</h2>
                         <button className="id-text-button" onClick={() => setShowAll(!showAll)}>
                             {showAll ? 'Show Recent' : 'View All'}
                         </button>
