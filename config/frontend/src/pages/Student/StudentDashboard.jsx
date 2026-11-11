@@ -1,5 +1,5 @@
-import DashboardCard from '../components/DashboardCard';
-import DashboardListItem from '../components/DashboardListItem';
+import DashboardCard from '../../components/DashboardCard';
+import DashboardListItem from '../../components/DashboardListItem';
 
 function StudentDashboard({user}) {
     return (
