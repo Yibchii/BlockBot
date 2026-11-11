@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import BlocklyComponent from "../components/BlocklyComponent";
-import { runBlocklyProgram } from "../runtime/runBlocklyProgram";
-import { ROBOT_IMPLEMENTATIONS } from "../robots/robotImplementations";
+import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
+import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
+import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
 import Console from "./StudentProgramConsole";
+import { generateCodePreview } from "./blockbotCodePreview";
 import "./StudentBlockProgram.css";
 
 export default function Editor() {
@@ -11,10 +12,15 @@ export default function Editor() {
   const [projectName, setProjectName] = useState("Maze Runner");
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeLanguage, setCodeLanguage] = useState("Python");
+  const [codePreview, setCodePreview] = useState({
+    code: "",
+    warning: "Blockly workspace is still loading.",
+  });
   const [robotReady, setRobotReady] = useState(false);
   const [runState, setRunState] = useState("idle");
   const [paused, setPaused] = useState(false);
-  const [displayName, setDisplayName] = useState("not logged in");
   const [status, setStatus] = useState({
     state: "idle",
     title: "Ready to edit",
@@ -53,30 +59,13 @@ export default function Editor() {
   }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
+    if (!workspace || !codeOpen) return;
 
-    fetch("/api/user/info/", { signal: controller.signal })
-      .then((response) => {
-        if (response.status === 401) {
-          return null;
-        }
-        if (!response.ok) {
-          throw new Error(`Unable to fetch user info (${response.status})`);
-        }
-        return response.json();
-      })
-      .then((user) => {
-        setDisplayName(user?.display_name || user?.username || "not logged in");
-      })
-      .catch((error) => {
-        if (error.name !== "AbortError") {
-          console.error(error);
-          setDisplayName("not logged in");
-        }
-      });
-
-    return () => controller.abort();
-  }, []);
+    const refresh = () => setCodePreview(generateCodePreview(workspace, codeLanguage));
+    refresh();
+    workspace.addChangeListener(refresh);
+    return () => workspace.removeChangeListener(refresh);
+  }, [workspace, codeOpen, codeLanguage]);
 
   const RobotComponent = robot
     ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
@@ -145,18 +134,17 @@ export default function Editor() {
     ["submit", "send.svg", "Submit", true],
   ];
 
-  return (
+    return (
     <div className="student-page">
       <header className="studio-toolbar">
-        <div className="studio-brand">
-          <img src="/static/frontend/images/robot.svg" alt="" />
-          <strong>BlockBot Studio</strong>
-        </div>
-
         <label className="project-name">
           <img src="/static/frontend/images/folder.svg" alt="" />
           <input aria-label="Project name" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
         </label>
+
+        <button className="code-preview-trigger" type="button" onClick={() => setCodeOpen(true)}>
+          &lt;/&gt; View Code
+        </button>
 
         <div className="studio-actions" aria-label="Program actions">
           {actions.map(([type, icon, label, disabled]) => (
@@ -188,11 +176,33 @@ export default function Editor() {
           ))}
         </div>
 
-        <div className="student-account">
-          <img src="/static/frontend/images/profile-silhouette.svg" alt="" />
-          <span>{displayName}</span>
-        </div>
       </header>
+
+      {codeOpen && (
+        <div className="code-preview-backdrop" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setCodeOpen(false);
+        }}>
+          <section className="code-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="code-preview-title">
+            <header className="code-preview-heading">
+              <h2 id="code-preview-title">Generated Code</h2>
+              <button type="button" onClick={() => setCodeOpen(false)} aria-label="Close code preview">×</button>
+            </header>
+            <div className="code-preview-controls">
+              <label htmlFor="code-language">Language</label>
+              <select id="code-language" value={codeLanguage} onChange={(event) => setCodeLanguage(event.target.value)}>
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+              </select>
+              <button type="button" onClick={() => navigator.clipboard?.writeText(codePreview.code)}>Copy Code</button>
+            </div>
+            {codePreview.warning && <p className="code-preview-warning" role="status">{codePreview.warning}</p>}
+            <div className="code-preview-container">
+              <pre className="code-preview-output"><code>{codePreview.code || 'Generating code…'}</code></pre>
+            </div>
+            <p className="code-preview-footnote">Read-only preview. Blockly's robot simulator continues using its existing runtime.</p>
+          </section>
+        </div>
+      )}
 
       <div className="student-content">
         <div className="student-grid">

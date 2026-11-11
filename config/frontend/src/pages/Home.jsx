@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import StudentDashboard from '../components/StudentDashboard';
+import StudentDashboard from './Student/StudentDashboard';
+import InstructorDashboard from './Instructor/InstructorDashboard';
 
 function Home() {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -23,20 +25,17 @@ function Home() {
                     console.error(error);
                     setUser(null);
                 }
-            });
-
+            })
+            .finally(() => setLoading(false));
         return () => controller.abort();
     }, []);
 
-    return (
-        <div >
-            {user ? (
-                <StudentDashboard user={user} />
-            ) : (
-                <p>Loading dashboard...</p>
-            )}
-        </div>
-    );
+    if (loading) return <p>Loading dashboard...</p>;
+    if (!user) return <p>Please log in to access your dashboard.</p>;
+
+    const isInstructor = user.role === 'instructor' || user.is_instructor === true ||
+        user.groups?.some((group) => (typeof group === 'string' ? group : group.name)?.toLowerCase() === 'instructor');
+    return isInstructor ? <InstructorDashboard user={user} /> : <StudentDashboard user={user} />;
 }
 
 export default Home;

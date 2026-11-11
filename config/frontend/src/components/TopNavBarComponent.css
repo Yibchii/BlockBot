@@ -1,0 +1,20 @@
+/* Instructor navigation only. Guest/student navigation keeps its current styles. */
+.bb-inav-header { width:100%; background:#fff; border-bottom:1px solid #d8e4f4; color:#1b3564; font:14px/1.45 'Segoe UI',system-ui,sans-serif; color-scheme:light; }
+.bb-inav-header * { box-sizing:border-box; }
+.bb-inav { display:flex; align-items:center; gap:clamp(16px,2.3vw,36px); padding:12px clamp(15px,2.4vw,38px); min-height:82px; width:100%; }
+.bb-inav-brand { display:flex; align-items:center; flex-shrink:0; }
+.bb-inav-brand img { display:block; width:clamp(155px,17vw,235px); max-height:62px; height:auto; object-fit:contain; }
+.bb-inav-links { display:flex; align-items:center; flex:1; min-width:0; gap:clamp(12px,1.8vw,27px); overflow-x:auto; scrollbar-width:thin; }
+.bb-inav-link,.bb-inav-disabled { display:inline-flex; align-items:center; flex-shrink:0; min-height:46px; border-bottom:3px solid transparent; padding:11px 0 8px; color:#465d80; text-decoration:none; white-space:nowrap; font-size:14px; }
+.bb-inav-link:hover { color:#246bf2; }
+.bb-inav-active { color:#246bf2; border-bottom-color:#3479ff; font-weight:750; }
+.bb-inav-disabled { color:#8594ad; cursor:not-allowed; }
+.bb-inav-account { display:flex; flex-shrink:0; align-items:center; gap:9px; margin-left:auto; font-size:13px; }
+.bb-inav-account img { width:32px; height:32px; border-radius:50%; background:#eaf0f9; }
+.bb-inav-name { max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bb-inav-logout { padding:8px 12px; border:1px solid #cbdcf1; border-radius:6px; background:white; color:#29436e; font:inherit; cursor:pointer; }
+.bb-inav-logout:hover { background:#eef5ff; }
+.bb-inav-link:focus-visible,.bb-inav-logout:focus-visible,.bb-inav-brand:focus-visible { outline:3px solid #83b1ff; outline-offset:3px; }
+.bb-inav-error { padding:8px 28px; background:#fff1f2; color:#a11c35; font-size:12px; }
+@media(max-width:1080px) { .bb-inav { flex-wrap:wrap; } .bb-inav-links { order:3; flex-basis:100%; } .bb-inav-account { margin-left:auto; } }
+@media(max-width:520px) { .bb-inav { padding:9px 12px; gap:8px; } .bb-inav-brand img { width:155px; } .bb-inav-name { display:none; } .bb-inav-links { gap:20px; } .bb-inav-link,.bb-inav-disabled { min-height:39px; } }

@@ -2,10 +2,10 @@ import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import { installBlocklyPrompt } from './blocklyPrompt';
-import '../IntegerConstantBlock';
-import '../coreBlocks';
-import '../blockGen';
-import '../generators/mazeBotGenerators';
+import '../../IntegerConstantBlock';
+import '../../coreBlocks';
+import '../../blockGen';
+import '../../generators/mazeBotGenerators';
 
 
 export default function BlocklyComponent({ onWorkspaceReady }) {
