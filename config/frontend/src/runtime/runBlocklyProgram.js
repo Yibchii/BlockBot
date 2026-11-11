@@ -3,7 +3,7 @@ import "../generators/mazeBotGenerators";
 
 const MAX_LOOP_CHECKS = 10000;
 
-javascriptGenerator.addReservedWords("robot,__blockbotCheckLoop");
+javascriptGenerator.addReservedWords("robot,__blockbotCheckLoop,__blockbotStep");
 
 export function generateBlocklyProgram(workspace) {
   const startBlocks = workspace
@@ -19,10 +19,12 @@ export function generateBlocklyProgram(workspace) {
   }
 
   const previousTrap = javascriptGenerator.INFINITE_LOOP_TRAP;
+  const previousPrefix = javascriptGenerator.STATEMENT_PREFIX;
 
   try {
     javascriptGenerator.INFINITE_LOOP_TRAP =
       "__blockbotCheckLoop();\n";
+    javascriptGenerator.STATEMENT_PREFIX = "await __blockbotStep(%1);\n";
 
     javascriptGenerator.init(workspace);
     const code = javascriptGenerator.blockToCode(startBlocks[0]);
@@ -34,10 +36,11 @@ export function generateBlocklyProgram(workspace) {
     return javascriptGenerator.finish(code);
   } finally {
     javascriptGenerator.INFINITE_LOOP_TRAP = previousTrap;
+    javascriptGenerator.STATEMENT_PREFIX = previousPrefix;
   }
 }
 
-export async function runBlocklyProgram(workspace, robot) {
+export async function runBlocklyProgram(workspace, robot, { onStep } = {}) {
   const code = generateBlocklyProgram(workspace);
   let loopChecks = 0;
 
@@ -51,15 +54,22 @@ export async function runBlocklyProgram(workspace, robot) {
       );
     }
   };
+  const step = async (blockId) => {      
+    if (onStep) {                        
+      await onStep(blockId);             
+    }                                    
+  };                                     
+
 
   const execute = new Function(
     "robot",
     "__blockbotCheckLoop",
+    "__blockbotStep",
     `"use strict"; return (async () => { ${code} })();`
   );
 
   try {
-    await execute(robot, checkLoop);
+    await execute(robot, checkLoop, step);
     return code;
   } catch (error) {
     // Stop the robot and abort any pending movement request.
