@@ -26,4 +26,7 @@ urlpatterns = [
     path('api/user/logout/', views.logout_user),
     path('api/user/register/student', views.register_student_user),
     path('api/user/register/instructor', views.register_instructor_user),
+    path('api/files/files_of_user/', views.all_save_files_of_user),
+    path('api/files/load_file/<str:save_file_name>/', views.fetch_save_file),
+    path('api/files/save_file/<str:save_file_name>/<str:project_robot>/', views.save_to_file),
 ]

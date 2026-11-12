@@ -1,6 +1,6 @@
 import {useState} from "react";
 import "./LoginPage.css";
-import logo from "../../public/images/logo.png";
+import logo from "../../../public/images/logo.png";
 
 
 const initialForm = {
