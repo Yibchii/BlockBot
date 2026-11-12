@@ -1,7 +1,21 @@
-function DashboardCard({src, title, content, progress, button}) {
+import { Link } from "react-router-dom";
+
+function DashboardCard({src, title, content, progress, button, viewAll, viewAllLink}) {
     return (
         <div className="dashboard-card p-2 bg-gray-100 rounded-lg ">
-            <h2 className="text-xl font-bold mb-3 flex flex-col items-start">{title}</h2>
+            <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold">{title}</h2>
+
+                {viewAll && (
+                    <Link
+                        to={viewAllLink}
+                        className="text-blue-500 hover:text-blue-700"
+                    >
+                        View All
+                    </Link>
+                )}
+            </div>
+
             {src && <img src={src} alt="" loading="lazy" />}
             
             <p>{content}</p>
