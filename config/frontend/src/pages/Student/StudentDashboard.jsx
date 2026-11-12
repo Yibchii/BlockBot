@@ -1,5 +1,5 @@
-import DashboardCard from '../components/DashboardCard';
-import DashboardListItem from '../components/DashboardListItem';
+import DashboardCard from '../../components/DashboardCard';
+import DashboardListItem from '../../components/DashboardListItem';
 import { Link } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
