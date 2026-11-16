@@ -1,5 +1,10 @@
 import json
 from pathlib import Path
+from uuid import uuid4
+
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.views.decorators.http import require_POST
 
 from django.shortcuts import render
 
@@ -162,37 +167,49 @@ def fetch_save_file(request, save_file_name):
         return JsonResponse({"content": content})
     except CloudSavedProject.DoesNotExist:
         return JsonResponse({"message": "Save file not found"}, status=404)
-
-def save_to_file(request, save_file_name, project_robot, workspace_payload):
-    #if not logged in
+@require_POST
+def save_to_file(request, save_file_name, project_robot):
     if not request.user.is_authenticated:
-        return JsonResponse({"message": "No user is logged in"}, status=401)
+        return JsonResponse({"message": "Sign in to save a project."}, status=401)
 
-    #if user profile not found
-    user_profile = UserProfile.objects.filter(user=request.user).first()
-    if not user_profile:
-        return JsonResponse({"message": "User profile not found"}, status=404)
+    profile = getattr(request.user, "profile", None)
+    if profile is None:
+        return JsonResponse({"message": "User profile not found."}, status=404)
 
-    # check if save file exists, if not create it
-    save_file = None
+    if not save_file_name.strip() or len(save_file_name) > 255:
+        return JsonResponse({"message": "Enter a project name up to 255 characters."}, status=400)
+
     try:
-        save_file = CloudSavedProject.objects.get(owner=user_profile, name=save_file_name)
-    except CloudSavedProject.DoesNotExist:
-        save_file = CloudSavedProject.objects.create(
-            owner=user_profile,
-            name=save_file_name,
-            robot=project_robot,
-            savefile=f"user_data/cloud_projects/{save_file_name}.json"
+        robot = Robot.objects.get(pk=int(project_robot))
+        workspace = json.loads(request.body)
+    except (ValueError, Robot.DoesNotExist):
+        return JsonResponse({"message": "Invalid robot or workspace data."}, status=400)
+
+    if not isinstance(workspace, dict):
+        return JsonResponse({"message": "Invalid workspace data."}, status=400)
+
+    with transaction.atomic():
+        UserProfile.objects.select_for_update().get(pk=profile.pk)
+        project, created = CloudSavedProject.objects.get_or_create(
+            owner=profile, name=save_file_name, defaults={"robot": robot}
         )
-    # open file and write data to it
-    save_file_path = Path(save_file.savefile.path)
-    save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with open(save_file_path, "w", encoding="utf-8") as file:
-            file.write(workspace_payload)
-    except FileNotFoundError:
-        return JsonResponse({"message": "Save file path not found"}, status=404)
-    return JsonResponse({"message": "Project Saved to File"}, status=201)
+        previous_file = project.savefile.name
+        storage = project.savefile.storage
+
+        project.robot = robot
+        project.savefile.save(
+            f"{uuid4().hex}.json", ContentFile(json.dumps(workspace)), save=False
+        )
+        try:
+            project.save(update_fields=["robot", "savefile"])
+        except Exception:
+            storage.delete(project.savefile.name)
+            raise
+
+        if previous_file and not CloudSavedProject.objects.filter(savefile=previous_file).exists():
+            transaction.on_commit(lambda: storage.delete(previous_file), robust=True)
+
+    return JsonResponse({"message": "Project saved."}, status=201 if created else 200)
 # Classroom API endpoints
 def create_classroom(request, name=None):
     if not request.user.is_authenticated:
