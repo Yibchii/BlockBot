@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/test/', views.test_api),
     path('api/robots/', views.get_robots),
     # Mazebot2D API simulator endpoints
+    path('api/mazebot2d/environments/', views.get_mazebot2d_environments),
     path('api/mazebot2d/grid/', views.get_mazebot2d_grid),
     path('api/mazebot2d/blocks', views.get_mazebot2d_blocks),
     # User API endpoints
