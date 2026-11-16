@@ -17,6 +17,7 @@ from django.middleware.csrf import get_token
 
 # Web Pages
 def index(request):
+    get_token(request)
     return render(request, 'BlockBot/index.html')
 
 

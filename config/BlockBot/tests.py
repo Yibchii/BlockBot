@@ -6,6 +6,11 @@ from .models import UserProfile
 
 
 class MazeBot2DViewTestCase(TestCase):
+	def test_index_sets_csrf_cookie_for_api_forms(self):
+		response = self.client.get('/')
+
+		self.assertIn('csrftoken', response.cookies)
+
 	def test_register_user_uses_email_when_username_is_missing(self):
 		response = self.client.post('/api/user/register/student', {
 			"email": "jane@example.com",
