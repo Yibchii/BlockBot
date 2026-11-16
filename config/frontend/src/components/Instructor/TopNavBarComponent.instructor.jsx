@@ -6,14 +6,6 @@ function getCookie(name) {
   return document.cookie.split("; ").find((cookie) => cookie.startsWith(`${name}=`))?.split("=")[1] || "";
 }
 
-function instructorRole(user) {
-  return user?.role?.toLowerCase() === "instructor" ||
-    user?.is_instructor === true ||
-    user?.groups?.some((group) =>
-      (typeof group === "string" ? group : group?.name)?.toLowerCase() === "instructor"
-    );
-}
-
 export default function TopNavBarComponent() {
   const location = useLocation();
   const basePath = location.pathname.startsWith("/static/frontend") ? "/static/frontend" : "";
@@ -66,11 +58,12 @@ export default function TopNavBarComponent() {
   // Avoid briefly rendering a student/guest navigation bar while the role loads.
   if (loading) return null;
 
-  if (instructorRole(user)) {
+  // Use the same full navigation for instructors and authenticated students.
+  if (user) {
     const linkClass = ({ isActive }) => `bb-inav-link${isActive ? " bb-inav-active" : ""}`;
     return (
       <header className="bb-inav-header">
-        <nav className="bb-inav" aria-label="Instructor navigation">
+        <nav className="bb-inav" aria-label="Main navigation">
           <Link className="bb-inav-brand" to={`${basePath}/home`} aria-label="BlockBot Studio dashboard">
             <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="BlockBot Studio" />
           </Link>
@@ -84,7 +77,7 @@ export default function TopNavBarComponent() {
           </div>
           <div className="bb-inav-account">
             <img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} alt="" />
-            <span className="bb-inav-name">{user?.first_name || user?.display_name || "Instructor"}</span>
+            <span className="bb-inav-name">{user?.first_name || user?.display_name || "User"}</span>
             <button type="button" className="bb-inav-logout" onClick={handleLogout}>Logout</button>
           </div>
         </nav>
@@ -93,7 +86,7 @@ export default function TopNavBarComponent() {
     );
   }
 
-  // Preserve the existing navigation for students and guests for now.
+  // Keep a simple navigation for signed-out guests.
   return (
     <nav className="site-nav bg-gray-200 text-black flex items-center gap-4 shadow-md">
       <Link to={`${basePath}/home`} className="logo">
