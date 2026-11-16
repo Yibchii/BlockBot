@@ -139,6 +139,9 @@ def all_save_files_of_user(request):
     user_profile = getattr(request.user, "profile", None)
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
+    save_files = list(
+        CloudSavedProject.objects.filter(owner=user_profile).values("name", "robot")
+    )
     return JsonResponse({"save_files": save_files})
 
 def fetch_save_file(request, save_file_name):
@@ -148,7 +151,18 @@ def fetch_save_file(request, save_file_name):
     user_profile = getattr(request.user, "profile", None)
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
-      
+
+    try:
+        save_file = CloudSavedProject.objects.get(owner=user_profile, name=save_file_name)
+        try:
+            with open(save_file.savefile.path, "r", encoding="utf-8") as file:
+                content = file.read()
+        except FileNotFoundError:
+            return JsonResponse({"message": "Save file not found"}, status=404)
+        return JsonResponse({"content": content})
+    except CloudSavedProject.DoesNotExist:
+        return JsonResponse({"message": "Save file not found"}, status=404)
+
 def save_to_file(request, save_file_name, project_robot, workspace_payload):
     #if not logged in
     if not request.user.is_authenticated:
@@ -181,6 +195,13 @@ def save_to_file(request, save_file_name, project_robot, workspace_payload):
     return JsonResponse({"message": "Project Saved to File"}, status=201)
 # Classroom API endpoints
 def create_classroom(request, name=None):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
     if request.method == "POST":
         name = request.POST.get("name")
         if not name:
@@ -192,9 +213,12 @@ def create_classroom(request, name=None):
     return JsonResponse({"message": "Invalid request method"}, status=400)
 
 def join_classroom(request, classroom_id):
-    save_files = list(
-        CloudSavedProject.objects.filter(owner=user_profile).values("name", "robot")
-    )
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
 
     try:
         classroom = Classroom.objects.get(id=classroom_id)
@@ -271,14 +295,3 @@ def get_classroom_info(request, classroom_id):
         "members": [member.display_name for member in classroom.members.all()],
     }
     return JsonResponse({"classroom": classroom_info})
-        save_file = CloudSavedProject.objects.get(owner=user_profile, name=save_file_name)
-        try:
-            with open(save_file.savefile.path, "r", encoding="utf-8") as file:
-                content = file.read()
-        except FileNotFoundError:
-            return JsonResponse({"message": "Save file not found"}, status=404)
-        return JsonResponse({"content": content})
-    except CloudSavedProject.DoesNotExist:
-        return JsonResponse({"message": "Save file not found"}, status=404)
-
-
