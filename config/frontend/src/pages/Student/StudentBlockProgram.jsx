@@ -142,6 +142,19 @@ export default function Editor() {
     ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
     : null;
 
+  const openSaveDialog = () => {
+    setSaveName(projectName);
+    setSaveOpen(true);
+  };
+
+  const handleSave = (event) => {
+    event.preventDefault();
+    const name = saveName.trim();
+    if (!name) return;
+    setProjectName(name);
+    setSaveOpen(false);
+    //send project API here!! 
+  };
   const handleRun = async () => {
     if (!workspace || !runtimeRef.current || runState === "running") return;
 
