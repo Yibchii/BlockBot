@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as Blockly from "blockly";
 import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
@@ -6,6 +7,7 @@ import { loadBlocksFromApi } from "../../blockGen";
 import Console from "./StudentProgramConsole";
 import { generateCodePreview } from "./blockbotCodePreview";
 import "./StudentBlockProgram.css";
+const WORKSPACE_STORAGE_KEY = "blockbot.student.workspace.v1";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
@@ -29,6 +31,8 @@ export default function Editor() {
     msg: "Drag blocks into the workspace to build your program.",
   });
   const runtimeRef = useRef(null);
+  const [blocksInitialized, setBlocksInitialized] = useState(false);
+  const hasRestoredRef = useRef(false);
   const handleRuntimeReady = useCallback((runtime) => {
     runtimeRef.current = runtime;
     setRobotReady(Boolean(runtime));
@@ -51,20 +55,24 @@ export default function Editor() {
         }
         setRobot(selectedRobot);
       })
-      .catch((error) =>
+      .catch((error) => {
+        setBlocksInitialized(true);
         setStatus({
           state: "error",
           title: "Robot unavailable",
           msg: error.message,
-        })
-      );
+      });
+      });
   }, []);
 
   // Register the selected robot's blocks and expose them in the toolbox.
   useEffect(() => {
+    if (!robot) return;
+
     const blocksUrl = robot && ROBOT_IMPLEMENTATIONS[robot.name]?.blocksUrl;
     if (!blocksUrl) {
       setRobotBlockTypes([]);
+      setBlocksInitialized(true);
       return;
     }
 
@@ -73,10 +81,12 @@ export default function Editor() {
       .then((data) => {
         if (cancelled) return;
         setRobotBlockTypes((data.blocks?.blocks ?? []).map((def) => def.type));
+        setBlocksInitialized(true);
       })
       .catch((error) => {
         if (cancelled) return;
         setRobotBlockTypes([]);
+        setBlocksInitialized(true);
         setStatus({
           state: "error",
           title: "Robot blocks unavailable",
@@ -88,6 +98,37 @@ export default function Editor() {
       cancelled = true;
     };
   }, [robot]);
+
+  useEffect(() => {
+    if (!workspace || !blocksInitialized) return;
+
+    if (!hasRestoredRef.current) {
+      hasRestoredRef.current = true;
+      try {
+        const raw = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+        if (raw) {
+          const savedState = JSON.parse(raw);
+          Blockly.serialization.workspaces.load(savedState, workspace);
+        }
+      } catch (error) {
+        console.warn("Failed to restore saved Blockly workspace:", error);
+        localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+      }
+    }
+
+    const handleWorkspaceChange = (event) => {
+      if (event.isUiEvent || workspace.isDragging()) return;
+      try {
+        const state = Blockly.serialization.workspaces.save(workspace);
+        localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn("Failed to persist Blockly workspace:", error);
+      }
+    };
+
+    workspace.addChangeListener(handleWorkspaceChange);
+    return () => workspace.removeChangeListener(handleWorkspaceChange);
+  }, [workspace, blocksInitialized]);
 
   useEffect(() => {
     if (!workspace || !codeOpen) return;
