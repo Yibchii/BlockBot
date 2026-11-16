@@ -695,31 +695,7 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
           kind: 'category',
           name: 'Functions',
           colour: '#995ba5',
-          contents: [
-            {
-                kind: 'button',
-                text: 'Create function...',
-                callbackKey: 'CREATE_FUNCTION'
-            },
-            {
-              kind: 'block',
-              type: 'procedures_defnoreturn',
-              fields: {
-                NAME: 'do something'
-              }
-            },
-            {
-              kind: 'block',
-              type: 'procedures_defreturn',
-              fields: {
-                NAME: 'do something'
-              }
-            },
-            {
-              kind: 'block',
-              type: 'procedures_ifreturn'
-            },
-          ]
+          custom: 'BLOCKBOT_FUNCTIONS'
         }
       ]
     };
@@ -739,6 +715,17 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
         pinch: true
       }
     });
+    workspaceRef.current.registerToolboxCategoryCallback(
+      'BLOCKBOT_FUNCTIONS',
+      (workspace) => [
+        {
+          kind: 'button',
+          text: 'Create function...',
+          callbackKey: 'CREATE_FUNCTION'
+        },
+        ...Blockly.Procedures.flyoutCategory(workspace)
+      ]
+    );
 
     workspaceRef.current.registerButtonCallback(
       'CREATE_FUNCTION',

@@ -1,6 +1,6 @@
 
-import { pythonGenerator } from "blockly/python";
-import { javascriptGenerator } from "blockly/javascript";
+import { pythonGenerator, Order as PythonOrder } from "blockly/python";
+import { javascriptGenerator, Order as JavaScriptOrder } from "blockly/javascript";
 
 // Use the actual JavaScript generators from BlockBot.
 import "../../generators/mazeBotGenerators";
@@ -10,12 +10,12 @@ pythonGenerator.forBlock["start_program"] = () => "";
 
 pythonGenerator.forBlock["direction_constant"] = (block, generator) => {
   const direction = block.getFieldValue("DIRECTION") || "UP";
-  return [JSON.stringify(direction), generator.ORDER_ATOMIC];
+  return [JSON.stringify(direction), PythonOrder.ATOMIC];
 };
 
 pythonGenerator.forBlock["mazebot2d_move"] = (block, generator) => {
   const direction = generator.valueToCode(
-    block, "DIRECTION", generator.ORDER_NONE
+    block, "DIRECTION", PythonOrder.NONE
   ) || "None";
 
   return `robot.move(${direction})\n`;
@@ -23,18 +23,18 @@ pythonGenerator.forBlock["mazebot2d_move"] = (block, generator) => {
 
 pythonGenerator.forBlock["mazebot2d_can_move"] = (block, generator) => {
   const direction = generator.valueToCode(
-    block, "DIRECTION", generator.ORDER_NONE
+    block, "DIRECTION", PythonOrder.NONE
   ) || "None";
 
   return [
     `robot.can_move(${direction})`,
-    generator.ORDER_FUNCTION_CALL
+    PythonOrder.FUNCTION_CALL
   ];
 };
 
 pythonGenerator.forBlock["mazebot2d_on_goal"] = (block, generator) => [
   "robot.on_goal()",
-  generator.ORDER_FUNCTION_CALL
+  PythonOrder.FUNCTION_CALL
 ];
 
 // Support the custom integer block.
@@ -57,14 +57,14 @@ const integerValue = (block) => {
 pythonGenerator.forBlock["integer_constant"] =
   (block, generator) => [
     String(integerValue(block)),
-    generator.ORDER_ATOMIC
+    PythonOrder.ATOMIC
   ];
 
 if (!javascriptGenerator.forBlock["integer_constant"]) {
   javascriptGenerator.forBlock["integer_constant"] =
     (block, generator) => [
       String(integerValue(block)),
-      generator.ORDER_ATOMIC
+      JavaScriptOrder.ATOMIC
     ];
 }
 
@@ -100,7 +100,11 @@ export function generateCodePreview(workspace, language = "Python") {
 
   try {
     generator.init(workspace);
-
+        for (const block of workspace.getTopBlocks(true)) {
+      if (block.type === "procedures_defnoreturn" || block.type === "procedures_defreturn") {
+        generator.blockToCode(block);
+      }
+    }
     const fragment = generator.blockToCode(startBlocks[0]);
 
     if (
