@@ -290,6 +290,33 @@ export default function Editor() {
         </div>
       )}
 
+      {saveOpen && (
+        <div className="code-preview-backdrop" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setSaveOpen(false);
+        }}>
+          <section className="code-preview-dialog save-dialog" role="dialog" aria-modal="true" aria-labelledby="save-dialog-title">
+            <header className="code-preview-heading">
+              <h2 id="save-dialog-title">Save Project</h2>
+              <button type="button" onClick={() => setSaveOpen(false)} aria-label="Close save dialog">×</button>
+            </header>
+            <form onSubmit={handleSave} onKeyDown={(e) => e.key === "Escape" && setSaveOpen(false)}>
+              <label htmlFor="save-name">Project name</label>
+              <input
+                id="save-name"
+                autoFocus
+                value={saveName}
+                maxLength={255}
+                onChange={(e) => setSaveName(e.target.value)}
+              />
+              <div className="save-dialog-actions">
+                <button type="button" onClick={() => setSaveOpen(false)}>Cancel</button>
+                <button type="submit" className="toolbar-save" disabled={!saveName.trim()}>Save</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
       <div className="student-content">
         <div className="student-grid">
           <section className="workspace-panel" aria-label="Interactive Blockly programming editor">
