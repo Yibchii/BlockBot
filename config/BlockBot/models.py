@@ -20,6 +20,7 @@ class RobotBlockFile(models.Model):
         return f"{self.robot.name} - {self.filename}"
 
 class UserProfile(models.Model):
+	id = models.AutoField(primary_key=True)
 	user = models.OneToOneField("auth.User", on_delete=models.CASCADE, related_name="profile")
 	display_name = models.CharField(max_length=255, blank=True)
 	email = models.EmailField(max_length=255, blank=True)
