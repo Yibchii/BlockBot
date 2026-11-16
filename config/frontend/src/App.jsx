@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
+import Classroom from "./pages/Classroom/Classroom";
 
 function AppContent() {
   const location = useLocation();
@@ -14,29 +15,32 @@ function AppContent() {
   return (
     <>
       {!hideNavbar && <TopNavBarComponent />}
-      <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
+      <main className="mx-auto w-full">
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/static/frontend/editor" element={<Editor />} />
-          <Route path="/static/frontend/home" element={<Home />} />
-          <Route path="/static/frontend/login" element={<LoginPage />} />
-          <Route path="/static/frontend/*" element={<Home />} />
-          <Route path="/editor" element={<Editor />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/static/frontend/login" element={<LoginPage />} />
+
+          <Route path="/home" element={<Home />} />
+          <Route path="/static/frontend/home" element={<Home />} />
+
+          <Route path="/editor" element={<Editor />} />
+          <Route path="/static/frontend/editor" element={<Editor />} />
+
+          <Route path="/classroom" element={<Classroom />} />
+          <Route path="/static/frontend/classroom" element={<Classroom />} />
+
+          <Route path="/static/frontend/*" element={<Home />} />
         </Routes>
       </main>
     </>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   );
 }
-
-
-export default App;
