@@ -15,6 +15,8 @@ export default function Editor() {
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [codeOpen, setCodeOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("Python");
   const [codePreview, setCodePreview] = useState({
     code: "",
