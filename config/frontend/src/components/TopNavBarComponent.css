@@ -1,4 +1,4 @@
-/* Instructor navigation only. Guest/student navigation keeps its current styles. */
+/* Shared authenticated navigation for instructors and students. */
 .bb-inav-header { width:100%; background:#fff; border-bottom:1px solid #d8e4f4; color:#1b3564; font:14px/1.45 'Segoe UI',system-ui,sans-serif; color-scheme:light; }
 .bb-inav-header * { box-sizing:border-box; }
 .bb-inav { display:flex; align-items:center; gap:clamp(16px,2.3vw,36px); padding:12px clamp(15px,2.4vw,38px); min-height:82px; width:100%; }
