@@ -211,7 +211,7 @@ export default function Editor() {
   };
 
   const actions = [
-    ["save", "save.svg", "Save", true],
+    ["save", "save.svg", "Save", false],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["reset", null, "Reset", false],
@@ -238,7 +238,9 @@ export default function Editor() {
               className={`toolbar-button toolbar-${type}`}
               disabled={disabled}
               onClick={
-                type === "run"
+                type === "save"
+                  ? openSaveDialog
+                  : type === "run"
                   ? handleRun
                   : type === "reset"
                   ? handleReset
