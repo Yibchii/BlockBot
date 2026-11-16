@@ -54,3 +54,50 @@
 @media(max-width:760px) { .studio-toolbar {gap:9px;} .studio-actions {width:100%;margin:0;} .toolbar-button {flex:1;padding:0 7px;} .student-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .student-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .console-panel {min-height:210px;} }
 @media(max-width:520px) { .studio-brand {flex:1;} .project-name {order:3;flex-basis:100%;max-width:none;} .studio-actions {order:4;} .toolbar-button {font-size:11px;} .student-side {display:flex;} .simulator-panel,.console-panel {width:100%;} .workspace-panel {height:clamp(450px,63dvh,690px);} .workspace-hint {font-size:10px;} .editor-badge {display:none;} }
 @media(max-width:760px) { .standalone-editor-page {padding:9px;} .standalone-editor-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .standalone-editor-grid .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .standalone-maze-panel {min-height:380px;} }
+
+/* Editor toolbar: one logo in the shared site navigation, project controls only here. */
+.studio-toolbar { padding-inline: clamp(14px, 2vw, 30px); }
+.project-name { flex: 0 1 300px; max-width: 340px; }
+.code-preview-trigger { min-height: 36px; padding: 8px 14px; border: 1px solid #a7c6f0; border-radius: 6px; color: #215fae; background: #edf5ff; font: 650 12px 'Segoe UI', sans-serif; cursor: pointer; white-space: nowrap; }
+.code-preview-trigger:hover { background: #e0eeff; }
+.code-preview-trigger:focus-visible { outline: 3px solid #83b1ff; outline-offset: 2px; }
+.code-preview-backdrop { position: fixed; inset: 0; z-index: 2000; padding: 20px; background: #0e245280; display: grid; place-items: center; }
+.code-preview-dialog { box-sizing: border-box; width: min(850px, 100%); max-height: min(85vh, 850px); overflow: auto; border-radius: 12px; background: #fff; color: #243f6b; box-shadow: 0 18px 60px #17284955; padding: 24px; }
+.code-preview-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.code-preview-heading h2 { margin: 0; font-size: 22px; font-weight: 750; }
+.code-preview-heading button { border: 0; background: transparent; color: #27436b; font-size: 28px; cursor: pointer; }
+.code-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 20px 0 12px; }
+.code-preview-controls select { padding: 9px 12px; border: 1px solid #bfd0eb; border-radius: 6px; color: #243f6b; background: white; }
+.code-preview-controls button { margin-left: auto; border: 1px solid #b2caee; border-radius: 6px; padding: 9px 12px; background: #ecf4ff; color: #225db3; cursor: pointer; }
+.code-preview-warning { background: #fff8e9; border: 1px solid #f2d694; color: #735011; border-radius: 7px; padding: 10px 12px; line-height: 1.5; font-size: 13px; }
+.code-preview-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 450px;
+    padding: 12px;
+    border: 1px solid #d1dff5;
+    border-radius: 8px;
+    background: #f3f7ff;
+}
+
+.code-preview-output {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    flex: 1;
+    margin: 0;
+    background: #1e1e26;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 6px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow: auto;
+    box-sizing: border-box;
+}
+.code-preview-footnote { font-size: 12px; color: #6a7f9b; margin: 12px 0 0; }
+@media (max-width: 760px) { .code-preview-trigger { flex: 1; } .project-name { max-width: none; flex: 1 1 160px; } }
+@media (max-width: 520px) { .code-preview-trigger { order: 3; } .project-name { order: 1; flex-basis: 100%; } .studio-actions { order: 4; } }

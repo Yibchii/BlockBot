@@ -1,13 +1,19 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
-import TopNavBarComponent from "./components/TopNavBarComponent";
-import LoginPage from "./pages/LoginPage";
-import Editor from "./pages/StudentBlockProgram";
+import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
+import LoginPage from "./pages/Login/LoginPage";
+import Editor from "./pages/Student/StudentBlockProgram";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideNavbar =
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/static/frontend/login";
+
   return (
-    <BrowserRouter>
-      <TopNavBarComponent />
+    <>
+      {!hideNavbar && <TopNavBarComponent />}
       <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
@@ -20,6 +26,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </main>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

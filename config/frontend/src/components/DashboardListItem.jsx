@@ -1,8 +1,11 @@
-function DashboardListItem({title, description, children}) {
+function DashboardListItem({ title, description, children }) {
     return (
-        <div className="dashboard-list-item p-4 bg-white rounded-lg shadow-md ">
-            <h1 className="text-xl font-bold mb-3 text-left">{title}</h1>
-            <p>{description}</p>
+        <div className="dashboard-list-item bg-white p-3 flex items-center justify-between rounded-lg shadow-md">
+            <div>
+                <h2 className="text-lg font-bold text-left">{title}</h2>
+                <p className="text-sm text-gray-500">{description}</p>
+            </div>
+
             {children}
         </div>
     );

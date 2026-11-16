@@ -2,16 +2,18 @@ import { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import 'blockly/blocks';
 import { installBlocklyPrompt } from './blocklyPrompt';
-import '../IntegerConstantBlock';
-import '../coreBlocks';
-import '../blockGen';
-import '../generators/mazeBotGenerators';
+import '../../IntegerConstantBlock';
+import '../../coreBlocks';
+import '../../blockGen';
+import '../../generators/mazeBotGenerators';
 
+const NO_ROBOT_BLOCKS = [];
 
-export default function BlocklyComponent({ onWorkspaceReady }) {
+export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = NO_ROBOT_BLOCKS }) {
   const readyCallbackRef = useRef(onWorkspaceReady);
   const blocklyDiv = useRef(null);
   const workspaceRef = useRef(null);
+  const updateToolboxRef = useRef(null);
 
   useEffect(() => installBlocklyPrompt(), []);
 
@@ -718,31 +720,6 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
               type: 'procedures_ifreturn'
             },
           ]
-            
-        },
-        
-        {
-          kind: 'category',
-          name: 'Robot',
-          colour: '#e67e22',
-          contents: [
-            {
-              kind: 'block',
-              type: 'mazebot2d_move'
-            },
-            {
-              kind: 'block',
-              type: 'mazebot2d_can_move'
-            },
-            {
-              kind: 'block',
-              type: 'direction_constant'
-            },
-            {
-              kind: 'block',
-              type: 'mazebot2d_on_goal'
-            }
-          ]
         }
       ]
     };
@@ -832,7 +809,6 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
     });
 
     // Replace variable-name placeholders with the IDs required by Blockly.
-    const resolvedToolbox = JSON.parse(JSON.stringify(toolbox));
     const variableMap = workspaceRef.current.getVariableMap();
 
     const resolveVariableIds = (value) => {
@@ -857,8 +833,20 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
       Object.values(value).forEach(resolveVariableIds);
     };
 
-    resolveVariableIds(resolvedToolbox);
-    workspaceRef.current.updateToolbox(resolvedToolbox);
+    // Rebuild the toolbox, adding a Robot category when the loaded robot provides blocks.
+    updateToolboxRef.current = (robotTypes) => {
+      const resolvedToolbox = JSON.parse(JSON.stringify(toolbox));
+      if (robotTypes.length > 0) {
+        resolvedToolbox.contents.push({
+          kind: 'category',
+          name: 'Robot',
+          colour: '#e67e22',
+          contents: robotTypes.map((type) => ({ kind: 'block', type }))
+        });
+      }
+      resolveVariableIds(resolvedToolbox);
+      workspaceRef.current.updateToolbox(resolvedToolbox);
+    };
 
     const workspace = workspaceRef.current;
     readyCallbackRef.current?.(workspace);
@@ -871,11 +859,16 @@ export default function BlocklyComponent({ onWorkspaceReady }) {
     return () => {
       observer?.disconnect();
       readyCallbackRef.current?.(null);
+      updateToolboxRef.current = null;
       if (workspaceRef.current) {
         workspaceRef.current.dispose();
       }
     };
   }, []);
+
+  useEffect(() => {
+    updateToolboxRef.current?.(robotBlockTypes);
+  }, [robotBlockTypes]);
 
   return (
     <div ref={blocklyDiv} className="blockly-host" aria-label="Blockly programming canvas" />

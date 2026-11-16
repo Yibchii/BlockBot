@@ -1,9 +1,10 @@
-import MazeBot2DComponent from "../components/MazeBot2DComponent";
+import MazeBot2DComponent from "../components/MazeBot/MazeBot2DComponent";
 
 // The database selects a robot; this map supplies the client implementation.
 export const ROBOT_IMPLEMENTATIONS = {
   MazeBot2D: {
     Component: MazeBot2DComponent,
+    blocksUrl: "/api/mazebot2d/blocks",
   },
 };
 
