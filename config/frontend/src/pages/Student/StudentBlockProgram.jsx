@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { serialization } from "blockly";
+import ProjectFileDialog from "./ProjectFileDialog";
 import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
@@ -12,6 +14,7 @@ export default function Editor() {
   const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [availableRobots, setAvailableRobots] = useState([]);
   const [projectName, setProjectName] = useState("Maze Runner");
+  const [fileMode, setFileMode] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [codeOpen, setCodeOpen] = useState(false);
@@ -195,8 +198,84 @@ export default function Editor() {
     }
   };
 
+  async function handleSaveProject(name) {
+    if (name.includes("/") || name === "." || name === "..") {
+      throw new Error("Use a project name without slashes or standalone periods.");
+    }
+
+    const csrfToken = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("csrftoken="))
+      ?.slice("csrftoken=".length);
+
+    const response = await fetch(
+      `/api/files/save_file/${encodeURIComponent(name)}/${robot.id}/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken ?? "",
+        },
+        body: JSON.stringify(serialization.workspaces.save(workspace)),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.message || "Could not save the project.");
+    }
+
+    setProjectName(name);
+    setFileMode(null);
+    setStatus({ state: "success", title: "Project saved", msg: name });
+  }
+  async function handleLoadProject(project) {
+    const savedRobot = availableRobots.find((item) => item.id === project.robot);
+    if (!savedRobot) {
+      throw new Error("This project uses a robot that is unavailable.");
+    }
+
+    if (workspace.getAllBlocks(false).length > 0 &&
+        !window.confirm("Replace the current blocks with this saved project?")) {
+      return;
+    }
+
+    const response = await fetch(
+      `/api/files/load_file/${encodeURIComponent(project.name)}/`
+    );
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.message || "Could not load the project.");
+    }
+
+    const savedWorkspace = JSON.parse(result.content);
+    if (!savedWorkspace || typeof savedWorkspace !== "object" || Array.isArray(savedWorkspace)) {
+      throw new Error("The saved workspace is invalid.");
+    }
+
+    await loadBlocksFromApi(ROBOT_IMPLEMENTATIONS[savedRobot.name].blocksUrl);
+
+    const previousWorkspace = serialization.workspaces.save(workspace);
+    try {
+      serialization.workspaces.load(savedWorkspace, workspace);
+    } catch (error) {
+      serialization.workspaces.load(previousWorkspace, workspace);
+      throw error;
+    }
+
+    if (savedRobot.id !== robot?.id) {
+      runtimeRef.current = null;
+      setRobotReady(false);
+      setRobot(savedRobot);
+    }
+
+    setProjectName(project.name);
+    setFileMode(null);
+    setStatus({ state: "success", title: "Project loaded", msg: project.name });
+  }
   const actions = [
-    ["save", "save.svg", "Save", true],
+    ["load", null, "Load", !workspace || !availableRobots.length || runState === "running"],
+    ["save", "save.svg", "Save", !workspace || !robot || runState === "running"],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["reset", null, "Reset", false],
@@ -223,13 +302,15 @@ export default function Editor() {
               className={`toolbar-button toolbar-${type}`}
               disabled={disabled}
               onClick={
-                type === "run"
-                  ? handleRun
-                  : type === "reset"
-                  ? handleReset
-                  : type === "pause"
-                  ? handlePauseToggle
-                  : undefined
+                type === "save" || type === "load"
+                  ? () => setFileMode(type)
+                  : type === "run"
+                    ? handleRun
+                    : type === "reset"
+                      ? handleReset
+                      : type === "pause"
+                        ? handlePauseToggle
+                        : undefined
               }
               aria-pressed={type === "pause" ? String(paused) : undefined}
             >
@@ -246,6 +327,16 @@ export default function Editor() {
         </div>
 
       </header>
+
+      {fileMode && (
+        <ProjectFileDialog
+          mode={fileMode}
+          projectName={projectName}
+          onClose={() => setFileMode(null)}
+          onSave={handleSaveProject}
+          onLoad={handleLoadProject}
+        />
+      )}
 
       {codeOpen && (
         <div className="code-preview-backdrop" onMouseDown={(event) => {
