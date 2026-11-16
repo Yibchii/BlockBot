@@ -782,6 +782,7 @@ export default function BlocklyComponent({ onWorkspaceReady, robotBlockTypes = N
             functionBlock.moveBy(40, bottom + 40);
             functionBlock.select();
             workspace.centerOnBlock(functionBlock.id);
+            workspace.getToolbox()?.refreshSelection();
           } finally {
             Blockly.Events.setGroup(false);
           }
