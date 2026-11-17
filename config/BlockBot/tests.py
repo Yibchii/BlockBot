@@ -126,3 +126,17 @@ class ClassroomApiTestCase(TestCase):
 		self.assertEqual(classroom.name, "Period 1")
 		self.assertEqual(classroom.owner, profile)
 		self.assertIn(profile, classroom.members.all())
+
+	def test_classroom_info_rejects_users_not_in_classroom(self):
+		teacher = User.objects.create_user(username="teacher", password="password")
+		teacher_profile = UserProfile.objects.create(user=teacher, display_name="Ms. Smith")
+		classroom = Classroom.objects.create(name="Period 1", owner=teacher_profile)
+		classroom.members.add(teacher_profile)
+
+		outsider = User.objects.create_user(username="outsider", password="password")
+		UserProfile.objects.create(user=outsider, display_name="Outsider")
+		self.client.force_login(outsider)
+
+		response = self.client.get(f'/api/classroom/{classroom.id}/info/')
+
+		self.assertEqual(response.status_code, 403)
