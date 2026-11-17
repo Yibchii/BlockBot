@@ -108,14 +108,6 @@ export default function TopNavBarComponent() {
               src={`${import.meta.env.BASE_URL}images/logo.png`}
               alt="BlockBot Studio"
             />
-  // Use the same full navigation for instructors and authenticated students.
-  if (user) {
-    const linkClass = ({ isActive }) => `bb-inav-link${isActive ? " bb-inav-active" : ""}`;
-    return (
-      <header className="bb-inav-header">
-        <nav className="bb-inav" aria-label="Main navigation">
-          <Link className="bb-inav-brand" to={`${basePath}/home`} aria-label="BlockBot Studio dashboard">
-            <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="BlockBot Studio" />
           </Link>
 
           <div className="bb-inav-links">
@@ -171,9 +163,6 @@ export default function TopNavBarComponent() {
             >
               Logout
             </button>
-            <img src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`} alt="" />
-            <span className="bb-inav-name">{user?.first_name || user?.display_name || "User"}</span>
-            <button type="button" className="bb-inav-logout" onClick={handleLogout}>Logout</button>
           </div>
         </nav>
 
