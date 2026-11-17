@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from .models import Robot
+from .models import Classroom, Robot
 from .models import UserProfile
 
 
@@ -113,3 +113,16 @@ class ClassroomApiTestCase(TestCase):
 		response = self.client.post('/api/classroom/create/', {"name": "Period 1"})
 
 		self.assertEqual(response.status_code, 401)
+
+	def test_create_classroom_makes_user_the_owner(self):
+		user = User.objects.create_user(username="teacher", password="password")
+		profile = UserProfile.objects.create(user=user, display_name="Ms. Smith")
+		self.client.force_login(user)
+
+		response = self.client.post('/api/classroom/create/', {"name": "Period 1"})
+
+		self.assertEqual(response.status_code, 200)
+		classroom = Classroom.objects.get(id=response.json()["classroom_id"])
+		self.assertEqual(classroom.name, "Period 1")
+		self.assertEqual(classroom.owner, profile)
+		self.assertIn(profile, classroom.members.all())
