@@ -107,3 +107,9 @@ class MazeBot2DViewTestCase(TestCase):
 		self.assertEqual(response.status_code, 200)
 		rows = response.json()['grid'].splitlines()
 		self.assertEqual(rows[1][5], '*')
+
+class ClassroomApiTestCase(TestCase):
+	def test_create_classroom_rejects_anonymous_users(self):
+		response = self.client.post('/api/classroom/create/', {"name": "Period 1"})
+
+		self.assertEqual(response.status_code, 401)
