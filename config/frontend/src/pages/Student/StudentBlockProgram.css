@@ -101,3 +101,15 @@
 .code-preview-footnote { font-size: 12px; color: #6a7f9b; margin: 12px 0 0; }
 @media (max-width: 760px) { .code-preview-trigger { flex: 1; } .project-name { max-width: none; flex: 1 1 160px; } }
 @media (max-width: 520px) { .code-preview-trigger { order: 3; } .project-name { order: 1; flex-basis: 100%; } .studio-actions { order: 4; } }
+
+/* The Save project dialog box*/
+.save-dialog { width: min(420px, 100%); }
+.save-dialog h2 { color: #17356c; }
+.save-dialog form { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.save-dialog label { font-weight: 600; }
+.save-dialog input { padding: 10px 12px; border: 1px solid #bdcee8; border-radius: 6px; color: #243f6b; font: inherit; }
+.save-dialog input:focus-visible { outline: 3px solid #83b1ff; outline-offset: 2px; }
+.save-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+.save-dialog-actions button { min-height: 40px; padding: 8px 18px; border: 1px solid #bdcee8; border-radius: 6px; background: #edf4ff; color: #29436e; font: 600 13px 'Segoe UI', sans-serif; cursor: pointer; }
+.save-dialog-actions .toolbar-save { border-color: #2671ec; background: #2671ec; color: #fff; }
+.save-dialog-actions button:disabled { opacity: .6; cursor: not-allowed; }
