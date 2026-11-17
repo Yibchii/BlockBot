@@ -55,6 +55,21 @@ function getCookie(name) {
     ?.split("=")[1];
 }
 
+async function readResponseData(response) {
+  const body = await response.text();
+
+  if (!body) {
+    return {};
+  }
+
+  try {
+    const data = JSON.parse(body);
+    return data && typeof data === "object" ? data : {};
+  } catch {
+    return {};
+  }
+}
+
 function Field({ label, name, value, onChange, type = "text", autoComplete, required = true, minLength }) {
   return (
     <label className="bb-field">
@@ -136,7 +151,7 @@ export default function LoginPage() {
           ),
         },
       );
-      const data = await response.json();
+      const data = await readResponseData(response);
 
       if (!response.ok) {
         throw new Error(
@@ -158,7 +173,7 @@ export default function LoginPage() {
             password: form.password,
           }),
         });
-        const loginData = await loginResponse.json();
+        const loginData = await readResponseData(loginResponse);
 
         if (!loginResponse.ok) {
           throw new Error(

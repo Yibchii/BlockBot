@@ -6,6 +6,7 @@ from .models import UserProfile
 
 
 class MazeBot2DViewTestCase(TestCase):
+
 	def test_register_user_uses_email_when_username_is_missing(self):
 		response = self.client.post('/api/user/register/student', {
 			"email": "jane@example.com",
