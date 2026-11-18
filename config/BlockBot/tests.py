@@ -192,6 +192,16 @@ class ClassroomApiTestCase(TestCase):
 		self.assertEqual(info["owner"], "Ms. Smith")
 		self.assertCountEqual(info["members"], ["Ms. Smith", "Sam"])
 
+	def test_classroom_info_returns_404_for_missing_classroom(self):
+		user = User.objects.create_user(username="teacher", password="password")
+		UserProfile.objects.create(user=user, display_name="Ms. Smith")
+		self.client.force_login(user)
+
+		response = self.client.get('/api/classroom/999/info/')
+
+		self.assertEqual(response.status_code, 404)
+		self.assertEqual(response.json()["message"], "Classroom not found")
+
 
 class ProjectFileApiTestCase(TestCase):
 
