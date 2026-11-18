@@ -1,0 +1,34 @@
+.project-creation-modal {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(470px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #cbdcf0;
+  border-radius: 12px;
+  background: #fff;
+  color: #29436e;
+  box-shadow: 0 20px 60px #17356c40;
+  font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+  text-align: left;
+  color-scheme: light;
+}
+.project-creation-modal::backdrop { background: #172b4d80; }
+.project-creation-modal h2 { margin: 0 0 8px; font-size: 22px; font-weight: 700; color: #17356c; }
+.project-creation-modal form { display: grid; gap: 10px; margin-top: 20px; }
+.project-creation-modal label { font-weight: 600; }
+.project-creation-modal input, .project-creation-modal select {
+  box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid #bdcee8; border-radius: 6px; background: white; color: #29436e; font: inherit
+}
+.project-creation-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.project-creation-modal button { min-height: 44px; padding: 9px 18px; border: 1px solid #bdcee8; border-radius: 6px; background: #edf4ff; color: #29436e; font: inherit; cursor: pointer; }
+.project-creation-modal .project-creation-primary { border-color: #2671ec; background: #2671ec; color: white; }
+.project-creation-modal button:hover:not(:disabled) { filter: brightness(.95); }
+.project-creation-modal :disabled { opacity: .6; cursor: not-allowed; }
+.project-creation-modal :is(input, select, button):focus-visible { outline: 3px solid #83b1ff; outline-offset: 3px; }
+.project-creation-modal .project-creation-error { color: #a11c35; }
+.project-creation-notice { padding: 10px 12px; border: 1px solid #bfd6f7; border-radius: 6px; background: #eef5ff; font-size: 13px; }
