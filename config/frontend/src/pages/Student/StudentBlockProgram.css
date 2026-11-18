@@ -19,11 +19,14 @@
 .toolbar-reset {background:#ee5965;}
 .toolbar-pause {background: #f4b400;}
 .toolbar-pause:hover {filter: brightness(0.95);}
+.toolbar-help { background:#6c7a91; }
+.help-glyph {display:grid;place-items:center;width:16px;height:16px;border:2px solid #fff;border-radius:50%;font-size:12px;line-height:1;}
 .pause-glyph {display: inline-grid;place-items: center;width: 15px;height: 15px;font-size: 14px;line-height: 1;}
 .student-account {display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;}
 .student-account img {width:30px;height:30px;border-radius:50%;background:#eaf0f8;}
 .student-content {width:100%;max-width:2000px;margin:auto;padding:clamp(9px,1.3vw,18px);}
-.student-grid {display:grid;grid-template-columns:minmax(0,1fr) clamp(255px,30vw,440px);gap:clamp(9px,1vw,16px);align-items:stretch;height:clamp(520px,calc(100dvh - 145px),1100px);min-height:520px;}
+.student-grid {position:relative;display:grid;grid-template-columns:minmax(0,1fr) clamp(255px,30vw,440px);gap:clamp(9px,1vw,16px);align-items:stretch;height:clamp(520px,calc(100dvh - 145px),1100px);min-height:520px;}
+.student-grid.tutorial-open {grid-template-columns:minmax(0,1fr) clamp(240px,26vw,380px) clamp(220px,25vw,320px);}
 .workspace-panel,.student-panel {min-width:0;min-height:0;overflow:hidden;border:1px solid #cbdcf0;border-radius:7px;background:white;box-shadow:0 3px 12px #213e6810;}
 .workspace-panel {display:flex;flex-direction:column;}
 .panel-header {display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;min-height:45px;background:#f9fbff;border-bottom:1px solid #d2e0f3;}
@@ -35,6 +38,20 @@
 .blockly-host {position:absolute;inset:0;width:100%;height:100%;min-height:0;overflow:hidden;}
 .blockly-host .blocklyToolboxDiv {background:#f8fbff;border-right:1px solid #d2e0f3;}
 .blockly-host .blocklySvg {background-color:#fff;}
+.editor-tutorial-sidebar {position:relative;z-index:1;grid-column:3;display:flex;min-width:0;min-height:0;flex-direction:column;overflow:hidden;border:0;border-left:1px solid #aebfd6;border-radius:0;background:#fff;color:#29436e;animation:tutorial-slide-in .18s ease-out;}
+.editor-tutorial-header {display:flex;align-items:center;justify-content:space-between;min-height:45px;padding:10px 12px;border-bottom:1px solid #d2e0f3;background:#f9fbff;}
+.editor-tutorial-header h2 {margin:0;font-size:13px;color:#29436e;}
+.editor-tutorial-header button {border:0;background:transparent;color:#29436e;font-size:24px;line-height:1;cursor:pointer;}
+.editor-tutorial-header button:focus-visible {outline:3px solid #83b1ff;outline-offset:2px;}
+.editor-tutorial-body {overflow-y:auto;padding:18px 16px;color:#29436e;}
+.editor-tutorial-body h3 {margin:0 0 14px;font-size:15px;color:#17356c;}
+.editor-tutorial-body ol {margin:0;padding:0;list-style:none;counter-reset:tutorial-step;}
+.editor-tutorial-body li {position:relative;margin:0 0 14px;padding:0 0 0 38px;counter-increment:tutorial-step;}
+.editor-tutorial-body li::before {content:counter(tutorial-step);position:absolute;left:0;top:0;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#edf4ff;color:#3972c6;font-weight:800;}
+.editor-tutorial-body li strong,.editor-tutorial-body li span {display:block;}
+.editor-tutorial-body li strong {margin-bottom:2px;font-size:12px;color:#29436e;}
+.editor-tutorial-body li span {font-size:11px;line-height:1.5;color:#7589a8;}
+@keyframes tutorial-slide-in {from {transform:translateX(12px);opacity:.5;} to {transform:translateX(0);opacity:1;} }
 .student-side {display:flex;flex-direction:column;gap:clamp(9px,1vw,16px);min-width:0;min-height:0;}
 .simulator-panel {flex:0 0 auto;}
 .console-panel {position:relative;flex:1;min-height:160px;padding-bottom:58px;}
@@ -50,8 +67,8 @@
 .maze-component-container button {margin:0 5px 5px 0;padding:7px 10px;border:1px solid #bdcee8;border-radius:5px;background:#edf4ff;color:#29436e;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;}
 .maze-component-container button:hover {background:#dceaff;}
 .maze-component-container pre {padding:12px;margin:8px 0 0;overflow:auto;border:1px solid #d2e0f3;background:#f8fbff;color:#29436e;font:14px/1.35 ui-monospace,Consolas,monospace;}
-@media(max-width:1050px) { .student-grid {grid-template-columns:minmax(0,1fr) minmax(245px,34%);} .student-account {display:none;} }
-@media(max-width:760px) { .studio-toolbar {gap:9px;} .studio-actions {width:100%;margin:0;} .toolbar-button {flex:1;padding:0 7px;} .student-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .student-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .console-panel {min-height:210px;} }
+@media(max-width:1050px) { .student-grid {grid-template-columns:minmax(0,1fr) minmax(245px,34%);} .student-grid.tutorial-open {grid-template-columns:minmax(0,1fr) minmax(225px,32%) minmax(220px,27%);} .student-account {display:none;} }
+@media(max-width:760px) { .studio-toolbar {gap:9px;} .studio-actions {width:100%;margin:0;} .toolbar-button {flex:1;padding:0 7px;} .student-grid,.student-grid.tutorial-open {display:flex;flex-direction:column;height:auto;min-height:0;} .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .editor-tutorial-sidebar {width:100%;min-height:300px;flex:none;border-top:1px solid #aebfd6;border-left:0;} .student-side {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .console-panel {min-height:210px;} }
 @media(max-width:520px) { .studio-brand {flex:1;} .project-name {order:3;flex-basis:100%;max-width:none;} .studio-actions {order:4;} .toolbar-button {font-size:11px;} .student-side {display:flex;} .simulator-panel,.console-panel {width:100%;} .workspace-panel {height:clamp(450px,63dvh,690px);} .workspace-hint {font-size:10px;} .editor-badge {display:none;} }
 @media(max-width:760px) { .standalone-editor-page {padding:9px;} .standalone-editor-grid {display:flex;flex-direction:column;height:auto;min-height:0;} .standalone-editor-grid .workspace-panel {height:clamp(430px,65dvh,760px);flex:none;} .standalone-maze-panel {min-height:380px;} }
 

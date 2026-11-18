@@ -17,6 +17,7 @@ export default function Editor() {
   const [projectName, setProjectName] = useState("Maze Runner");
   const [fileMode, setFileMode] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [codeOpen, setCodeOpen] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState("Python");
@@ -364,6 +365,18 @@ export default function Editor() {
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            className="toolbar-button toolbar-help"
+            onClick={() => setTutorialOpen((open) => !open)}
+            aria-expanded={tutorialOpen}
+            aria-controls="editor-tutorial"
+            aria-label={tutorialOpen ? "Close tutorial" : "Open tutorial"}
+            title={tutorialOpen ? "Close tutorial" : "Open tutorial"}
+          >
+            <span aria-hidden="true" className="help-glyph">?</span>
+            Help
+          </button>
         </div>
 
       </header>
@@ -405,7 +418,7 @@ export default function Editor() {
       )}
 
       <div className="student-content">
-        <div className="student-grid">
+        <div className={`student-grid${tutorialOpen ? " tutorial-open" : ""}`}>
           <section className="workspace-panel" aria-label="Interactive Blockly programming editor">
             <div className="panel-header workspace-editor-header">
               <div>
@@ -462,6 +475,40 @@ export default function Editor() {
 
             <Console status={status} showHelp={showHelp} onToggleHelp={() => setShowHelp(v => !v)} />
           </div>
+          {tutorialOpen && (
+            <aside className="editor-tutorial-sidebar" id="editor-tutorial" aria-label="Tutorial">
+              <div className="editor-tutorial-header">
+                <h2>Tutorial</h2>
+                <button
+                  type="button"
+                  onClick={() => setTutorialOpen(false)}
+                  aria-label="Close tutorial"
+                >
+                  ×
+                </button>
+              </div>
+              <article className="editor-tutorial-body">
+                <p className="tutorial-kicker">Get started</p>
+                <h3>Build your first program</h3>
+                <ol>
+                  <li>
+                    <strong>Place your blocks</strong>
+                    <span>Start by dragging the "start program" block from the logic tab onto the workspace.</span>
+                    
+                  </li>
+                  <li>
+                    <strong>Connect your blocks</strong>
+                    <span>Snap blocks together in the order you want the robot to run.</span>
+                    <span>Try connecting a move block to the start block, then add a direction block to the move block.</span>
+                  </li>
+                  <li>
+                    <strong>Reach the goal!</strong>
+                    <span>Use Run to test your program, then reset or change the blocks. Try to reach the goal in as few steps as possible!</span>
+                  </li>
+                </ol>
+              </article>
+            </aside>
+          )}
         </div>
       </div>
     </div>
