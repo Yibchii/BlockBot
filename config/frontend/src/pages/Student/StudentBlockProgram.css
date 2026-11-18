@@ -101,3 +101,52 @@
 .code-preview-footnote { font-size: 12px; color: #6a7f9b; margin: 12px 0 0; }
 @media (max-width: 760px) { .code-preview-trigger { flex: 1; } .project-name { max-width: none; flex: 1 1 160px; } }
 @media (max-width: 520px) { .code-preview-trigger { order: 3; } .project-name { order: 1; flex-basis: 100%; } .studio-actions { order: 4; } }
+.toolbar-button.toolbar-load {
+  background: #eaf2ff;
+  color: #174881;
+  border: 1px solid #9dbbed;
+}
+
+.project-file-dialog {
+  width: min(28rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.5rem;
+  border: 1px solid #a6b1be;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #172235;
+}
+
+.project-file-dialog::backdrop {
+  background: rgb(15 23 42 / 55%);
+}
+
+.project-file-dialog form,
+.project-file-dialog label {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.project-file-dialog h2 {
+  color: #172235;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.project-file-dialog input,
+.project-file-dialog select,
+.project-file-dialog button {
+  border: 1px solid #65748a;
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  color: #172235;
+}
+
+.project-file-dialog button[type="submit"] {
+  background: #234a87;
+  color: #fff;
+}
+
+.project-file-dialog button:disabled {
+  opacity: 0.55;
+}
