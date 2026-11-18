@@ -173,6 +173,25 @@ class ClassroomApiTestCase(TestCase):
 			}
 		})
 
+	def test_member_can_view_classroom_info(self):
+		teacher = User.objects.create_user(username="teacher", password="password")
+		teacher_profile = UserProfile.objects.create(user=teacher, display_name="Ms. Smith")
+		classroom = Classroom.objects.create(name="Period 1", owner=teacher_profile)
+		classroom.members.add(teacher_profile)
+
+		student = User.objects.create_user(username="student", password="password")
+		student_profile = UserProfile.objects.create(user=student, display_name="Sam")
+		classroom.members.add(student_profile)
+		self.client.force_login(student)
+
+		response = self.client.get(f'/api/classroom/{classroom.id}/info/')
+
+		self.assertEqual(response.status_code, 200)
+		info = response.json()["classroom"]
+		self.assertEqual(info["name"], "Period 1")
+		self.assertEqual(info["owner"], "Ms. Smith")
+		self.assertCountEqual(info["members"], ["Ms. Smith", "Sam"])
+
 
 class ProjectFileApiTestCase(TestCase):
 
