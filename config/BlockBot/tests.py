@@ -4,7 +4,7 @@ import tempfile
 from django.test import TestCase, override_settings
 from django.contrib.auth.models import User
 
-from .models import Classroom, Robot
+from .models import Classroom, CloudSavedProject, Robot
 from .models import UserProfile
 
 
@@ -257,3 +257,15 @@ class ProjectFileApiTestCase(TestCase):
 		response = self.client.get('/api/files/load_file/NotARealProject/')
 
 		self.assertEqual(response.status_code, 404)
+
+	def test_save_rejects_anonymous_users(self):
+		self.client.logout()
+
+		response = self.client.post(
+			f'/api/files/save_file/MyMaze/{self.robot.id}/',
+			data=json.dumps({"blocks": {}}),
+			content_type="application/json",
+		)
+
+		self.assertEqual(response.status_code, 401)
+		self.assertFalse(CloudSavedProject.objects.exists())
