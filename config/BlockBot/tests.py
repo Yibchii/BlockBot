@@ -1,4 +1,7 @@
-from django.test import TestCase
+import json
+import tempfile
+
+from django.test import TestCase, override_settings
 from django.contrib.auth.models import User
 
 from .models import Classroom, Robot
@@ -140,3 +143,34 @@ class ClassroomApiTestCase(TestCase):
 		response = self.client.get(f'/api/classroom/{classroom.id}/info/')
 
 		self.assertEqual(response.status_code, 403)
+
+
+class ProjectFileApiTestCase(TestCase):
+
+	def setUp(self):
+		# Save project files to a temporary folder instead of the real one
+		media_dir = tempfile.TemporaryDirectory()
+		self.addCleanup(media_dir.cleanup)
+		media_settings = override_settings(MEDIA_ROOT=media_dir.name)
+		media_settings.enable()
+		self.addCleanup(media_settings.disable)
+
+		self.user = User.objects.create_user(username="student", password="password")
+		UserProfile.objects.create(user=self.user, display_name="Student")
+		self.robot = Robot.objects.create(id=1, name="MazeBot2D", robot_type=Robot.RobotType.SIMULATED)
+		self.client.force_login(self.user)
+
+	def test_saved_project_loads_with_same_content(self):
+		workspace = {"blocks": {"languageVersion": 0, "blocks": [{"type": "move_forward"}]}}
+
+		save_response = self.client.post(
+			f'/api/files/save_file/MyMaze/{self.robot.id}/',
+			data=json.dumps(workspace),
+			content_type="application/json",
+		)
+		self.assertEqual(save_response.status_code, 201)
+
+		load_response = self.client.get('/api/files/load_file/MyMaze/')
+
+		self.assertEqual(load_response.status_code, 200)
+		self.assertEqual(json.loads(load_response.json()["content"]), workspace)
