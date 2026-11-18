@@ -144,6 +144,16 @@ class ClassroomApiTestCase(TestCase):
 
 		self.assertEqual(response.status_code, 403)
 
+	def test_create_classroom_requires_a_name(self):
+		user = User.objects.create_user(username="teacher", password="password")
+		UserProfile.objects.create(user=user, display_name="Ms. Smith")
+		self.client.force_login(user)
+
+		response = self.client.post('/api/classroom/create/', {})
+
+		self.assertEqual(response.status_code, 400)
+		self.assertFalse(Classroom.objects.exists())
+
 
 class ProjectFileApiTestCase(TestCase):
 
