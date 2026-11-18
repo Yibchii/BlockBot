@@ -18,6 +18,7 @@
 .toolbar-run {background:#46a464;}
 .toolbar-reset {background:#ee5965;}
 .toolbar-pause {background: #f4b400;}
+.toolbar-step {background:#7c5cd6;}
 .toolbar-pause:hover {filter: brightness(0.95);}
 .pause-glyph {display: inline-grid;place-items: center;width: 15px;height: 15px;font-size: 14px;line-height: 1;}
 .student-account {display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;}
