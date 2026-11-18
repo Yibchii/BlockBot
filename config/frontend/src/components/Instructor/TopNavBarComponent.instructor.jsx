@@ -139,13 +139,9 @@ export default function TopNavBarComponent() {
               Classroom
             </NavLink>
 
-            <span
-              className="bb-inav-disabled"
-              aria-disabled="true"
-              title="Help page is not available yet"
-            >
+            <NavLink to={`${basePath}/help`} className={linkClass}>
               Help
-            </span>
+            </NavLink>
           </div>
 
           <div className="bb-inav-account">

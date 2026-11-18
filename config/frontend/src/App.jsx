@@ -3,7 +3,8 @@ import Home from "./pages/Home";
 import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
-import Classroom from "./pages/Classroom/Classroom";
+import Classroom from "./pages/Classroom/Classroom";  
+import Help from "./pages/Help";
 
 function AppContent() {
   const location = useLocation();
@@ -29,6 +30,9 @@ function AppContent() {
 
           <Route path="/classroom" element={<Classroom />} />
           <Route path="/static/frontend/classroom" element={<Classroom />} />
+
+          <Route path="/help" element={<Help />} />
+          <Route path="/static/frontend/help" element={<Help />} />
 
           <Route path="/static/frontend/*" element={<Home />} />
         </Routes>
