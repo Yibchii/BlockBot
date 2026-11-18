@@ -202,6 +202,26 @@ class ClassroomApiTestCase(TestCase):
 		self.assertEqual(response.status_code, 404)
 		self.assertEqual(response.json()["message"], "Classroom not found")
 
+	def test_owned_classrooms_only_lists_your_classrooms(self):
+		teacher = User.objects.create_user(username="teacher", password="password")
+		teacher_profile = UserProfile.objects.create(user=teacher, display_name="Ms. Smith")
+		period_1 = Classroom.objects.create(name="Period 1", owner=teacher_profile)
+		period_2 = Classroom.objects.create(name="Period 2", owner=teacher_profile)
+
+		other_teacher = User.objects.create_user(username="other", password="password")
+		other_profile = UserProfile.objects.create(user=other_teacher, display_name="Mr. Lee")
+		Classroom.objects.create(name="Mr. Lee's Class", owner=other_profile)
+
+		self.client.force_login(teacher)
+
+		response = self.client.get('/api/classroom/owned/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertCountEqual(response.json()["classrooms"], [
+			{"id": period_1.id, "name": "Period 1"},
+			{"id": period_2.id, "name": "Period 2"},
+		])
+
 
 class ProjectFileApiTestCase(TestCase):
 
