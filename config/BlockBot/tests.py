@@ -154,6 +154,25 @@ class ClassroomApiTestCase(TestCase):
 		self.assertEqual(response.status_code, 400)
 		self.assertFalse(Classroom.objects.exists())
 
+	def test_owner_can_view_classroom_info(self):
+		teacher = User.objects.create_user(username="teacher", password="password")
+		teacher_profile = UserProfile.objects.create(user=teacher, display_name="Ms. Smith")
+		classroom = Classroom.objects.create(name="Period 1", owner=teacher_profile)
+		classroom.members.add(teacher_profile)
+		self.client.force_login(teacher)
+
+		response = self.client.get(f'/api/classroom/{classroom.id}/info/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json(), {
+			"classroom": {
+				"id": classroom.id,
+				"name": "Period 1",
+				"owner": "Ms. Smith",
+				"members": ["Ms. Smith"],
+			}
+		})
+
 
 class ProjectFileApiTestCase(TestCase):
 
