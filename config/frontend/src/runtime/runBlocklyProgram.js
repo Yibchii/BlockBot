@@ -27,6 +27,13 @@ export function generateBlocklyProgram(workspace) {
     javascriptGenerator.STATEMENT_PREFIX = "await __blockbotStep(%1);\n";
 
     javascriptGenerator.init(workspace);
+
+    for (const block of workspace.getTopBlocks(true)) {
+      if (block.type === "procedures_defnoreturn" || block.type === "procedures_defreturn") {
+        javascriptGenerator.blockToCode(block);
+      }
+    }
+
     const code = javascriptGenerator.blockToCode(startBlocks[0]);
 
     if (!code.trim()) {
