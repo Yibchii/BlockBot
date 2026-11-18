@@ -174,3 +174,8 @@ class ProjectFileApiTestCase(TestCase):
 
 		self.assertEqual(load_response.status_code, 200)
 		self.assertEqual(json.loads(load_response.json()["content"]), workspace)
+
+	def test_loading_missing_project_returns_404(self):
+		response = self.client.get('/api/files/load_file/NotARealProject/')
+
+		self.assertEqual(response.status_code, 404)
