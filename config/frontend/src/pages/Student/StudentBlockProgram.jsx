@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Blockly from "blockly";
+import { useLocation } from "react-router-dom";
 import ProjectFileDialog from "./ProjectFileDialog";
 import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
@@ -11,10 +12,15 @@ import "./StudentBlockProgram.css";
 const WORKSPACE_STORAGE_KEY = "blockbot.student.workspace.v1";
 
 export default function Editor() {
+  const location = useLocation();
+  const initialProject = useRef(location.state?.newProject ?? null).current;
+  const workspaceStorageKey = initialProject
+    ? `${WORKSPACE_STORAGE_KEY}:${location.key}`
+    : WORKSPACE_STORAGE_KEY;
   const [robot, setRobot] = useState(null);
   const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [availableRobots, setAvailableRobots] = useState([]);
-  const [projectName, setProjectName] = useState("Maze Runner");
+  const [projectName, setProjectName] = useState(initialProject?.name ?? "Maze Runner");
   const [fileMode, setFileMode] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
@@ -51,7 +57,11 @@ export default function Editor() {
           (item) => ROBOT_IMPLEMENTATIONS[item.name]?.Component
         );
         setAvailableRobots(supportedRobots);
-        const selectedRobot = supportedRobots[0];
+        const selectedRobot = initialProject
+          ? supportedRobots.find(
+              (item) => String(item.id) === String(initialProject.robot_id)
+            )
+          : supportedRobots[0];
         if (!selectedRobot || !ROBOT_IMPLEMENTATIONS[selectedRobot.name]) {
           throw new Error("No supported robot is available.");
         }
@@ -107,14 +117,14 @@ export default function Editor() {
     if (!hasRestoredRef.current) {
       hasRestoredRef.current = true;
       try {
-        const raw = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+        const raw = localStorage.getItem(workspaceStorageKey);
         if (raw) {
           const savedState = JSON.parse(raw);
           Blockly.serialization.workspaces.load(savedState, workspace);
         }
       } catch (error) {
         console.warn("Failed to restore saved Blockly workspace:", error);
-        localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+        localStorage.removeItem(workspaceStorageKey);
       }
     }
 
@@ -122,7 +132,7 @@ export default function Editor() {
       if (event.isUiEvent || workspace.isDragging()) return;
       try {
         const state = Blockly.serialization.workspaces.save(workspace);
-        localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(workspaceStorageKey, JSON.stringify(state));
       } catch (error) {
         console.warn("Failed to persist Blockly workspace:", error);
       }
@@ -130,7 +140,7 @@ export default function Editor() {
 
     workspace.addChangeListener(handleWorkspaceChange);
     return () => workspace.removeChangeListener(handleWorkspaceChange);
-  }, [workspace, blocksInitialized]);
+  }, [workspace, blocksInitialized, workspaceStorageKey]);
 
   useEffect(() => {
     if (!workspace || !codeOpen) return;
@@ -256,7 +266,7 @@ export default function Editor() {
           "Content-Type": "application/json",
           "X-CSRFToken": csrfToken ?? "",
         },
-        body: JSON.stringify(serialization.workspaces.save(workspace)),
+        body: JSON.stringify(Blockly.serialization.workspaces.save(workspace)),
       }
     );
 
@@ -295,11 +305,11 @@ export default function Editor() {
 
     await loadBlocksFromApi(ROBOT_IMPLEMENTATIONS[savedRobot.name].blocksUrl);
 
-    const previousWorkspace = serialization.workspaces.save(workspace);
+    const previousWorkspace = Blockly.serialization.workspaces.save(workspace);
     try {
-      serialization.workspaces.load(savedWorkspace, workspace);
+      Blockly.serialization.workspaces.load(savedWorkspace, workspace);
     } catch (error) {
-      serialization.workspaces.load(previousWorkspace, workspace);
+      Blockly.serialization.workspaces.load(previousWorkspace, workspace);
       throw error;
     }
 
