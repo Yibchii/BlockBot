@@ -3,9 +3,11 @@ import DashboardListItem from '../../components/DashboardListItem';
 import { Link } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
+import ProjectCreationModal from '../../components/ProjectCreationModal';
 
 function StudentDashboard({user}) {
-    const [projects, setProjects] = useState([]);
+    const [projects] = useState([]);
+    const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
     return (
         <div className="student-dashboard p-3">
@@ -23,7 +25,7 @@ function StudentDashboard({user}) {
                         Keep learning and build something amazing with your robot!
                     </p>
                 </div>
-                <button className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
+                <button type="button" onClick={() => setIsProjectModalOpen(true)} className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
                     + New Project 
                 </button>
             </section>
@@ -51,12 +53,13 @@ function StudentDashboard({user}) {
                             <p className="text-gray-500">
                                 Get started by creating your first project.
                             </p>
-                            <Link
-                                to="/editor"
+                            <button
+                                type="button"
+                                onClick={() => setIsProjectModalOpen(true)}
                                 className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800"
                             >
-                                + Create Project
-                            </Link>
+                                + New Project
+                            </button>
                         </div>
                     ) : (
                         // Projects exist
@@ -120,6 +123,7 @@ function StudentDashboard({user}) {
                 
                     
             </section>
+            {isProjectModalOpen && <ProjectCreationModal onClose={() => setIsProjectModalOpen(false)} />}
         </div>
         
     );
