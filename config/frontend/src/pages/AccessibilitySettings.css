@@ -1,0 +1,42 @@
+.bb-settings {
+  width: min(40rem, calc(100% - 2rem));
+  margin: 3rem auto;
+  padding: 1.5rem;
+  border: 1px solid #a6b1be;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #172235;
+}
+
+.bb-settings h1 {
+  margin-bottom: 1rem;
+  color: inherit;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.bb-settings label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0;
+}
+
+.bb-settings p {
+  margin-top: 1rem;
+}
+
+.bb-strong-focus :focus-visible {
+  outline: 3px solid #0046a1;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px #fff;
+}
+
+.bb-reduce-motion *,
+.bb-reduce-motion *::before,
+.bb-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
