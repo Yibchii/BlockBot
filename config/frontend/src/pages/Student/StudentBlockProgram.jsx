@@ -293,7 +293,7 @@ export default function Editor() {
           "Content-Type": "application/json",
           "X-CSRFToken": csrfToken ?? "",
         },
-        body: JSON.stringify(serialization.workspaces.save(workspace)),
+        body: JSON.stringify(Blockly.serialization.workspaces.save(workspace)),
       }
     );
 
@@ -332,11 +332,11 @@ export default function Editor() {
 
     await loadBlocksFromApi(ROBOT_IMPLEMENTATIONS[savedRobot.name].blocksUrl);
 
-    const previousWorkspace = serialization.workspaces.save(workspace);
+    const previousWorkspace = Blockly.serialization.workspaces.save(workspace);
     try {
-      serialization.workspaces.load(savedWorkspace, workspace);
+      Blockly.serialization.workspaces.load(savedWorkspace, workspace);
     } catch (error) {
-      serialization.workspaces.load(previousWorkspace, workspace);
+      Blockly.serialization.workspaces.load(previousWorkspace, workspace);
       throw error;
     }
 
