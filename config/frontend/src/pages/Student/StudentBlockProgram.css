@@ -12,7 +12,11 @@
 .project-name:focus-within { outline:2px solid #83b1ff;outline-offset:2px; }
 .studio-actions { display:flex;align-items:center;gap:7px;margin-left:auto;flex-wrap:wrap; }
 .toolbar-button { display:flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:0 12px;border:0;border-radius:5px;color:#fff;font:600 12px 'Segoe UI',sans-serif;white-space:nowrap;box-shadow:0 2px 5px #306afa26; }
+.toolbar-button { cursor:pointer; }
 .toolbar-button:disabled {opacity:.82;cursor:not-allowed;}
+.student-page button:not(:disabled),
+.standalone-editor-page button:not(:disabled),
+.project-file-dialog button:not(:disabled) { cursor:pointer; }
 .toolbar-button img { width:15px;height:15px;filter:brightness(0) invert(1); }
 .toolbar-save,.toolbar-submit,.ai-help-button {background:#2671ec;}
 .toolbar-run {background:#46a464;}
