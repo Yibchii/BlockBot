@@ -166,12 +166,14 @@ function Help() {
                                 />
                                 <p>You have now moved the robot down one space in the maze, but we need to continue adding blocks to navigate the entire maze.
                                 But how do we reach the end of the maze? </p>
-                                <p>Your first thought might be to add a move block for each space in the maze, but that would be very time-consuming. Instead, we can use a "repeat" block to repeat a set of blocks multiple times.</p>
+                                <p>Your first thought might be to add a "move" block for each space in the maze, but that would be very time-consuming. Instead, we can use a "repeat" block to repeat a set of blocks multiple times.</p>
                                 <li>Click the "Loops" tab on the left side of the workspace.</li>
                                 <li>Drag a "Repeat _ Times" block into the workspace.</li>
+                                <li>Detach the "move" block from the "start program" block.</li>
+                                <li>Attach the "Repeat _ Times" block to the "start program" block.</li>
                                 <li>
                                     Drag and drop the "move" block into the "Repeat _ Times" block (Figure 2).
-                                    <p className="help-copy">Be careful to grab the move block itself and not the direction block. Dragging the direction block will disconect it from the move block.</p>
+                                    <p className="help-copy">Be careful to grab the "move" block itself and not the direction block. Dragging the direction block will disconect it from the move block.</p>
                                 
                                     <ImageFigure
                                         src={`${import.meta.env.BASE_URL}images/firstMazeTutorialFigure2.png`}
