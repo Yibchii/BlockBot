@@ -39,6 +39,8 @@
 .simulator-panel {flex:0 0 auto;}
 .console-panel {position:relative;flex:1;min-height:160px;padding-bottom:58px;}
 .console-message {display:flex;align-items:flex-start;gap:10px;padding:17px 12px;font-size:12px;}.feedback-check {display:grid;place-items:center;flex-shrink:0;width:19px;height:19px;border-radius:50%;background:#5aab75;color:#fff;}.console-message strong {color:#499b65;font-size:12px;font-weight:600;}.console-message p {margin:4px 0 0;color:#617896;font-size:11px;}
+.console-error .feedback-check {background:#b42332;color:#fff;}
+.console-error .console-message strong,.console-error .console-message p {color:#b42332;}
 .ai-help-button {position:absolute;bottom:12px;right:12px;padding:9px 15px;border:0;border-radius:5px;color:#fff;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;}.ai-help-button:focus-visible {outline:3px solid #94baff;outline-offset:3px;}.help-card {margin:0 12px 12px;padding:12px;border-radius:5px;background:#edf5ff;font-size:12px;}.help-card p {margin:5px 0 0;}
 .standalone-editor-page {display:flex;flex-direction:column;width:100%;min-height:100dvh;padding:clamp(9px,1.3vw,18px);background:#f5f8fe;}
 .standalone-editor-grid {display:grid;grid-template-columns:minmax(0,1fr) clamp(255px,30vw,440px);gap:clamp(9px,1vw,16px);height:calc(100dvh - clamp(18px,2.6vw,36px));min-height:520px;}
