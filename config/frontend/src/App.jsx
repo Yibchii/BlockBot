@@ -3,6 +3,11 @@ import Home from "./pages/Home";
 import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
+import { useEffect } from "react";
+import AccessibilitySettings, {
+  applyAccessibilitySettings,
+  readAccessibilitySettings,
+} from "./pages/AccessibilitySettings";
 import Classroom from "./pages/Classroom/Classroom";
 
 function AppContent() {
@@ -20,6 +25,10 @@ function AppContent() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/static/frontend/login" element={<LoginPage />} />
+          <Route path="/settings" element={<AccessibilitySettings />} />
+          <Route path="/static/frontend/settings" element={<AccessibilitySettings />} />
+          <Route path="/static/frontend/*" element={<Home />} />
+          <Route path="/editor" element={<Editor />} />
 
           <Route path="/home" element={<Home />} />
           <Route path="/static/frontend/home" element={<Home />} />
@@ -38,6 +47,9 @@ function AppContent() {
 }
 
 export default function App() {
+    useEffect(() => {
+    applyAccessibilitySettings(readAccessibilitySettings());
+  }, []);
   return (
     <BrowserRouter>
       <AppContent />

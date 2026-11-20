@@ -17,8 +17,8 @@ const OFFSETS = {
 };
 const GRID_MAX_INDEX = 9;
 
-async function fetchGridCoordinate(x, y, signal) {
-  const response = await fetch(`/api/mazebot2d/grid/?x=${x}&y=${y}`, { signal });
+async function fetchGridCoordinate(x, y, signal, environmentId) {
+  const response = await fetch(`/api/mazebot2d/grid/?x=${x}&y=${y}&environment=${encodeURIComponent(environmentId)}`, { signal });
   let data;
 
   try {
@@ -56,7 +56,7 @@ function BotFace() {
     return <img className="bb-maze-bot-logo" src={`${import.meta.env.BASE_URL}images/robot.svg`} alt="" draggable="false" />;
 }
 
-export default function MazeBot2DComponent({ onRuntimeReady }) {
+export default function MazeBot2DComponent({ onRuntimeReady, environmentId = "hard" }) {
   const [grid, setGrid] = useState("");
   const [header, setHeader] = useState("");
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -123,7 +123,8 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       const data = await fetchGridCoordinate(
         nextPosition.x,
         nextPosition.y,
-        requestController.signal
+        requestController.signal,
+        environmentId
       );
 
       await waitIfPaused();
@@ -146,7 +147,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       }
       requestController?.abort();
       requestController = new AbortController();
-      const data = await fetchGridCoordinate(0, 0, requestController.signal);
+      const data = await fetchGridCoordinate(0, 0, requestController.signal, environmentId);
       positionState = { x: 0, y: 0 };
       setTrail([{ x: 0, y: 0 }]);
       return publish(data);
@@ -241,7 +242,7 @@ export default function MazeBot2DComponent({ onRuntimeReady }) {
       runtime.stop();
       onRuntimeReady?.(null);
     };
-  }, [handleStateChange, onRuntimeReady]);
+  }, [handleStateChange, onRuntimeReady, environmentId]);
 
     const handleMove = (direction) => {
         runtimeRef.current?.move(direction.toUpperCase()).catch((error) => {
