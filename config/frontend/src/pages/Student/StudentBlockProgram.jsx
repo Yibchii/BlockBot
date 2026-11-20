@@ -189,7 +189,8 @@ export default function Editor() {
     ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
     : null;
 
-  const waitForStep = async () => {
+  const waitForStep = async (blockId) => {
+    workspace?.highlightBlock(blockId);
     if (!stepModeRef.current) return;
     setStatus({ state: "running", title: "Step mode", msg: "Click Step to run the next block." });
     await new Promise((resolve) => {
@@ -211,12 +212,14 @@ export default function Editor() {
       await runtimeRef.current.reset();
       runtimeRef.current?.start?.();
       await runBlocklyProgram(workspace, runtimeRef.current, { onStep: waitForStep });
+      workspace.highlightBlock(null);
       stepModeRef.current = false;
       setStepping(false);
       setRunState("idle");
       setPaused(false);
       setStatus({ state: "success", title: "Program complete", msg: "Your robot finished the program." });
     } catch (error) {
+      workspace.highlightBlock(null);
       stepModeRef.current = false;
       setStepping(false);
       if (error.name === "AbortError" || error.message === "Program stopped.") {
@@ -249,6 +252,7 @@ export default function Editor() {
     setStepping(false);
     releaseStepRef.current?.();
     releaseStepRef.current = null;
+    workspace?.highlightBlock(null);
     setRunState("idle");
     setPaused(false);
     try {
