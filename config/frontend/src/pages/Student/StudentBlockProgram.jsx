@@ -12,6 +12,9 @@ const WORKSPACE_STORAGE_KEY = "blockbot.student.workspace.v1";
 
 export default function Editor() {
   const [robot, setRobot] = useState(null);
+  const [environmentId, setEnvironmentId] = useState("hard");
+  const [environments, setEnvironments] = useState([]);
+  const [environmentError, setEnvironmentError] = useState("");
   const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [availableRobots, setAvailableRobots] = useState([]);
   const [projectName, setProjectName] = useState("Maze Runner");
@@ -313,6 +316,20 @@ export default function Editor() {
     setFileMode(null);
     setStatus({ state: "success", title: "Project loaded", msg: project.name });
   }
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/mazebot2d/environments/", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load maze environments.");
+        return response.json();
+      })
+      .then(({ environments }) => setEnvironments(environments))
+      .catch((error) => {
+        if (error.name !== "AbortError") setEnvironmentError(error.message);
+      });
+    return () => controller.abort();
+  }, []);
+
   const actions = [
     ["load", null, "Load", !workspace || !availableRobots.length || runState === "running"],
     ["save", "save.svg", "Save", !workspace || !robot || runState === "running"],
@@ -456,7 +473,41 @@ export default function Editor() {
                 </label>
               </div>
               <div className="maze-component-container">
-                {RobotComponent && <RobotComponent key={robot.id} onRuntimeReady={handleRuntimeReady} />}
+                {robot?.name === "MazeBot2D" && (
+                  <label>
+                    Environment{" "}
+                    <select
+                      value={environmentId}
+                      disabled={!environments.length || runState === "running"}
+                      onChange={(event) => {
+                        const nextId = event.target.value;
+                        if (runState === "running" || nextId === environmentId) return;
+                        runtimeRef.current?.stop?.();
+                        handleRuntimeReady(null);
+                        setEnvironmentId(nextId);
+                        setStatus({
+                          state: "idle",
+                          title: "Environment changed",
+                          msg: "The maze was reset. Your blocks are still in the workspace.",
+                        });
+                      }}
+                    >
+                      {!environments.length && (
+                        <option value="hard">{environmentError || "Loading environments..."}</option>
+                      )}
+                      {environments.map(({ id, name }) => (
+                        <option key={id} value={id}>{name}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {RobotComponent && (
+                  <RobotComponent
+                    key={`${robot.id}:${environmentId}`}
+                    environmentId={environmentId}
+                    onRuntimeReady={handleRuntimeReady}
+                  />
+                )}
               </div>
             </section>
 
