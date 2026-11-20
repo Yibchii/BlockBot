@@ -75,6 +75,15 @@ function hasInstructorRole(user) {
   );
 }
 
+function getCookie(name) {
+  return (
+    document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith(`${name}=`))
+      ?.split("=")[1] || ""
+  );
+}
+
 export default function Classroom() {
   const [user, setUser] = useState(null);
   const [classrooms, setClassrooms] = useState([]);
@@ -85,8 +94,81 @@ export default function Classroom() {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
+  const [classroomActionLoading, setClassroomActionLoading] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
   const instructor = hasInstructorRole(user);
+
+  async function reloadClassrooms(roleUser = user) {
+    const endpoint = hasInstructorRole(roleUser)
+      ? "/api/classroom/owned/"
+      : "/api/classroom/member/";
+    const response = await fetch(endpoint, { credentials: "same-origin" });
+    if (!response.ok) throw new Error("Unable to load your classrooms.");
+    const data = await response.json();
+    const results = data.classrooms || data.results || [];
+    setClassrooms(results);
+    setClassroomInfo(null);
+    setSelectedClassroom(results[0] || null);
+  }
+
+  async function createClassroom(event) {
+    event.preventDefault();
+    const name = createName.trim();
+    if (!name) return;
+
+    setClassroomActionLoading(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/classroom/create/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: new URLSearchParams({ name }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Unable to create classroom.");
+      setCreateName("");
+      await reloadClassrooms();
+      setNotice(`Classroom "${name}" created.`);
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      setClassroomActionLoading(false);
+    }
+  }
+
+  async function joinClassroom(event) {
+    event.preventDefault();
+    const classroomId = joinCode.trim();
+    if (!/^\d+$/.test(classroomId)) {
+      setNotice("Enter a valid numeric classroom ID.");
+      return;
+    }
+
+    setClassroomActionLoading(true);
+    setNotice("");
+    try {
+      const response = await fetch(`/api/classroom/join/${classroomId}/`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Unable to join classroom.");
+      setJoinCode("");
+      await reloadClassrooms();
+      setNotice("You joined the classroom.");
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      setClassroomActionLoading(false);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -136,7 +218,6 @@ export default function Classroom() {
 
   useEffect(() => {
     if (!selectedClassroom?.id) {
-      setClassroomInfo(null);
       return undefined;
     }
 
@@ -298,6 +379,7 @@ export default function Classroom() {
                   const nextClass = classrooms.find(
                     (item) => String(item.id) === event.target.value
                   );
+                  setClassroomInfo(null);
                   setSelectedClassroom(nextClass || null);
                 }}
               >
@@ -357,9 +439,41 @@ export default function Classroom() {
             <h3>No classroom yet</h3>
             <p>
               {instructor
-                ? "Create a classroom to get started."
-                : "Ask your instructor for a classroom invite."}
+                ? "Create a classroom to start assigning work."
+                : "Enter the classroom ID from your instructor."}
             </p>
+            {instructor ? (
+              <form className="classroom-create-form" onSubmit={createClassroom}>
+                <label>
+                  Classroom name
+                  <input
+                    value={createName}
+                    onChange={(event) => setCreateName(event.target.value)}
+                    placeholder="e.g. Period 1"
+                    required
+                  />
+                </label>
+                <button type="submit" className="classroom-primary" disabled={classroomActionLoading}>
+                  {classroomActionLoading ? "Creating…" : "Create classroom"}
+                </button>
+              </form>
+            ) : (
+              <form className="classroom-create-form" onSubmit={joinClassroom}>
+                <label>
+                  Classroom ID
+                  <input
+                    inputMode="numeric"
+                    value={joinCode}
+                    onChange={(event) => setJoinCode(event.target.value)}
+                    placeholder="Enter classroom ID"
+                    required
+                  />
+                </label>
+                <button type="submit" className="classroom-primary" disabled={classroomActionLoading}>
+                  {classroomActionLoading ? "Joining…" : "Join classroom"}
+                </button>
+              </form>
+            )}
           </section>
         ) : activeTab === "Overview" ? (
           instructor ? (
