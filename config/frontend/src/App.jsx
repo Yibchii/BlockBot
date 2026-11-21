@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
+import MyProjects from "./pages/Student/Projects/MyProjects";
 import { useEffect } from "react";
 import AccessibilitySettings, {
   applyAccessibilitySettings,
@@ -23,6 +24,9 @@ function AppContent() {
       <main className="mx-auto w-full">
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/static/frontend/editor" element={<Editor />} />
+          <Route path="/static/frontend/projects" element={<MyProjects />} />
+          <Route path="/static/frontend/home" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/static/frontend/login" element={<LoginPage />} />
           <Route path="/settings" element={<AccessibilitySettings />} />
