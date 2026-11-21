@@ -213,6 +213,12 @@ def save_to_file(request, save_file_name, project_robot):
 
     with transaction.atomic():
         UserProfile.objects.select_for_update().get(pk=profile.pk)
+        if request.GET.get("create_only") == "1":
+            if CloudSavedProject.objects.filter(owner=profile, name=save_file_name).exists():
+                return JsonResponse(
+                    {"message": "A project with this name already exists. Choose another name."},
+                    status=409,
+                )
         project, created = CloudSavedProject.objects.get_or_create(
             owner=profile, name=save_file_name, defaults={"robot": robot}
         )
