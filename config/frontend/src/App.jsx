@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instructor";
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
+import Help from "./pages/Help";
 import { useEffect } from "react";
 import AccessibilitySettings, {
   applyAccessibilitySettings,
