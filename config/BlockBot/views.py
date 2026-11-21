@@ -11,6 +11,7 @@ from django.shortcuts import render
 from .utils import _register_user, loadDefaultBlocks
 from .models import Classroom, Robot, UserProfile, CloudSavedProject
 from Mazebot2D import CellType, Grid, Mazebot2D
+from Mazebot2D.environments import ENVIRONMENTS
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, logout, login
 from django.middleware.csrf import get_token
@@ -74,14 +75,35 @@ def get_robots(request):
     return JsonResponse({"robots": robots})
 
 # Mazebot 2D API endpoints
+def get_mazebot2d_environments(request):
+    return JsonResponse({
+        "environments": [
+            {"id": key, "name": name}
+            for key, (name, _) in ENVIRONMENTS.items()
+        ],
+    })
+
+
 def get_mazebot2d_grid(request):
-    x = int(request.GET.get("x", 0))
-    y = int(request.GET.get("y", 0))
-    response_data = {
+    environment_id = request.GET.get("environment", "hard")
+    if environment_id not in ENVIRONMENTS:
+        return JsonResponse({"error": "Unknown maze environment."}, status=400)
+
+    _, layout = ENVIRONMENTS[environment_id]
+    grid = Grid(layout=layout)
+    try:
+        x = int(request.GET.get("x", 0))
+        y = int(request.GET.get("y", 0))
+        robot = Mazebot2D(x, y, grid=grid)
+    except ValueError as error:
+        return JsonResponse({"error": str(error)}, status=400)
+
+    return JsonResponse({
         "header": "Mazebot2D Grid",
-        "grid": _ascii_grid(Grid(), Mazebot2D(x, y, grid=Grid())),
-    }
-    return JsonResponse(response_data)
+        "environment": environment_id,
+        "grid": _ascii_grid(grid, robot),
+    })
+
 
 def get_mazebot2d_blocks(request):
     json_file = Path(__file__).resolve().parent / "block_files" / "mazebot2d.json"
@@ -191,6 +213,12 @@ def save_to_file(request, save_file_name, project_robot):
 
     with transaction.atomic():
         UserProfile.objects.select_for_update().get(pk=profile.pk)
+        if request.GET.get("create_only") == "1":
+            if CloudSavedProject.objects.filter(owner=profile, name=save_file_name).exists():
+                return JsonResponse(
+                    {"message": "A project with this name already exists. Choose another name."},
+                    status=409,
+                )
         project, created = CloudSavedProject.objects.get_or_create(
             owner=profile, name=save_file_name, defaults={"robot": robot}
         )

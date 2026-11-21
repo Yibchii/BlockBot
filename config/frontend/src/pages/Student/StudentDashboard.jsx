@@ -1,11 +1,46 @@
 import DashboardCard from '../../components/DashboardCard';
 import DashboardListItem from '../../components/DashboardListItem';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
+import ProjectCreationModal from '../../components/ProjectCreationModal';
 
 function StudentDashboard({user}) {
-    const [projects, setProjects] = useState([]);
+    const navigate = useNavigate();
+    const [projects] = useState([]);
+
+    async function handleCreateProject({ name, robot_id }) {
+        if (name.includes("/") || name === "." || name === "..") {
+            throw new Error("Use a project name without slashes or standalone periods.");
+        }
+
+        const csrfToken = document.cookie
+            .split("; ")
+            .find((cookie) => cookie.startsWith("csrftoken="))
+            ?.slice("csrftoken=".length);
+
+        const response = await fetch(
+            `/api/files/save_file/${encodeURIComponent(name)}/${robot_id}/?create_only=1`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken ?? "",
+                },
+                body: JSON.stringify({}),
+            }
+        );
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.message || "Could not create the project.");
+        }
+
+        setIsProjectModalOpen(false);
+        navigate("/editor", {
+            state: { newProject: { name, robot_id } },
+        });
+    }
+    const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
     return (
         <div className="student-dashboard p-3">
@@ -23,7 +58,7 @@ function StudentDashboard({user}) {
                         Keep learning and build something amazing with your robot!
                     </p>
                 </div>
-                <button className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
+                <button type="button" onClick={() => setIsProjectModalOpen(true)} className="ml-auto bg-blue-700 text-white p-2 w-35 rounded-lg hover:bg-blue-800">
                     + New Project 
                 </button>
             </section>
@@ -51,12 +86,13 @@ function StudentDashboard({user}) {
                             <p className="text-gray-500">
                                 Get started by creating your first project.
                             </p>
-                            <Link
-                                to="/editor"
+                            <button
+                                type="button"
+                                onClick={() => setIsProjectModalOpen(true)}
                                 className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800"
                             >
-                                + Create Project
-                            </Link>
+                                + New Project
+                            </button>
                         </div>
                     ) : (
                         // Projects exist
@@ -120,6 +156,7 @@ function StudentDashboard({user}) {
                 
                     
             </section>
+            {isProjectModalOpen && <ProjectCreationModal onCreate={handleCreateProject} onClose={() => setIsProjectModalOpen(false)} />}
         </div>
         
     );

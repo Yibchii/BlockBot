@@ -111,37 +111,13 @@ export default function TopNavBarComponent() {
           </Link>
 
           <div className="bb-inav-links">
-            <NavLink to={`${basePath}/home`} end className={linkClass}>
-              Dashboard
-            </NavLink>
-
-            <span
-              className="bb-inav-disabled"
-              aria-disabled="true"
-              title="Learning page is not available yet"
-            >
-              Learn
-            </span>
-
-            <span
-              className="bb-inav-disabled"
-              aria-disabled="true"
-              title="Projects page is not available yet"
-            >
-              Projects
-            </span>
-
-            <NavLink to={`${basePath}/editor`} className={linkClass}>
-              Editor
-            </NavLink>
-
-            <NavLink to={`${basePath}/classroom`} className={linkClass}>
-              Classroom
-            </NavLink>
-
-            <NavLink to={`${basePath}/help`} className={linkClass}>
-              Help
-            </NavLink>
+            <NavLink to={`${basePath}/home`} end className={linkClass}>Dashboard</NavLink>
+            <span className="bb-inav-disabled" aria-disabled="true" title="Learning library coming later">Learn</span>
+            <span className="bb-inav-disabled" aria-disabled="true" title="Projects page coming later">Projects</span>
+            <NavLink to={`${basePath}/editor`} className={linkClass}>Editor</NavLink>
+            <NavLink to={`${basePath}/settings`} className={linkClass}>Settings</NavLink>
+            <NavLink to={`${basePath}/classroom`} className={linkClass}>Classroom</NavLink>
+            <span className="bb-inav-disabled" aria-disabled="true" title="Help page coming later">Help</span>
           </div>
 
           <div className="bb-inav-account">
@@ -168,7 +144,8 @@ export default function TopNavBarComponent() {
           </div>
         )}
       </header>
-    );
+
+);
   }
 
   // Keep a simple navigation for signed-out guests.
@@ -183,15 +160,12 @@ export default function TopNavBarComponent() {
       </Link>
 
       <div className="nav-links flex gap-1 text-2xl">
-        <Link to={`${basePath}/home`} className="mr-4 hover:text-blue-600">
-          Home
-        </Link>
-        <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
-          Editor
-        </Link>
-        <Link to={`${basePath}/login`} className="hover:text-gray-400">
-          Login
-        </Link>
+        <Link to={`${basePath}/home`} className="mr-4 hover:text-blue-600">Home</Link>
+        <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">Editor</Link>
+      <Link to={`${basePath}/settings`} className="mr-4 hover:text-blue-600">Settings</Link>
+
+        {user ? <button type="button" onClick={handleLogout} className="hover:text-gray-400">Logout</button>
+          : <Link to={`${basePath}/login`} className="hover:text-gray-400">Login</Link>}
       </div>
 
       {error && <span role="alert">{error}</span>}
