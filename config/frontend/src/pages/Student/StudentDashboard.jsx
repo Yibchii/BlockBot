@@ -1,12 +1,45 @@
 import DashboardCard from '../../components/DashboardCard';
 import DashboardListItem from '../../components/DashboardListItem';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
 import ProjectCreationModal from '../../components/ProjectCreationModal';
 
 function StudentDashboard({user}) {
+    const navigate = useNavigate();
     const [projects] = useState([]);
+
+    async function handleCreateProject({ name, robot_id }) {
+        if (name.includes("/") || name === "." || name === "..") {
+            throw new Error("Use a project name without slashes or standalone periods.");
+        }
+
+        const csrfToken = document.cookie
+            .split("; ")
+            .find((cookie) => cookie.startsWith("csrftoken="))
+            ?.slice("csrftoken=".length);
+
+        const response = await fetch(
+            `/api/files/save_file/${encodeURIComponent(name)}/${robot_id}/?create_only=1`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken ?? "",
+                },
+                body: JSON.stringify({}),
+            }
+        );
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.message || "Could not create the project.");
+        }
+
+        setIsProjectModalOpen(false);
+        navigate("/editor", {
+            state: { newProject: { name, robot_id } },
+        });
+    }
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
     return (
@@ -123,7 +156,7 @@ function StudentDashboard({user}) {
                 
                     
             </section>
-            {isProjectModalOpen && <ProjectCreationModal onClose={() => setIsProjectModalOpen(false)} />}
+            {isProjectModalOpen && <ProjectCreationModal onCreate={handleCreateProject} onClose={() => setIsProjectModalOpen(false)} />}
         </div>
         
     );
