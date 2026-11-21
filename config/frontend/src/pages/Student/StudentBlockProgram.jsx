@@ -36,12 +36,15 @@ export default function Editor() {
   const [robotReady, setRobotReady] = useState(false);
   const [runState, setRunState] = useState("idle");
   const [paused, setPaused] = useState(false);
+  const [stepping, setStepping] = useState(false);
   const [status, setStatus] = useState({
     state: "idle",
     title: "Ready to edit",
     msg: "Drag blocks into the workspace to build your program.",
   });
   const runtimeRef = useRef(null);
+  const stepModeRef = useRef(false);
+  const releaseStepRef = useRef(null);
   const [blocksInitialized, setBlocksInitialized] = useState(false);
   const hasRestoredRef = useRef(false);
   const handleRuntimeReady = useCallback((runtime) => {
@@ -196,9 +199,21 @@ export default function Editor() {
     ? ROBOT_IMPLEMENTATIONS[robot.name]?.Component
     : null;
 
-  const handleRun = async () => {
+  const waitForStep = async (blockId) => {
+    workspace?.highlightBlock(blockId);
+    if (!stepModeRef.current) return;
+    setStatus({ state: "running", title: "Step mode", msg: "Click Step to run the next block." });
+    await new Promise((resolve) => {
+      releaseStepRef.current = resolve;
+    });
+    if (!stepModeRef.current) throw new Error("Program stopped.");
+  };
+
+  const startProgram = async (stepMode) => {
     if (!workspace || !runtimeRef.current || runState === "running") return;
 
+    stepModeRef.current = stepMode;
+    setStepping(stepMode);
     setPaused(false);
     setRunState("running");
     setStatus({ state: "running", title: "Running", msg: "Executing your program..." });
@@ -206,11 +221,17 @@ export default function Editor() {
     try {
       await runtimeRef.current.reset();
       runtimeRef.current?.start?.();
-      await runBlocklyProgram(workspace, runtimeRef.current);
+      await runBlocklyProgram(workspace, runtimeRef.current, { onStep: waitForStep });
+      workspace.highlightBlock(null);
+      stepModeRef.current = false;
+      setStepping(false);
       setRunState("idle");
       setPaused(false);
       setStatus({ state: "success", title: "Program complete", msg: "Your robot finished the program." });
     } catch (error) {
+      workspace.highlightBlock(null);
+      stepModeRef.current = false;
+      setStepping(false);
       if (error.name === "AbortError" || error.message === "Program stopped.") {
         setRunState("idle");
         setPaused(false);
@@ -224,7 +245,24 @@ export default function Editor() {
     }
   };
 
+    const handleRun = () => startProgram(false);
+
+  const handleStep = () => {
+    if (runState !== "running") {
+      startProgram(true);
+      return;
+    }
+    const release = releaseStepRef.current;
+    releaseStepRef.current = null;
+    release?.();
+  };
+
   const handleReset = async () => {
+    stepModeRef.current = false;
+    setStepping(false);
+    releaseStepRef.current?.();
+    releaseStepRef.current = null;
+    workspace?.highlightBlock(null);
     setRunState("idle");
     setPaused(false);
     try {
@@ -344,6 +382,7 @@ export default function Editor() {
     ["load", null, "Load", !workspace || !availableRobots.length || runState === "running"],
     ["save", "save.svg", "Save", !workspace || !robot || runState === "running"],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
+    ["step", null, "Step", !workspace || !robotReady || (runState === "running" && !stepping)],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["reset", null, "Reset", false],
     ["submit", "send.svg", "Submit", true],
@@ -377,12 +416,16 @@ export default function Editor() {
                       ? handleReset
                       : type === "pause"
                         ? handlePauseToggle
-                        : undefined
+                        : type === "step"
+                          ? handleStep
+                          : undefined
               }
               aria-pressed={type === "pause" ? String(paused) : undefined}
             >
               {type === "pause" ? (
                 <span aria-hidden="true" className="pause-glyph">{paused ? "▶" : "⏸"}</span>
+                ) : type === "step" ? (
+                <span aria-hidden="true">⏭</span>
               ) : icon ? (
                 <img src={`/static/frontend/images/${icon}`} alt="" />
               ) : (
