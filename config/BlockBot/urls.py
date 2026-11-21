@@ -31,8 +31,8 @@ urlpatterns = [
     path('api/user/register/instructor', views.register_instructor_user),
     # Classroom API endpoints
     path('api/classroom/create/', views.create_classroom),
-    path('api/classroom/join/', views.join_classroom),
-    path('api/classroom/remove/', views.remove_classroom_member),
+    path('api/classroom/<int:classroom_id>/join/',views.join_classroom,),
+    path('api/classroom/<int:classroom_id>/remove/<int:member_id>/',views.remove_classroom_member,),
     path('api/classroom/owned/', views.get_owned_classrooms),
     path('api/classroom/member/', views.get_member_classrooms),
     path('api/classroom/<int:classroom_id>/info/', views.get_classroom_info),
@@ -40,4 +40,6 @@ urlpatterns = [
     path('api/files/files_of_user/', views.all_save_files_of_user),
     path('api/files/load_file/<str:save_file_name>/', views.fetch_save_file),
     path('api/files/save_file/<str:save_file_name>/<str:project_robot>/', views.save_to_file),
+    # Project sharing API
+    path('api/projects/<int:project_id>/share/', views.share_project),
 ]

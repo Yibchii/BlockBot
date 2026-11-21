@@ -8,9 +8,14 @@ import { loadBlocksFromApi } from "../../blockGen";
 import Console from "./StudentProgramConsole";
 import { generateCodePreview } from "./blockbotCodePreview";
 import "./StudentBlockProgram.css";
+import { Share2 } from "lucide-react";
 const WORKSPACE_STORAGE_KEY = "blockbot.student.workspace.v1";
 
 export default function Editor() {
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUsername, setShareUsername] = useState("");
+  const [shareError, setShareError] = useState("");
+  const [sharing, setSharing] = useState(false);
   const [robot, setRobot] = useState(null);
   const [environmentId, setEnvironmentId] = useState("hard");
   const [environments, setEnvironments] = useState([]);
@@ -259,7 +264,7 @@ export default function Editor() {
           "Content-Type": "application/json",
           "X-CSRFToken": csrfToken ?? "",
         },
-        body: JSON.stringify(serialization.workspaces.save(workspace)),
+        body: JSON.stringify(Blockly.serialization.workspaces.save(workspace)),
       }
     );
 
@@ -272,6 +277,88 @@ export default function Editor() {
     setFileMode(null);
     setStatus({ state: "success", title: "Project saved", msg: name });
   }
+  async function handleShareProject(event) {
+  event.preventDefault();
+  setShareError("");
+
+  const username = shareUsername.trim();
+  const name = projectName.trim();
+
+  if (!username) {
+    setShareError("Please enter a recipient username.");
+    return;
+  }
+
+  if (!name) {
+    setShareError("Please save your project first.");
+    return;
+  }
+
+  setSharing(true);
+
+  try {
+    // Find the current project's actual database ID.
+    const listResponse = await fetch("/api/files/files_of_user/", {
+      credentials: "same-origin",
+    });
+
+    const listResult = await listResponse.json();
+
+    if (!listResponse.ok) {
+      throw new Error(
+        listResult.message || "Could not find saved projects."
+      );
+    }
+
+    const project = (listResult.save_files || []).find(
+      (item) => item.name === name
+    );
+
+    if (!project || !project.id) {
+      throw new Error(
+        "Project not found. Save your project before sharing."
+      );
+    }
+
+    const csrfToken = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("csrftoken="))
+      ?.slice("csrftoken=".length);
+
+    const response = await fetch(
+      `/api/projects/${project.id}/share/`,
+      {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken ?? "",
+        },
+        body: JSON.stringify({ username }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Could not share the project."
+      );
+    }
+
+    setShareOpen(false);
+    setShareUsername("");
+    setStatus({
+      state: "success",
+      title: "Project shared",
+      msg: `Shared with ${username}`,
+    });
+  } catch (error) {
+    setShareError(error.message || "Sharing failed.");
+  } finally {
+    setSharing(false);
+  }
+}
   async function handleLoadProject(project) {
     const savedRobot = availableRobots.find((item) => item.id === project.robot);
     if (!savedRobot) {
@@ -298,11 +385,11 @@ export default function Editor() {
 
     await loadBlocksFromApi(ROBOT_IMPLEMENTATIONS[savedRobot.name].blocksUrl);
 
-    const previousWorkspace = serialization.workspaces.save(workspace);
+    const previousWorkspace = Blockly.serialization.workspaces.save(workspace);
     try {
-      serialization.workspaces.load(savedWorkspace, workspace);
+      Blockly.serialization.workspaces.load(savedWorkspace, workspace);
     } catch (error) {
-      serialization.workspaces.load(previousWorkspace, workspace);
+      Blockly.serialization.workspaces.load(previousWorkspace, workspace);
       throw error;
     }
 
@@ -333,6 +420,7 @@ export default function Editor() {
   const actions = [
     ["load", null, "Load", !workspace || !availableRobots.length || runState === "running"],
     ["save", "save.svg", "Save", !workspace || !robot || runState === "running"],
+    ["share", null, "Share", !workspace || !robot || runState === "running"],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["reset", null, "Reset", false],
@@ -361,23 +449,29 @@ export default function Editor() {
               onClick={
                 type === "save" || type === "load"
                   ? () => setFileMode(type)
+                  : type === "share"
+                  ? () => setShareOpen(true)
                   : type === "run"
-                    ? handleRun
-                    : type === "reset"
-                      ? handleReset
-                      : type === "pause"
-                        ? handlePauseToggle
-                        : undefined
+                  ? handleRun
+                  : type === "reset"
+                  ? handleReset
+                  : type === "pause"
+                  ? handlePauseToggle
+                  : undefined
               }
               aria-pressed={type === "pause" ? String(paused) : undefined}
             >
               {type === "pause" ? (
-                <span aria-hidden="true" className="pause-glyph">{paused ? "▶" : "⏸"}</span>
-              ) : icon ? (
-                <img src={`/static/frontend/images/${icon}`} alt="" />
-              ) : (
-                <span aria-hidden="true">■</span>
-              )}
+              <span aria-hidden="true" className="pause-glyph">
+                {paused ? "▶" : "Ⅱ"}
+              </span>
+            ) : type === "share" ? (
+              <Share2 size={16} aria-hidden="true" />
+            ) : icon ? (
+              <img src={`/static/frontend/images/${icon}`} alt="" />
+            ) : (
+              <span aria-hidden="true">■</span>
+            )}
               {label}
             </button>
           ))}
@@ -394,6 +488,67 @@ export default function Editor() {
           onLoad={handleLoadProject}
         />
       )}
+      {shareOpen && (
+  <div className="code-preview-backdrop">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-project-title"
+      style={{
+        background: "white",
+        padding: "24px",
+        borderRadius: "12px",
+        width: "420px",
+        maxWidth: "90vw",
+        margin: "15vh auto"
+      }}
+    >
+      <h2 id="share-project-title">Share Project</h2>
+
+      <form onSubmit={handleShareProject}>
+        <label htmlFor="share-username">
+          Recipient username
+        </label>
+
+        <input
+          id="share-username"
+          type="text"
+          value={shareUsername}
+          onChange={(e) => setShareUsername(e.target.value)}
+          placeholder="Enter username"
+          required
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "10px",
+            margin: "12px 0"
+          }}
+        />
+
+        {shareError && (
+          <p role="alert" style={{ color: "red" }}>
+            {shareError}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => {
+            setShareOpen(false);
+            setShareError("");
+          }}
+          disabled={sharing}
+        >
+          Cancel
+        </button>
+
+        <button type="submit" disabled={sharing}>
+          {sharing ? "Sharing..." : "Share"}
+        </button>
+      </form>
+    </div>
+  </div>
+)}
 
       {codeOpen && (
         <div className="code-preview-backdrop" onMouseDown={(event) => {

@@ -14,7 +14,8 @@
 .toolbar-button { display:flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:0 12px;border:0;border-radius:5px;color:#fff;font:600 12px 'Segoe UI',sans-serif;white-space:nowrap;box-shadow:0 2px 5px #306afa26; }
 .toolbar-button:disabled {opacity:.82;cursor:not-allowed;}
 .toolbar-button img { width:15px;height:15px;filter:brightness(0) invert(1); }
-.toolbar-save,.toolbar-submit,.ai-help-button {background:#2671ec;}
+.toolbar-save, .toolbar-share, .toolbar-submit, .ai-help-button {background: #2671ec;color: white;}
+.toolbar-share svg {width: 16px;height: 16px;stroke: white;fill: none;}
 .toolbar-run {background:#46a464;}
 .toolbar-reset {background:#ee5965;}
 .toolbar-pause {background: #f4b400;}
@@ -149,4 +150,28 @@
 
 .project-file-dialog button:disabled {
   opacity: 0.55;
+}
+
+/* Share button */
+.studio-toolbar .toolbar-share {
+  background-color: #2563eb;
+  color: white;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.studio-toolbar .toolbar-share svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.studio-toolbar .toolbar-share:hover:not(:disabled) {
+  background-color: #1d4ed8;
 }

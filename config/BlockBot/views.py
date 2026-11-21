@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.db.models import Q
 from django.views.decorators.http import require_POST
 
 from django.shortcuts import render
@@ -168,7 +169,7 @@ def all_save_files_of_user(request):
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
     save_files = list(
-        CloudSavedProject.objects.filter(owner=user_profile).values("name", "robot")
+        CloudSavedProject.objects.filter(Q(owner=user_profile) | Q(shared_with=user_profile)).distinct().values("id", "name", "robot")
     )
     return JsonResponse({"save_files": save_files})
 
@@ -180,16 +181,22 @@ def fetch_save_file(request, save_file_name):
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
 
-    try:
-        save_file = CloudSavedProject.objects.get(owner=user_profile, name=save_file_name)
-        try:
-            with open(save_file.savefile.path, "r", encoding="utf-8") as file:
-                content = file.read()
-        except FileNotFoundError:
-            return JsonResponse({"message": "Save file not found"}, status=404)
-        return JsonResponse({"content": content})
-    except CloudSavedProject.DoesNotExist:
+
+    save_file = CloudSavedProject.objects.filter(
+        Q(owner=user_profile) | Q(shared_with=user_profile),
+        name=save_file_name
+    ).distinct().first()
+
+    if save_file is None:
         return JsonResponse({"message": "Save file not found"}, status=404)
+
+    try:
+        with open(save_file.savefile.path, "r", encoding="utf-8") as file:
+            content = file.read()
+    except (FileNotFoundError, OSError):
+        return JsonResponse({"message": "Save file not found"}, status=404)
+
+    return JsonResponse({"content": content})
 @require_POST
 def save_to_file(request, save_file_name, project_robot):
     if not request.user.is_authenticated:
@@ -233,6 +240,70 @@ def save_to_file(request, save_file_name, project_robot):
             transaction.on_commit(lambda: storage.delete(previous_file), robust=True)
 
     return JsonResponse({"message": "Project saved."}, status=201 if created else 200)
+@require_POST
+def share_project(request, project_id):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"message": "Login required"},
+            status=401
+        )
+
+    owner_profile = getattr(request.user, "profile", None)
+    if owner_profile is None:
+        return JsonResponse(
+            {"message": "User profile not found"},
+            status=404
+        )
+
+    try:
+        data = json.loads(request.body)
+        recipient_username = data.get("username", "").strip()
+    except (ValueError, AttributeError):
+        return JsonResponse(
+            {"message": "Invalid request data"},
+            status=400
+        )
+
+    if not recipient_username:
+        return JsonResponse(
+            {"message": "Recipient username required"},
+            status=400
+        )
+
+    try:
+        project = CloudSavedProject.objects.get(
+            id=project_id,
+            owner=owner_profile
+        )
+    except CloudSavedProject.DoesNotExist:
+        return JsonResponse(
+            {"message": "Project not found"},
+            status=404
+        )
+
+    try:
+        recipient = UserProfile.objects.get(
+            user__username=recipient_username
+        )
+    except UserProfile.DoesNotExist:
+        return JsonResponse(
+            {"message": "Recipient not found"},
+            status=404
+        )
+
+    if recipient == owner_profile:
+        return JsonResponse(
+            {"message": "You already own this project"},
+            status=400
+        )
+
+    project.shared_with.add(recipient)
+
+    return JsonResponse({
+        "message": "Project shared successfully",
+        "project_id": project.id,
+        "shared_with": recipient_username
+    })
 # Classroom API endpoints
 def create_classroom(request, name=None):
     if not request.user.is_authenticated:
