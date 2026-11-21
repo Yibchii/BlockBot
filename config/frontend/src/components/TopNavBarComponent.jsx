@@ -82,6 +82,9 @@ export default function TopNavBarComponent() {
                 <Link to={`${basePath}/home`} className="mr-4 hover:text-blue-600">
                     Home
                 </Link>
+                <Link to={`${basePath}/projects`} className="mr-4 hover:text-gray-400">
+                    Projects
+                </Link>
                 <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
                     Editor
                 </Link>

@@ -70,7 +70,9 @@ export default function TopNavBarComponent() {
           <div className="bb-inav-links">
             <NavLink to={`${basePath}/home`} end className={linkClass}>Dashboard</NavLink>
             <span className="bb-inav-disabled" aria-disabled="true" title="Learning library coming later">Learn</span>
-            <span className="bb-inav-disabled" aria-disabled="true" title="Projects page coming later">Projects</span>
+            <NavLink to={`${basePath}/projects`} className={linkClass}>Projects</NavLink>
+
+
             <NavLink to={`${basePath}/editor`} className={linkClass}>Editor</NavLink>
             <span className="bb-inav-disabled" aria-disabled="true" title="Classroom page coming later">Classroom</span>
             <span className="bb-inav-disabled" aria-disabled="true" title="Help page coming later">Help</span>
