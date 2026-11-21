@@ -61,7 +61,7 @@ export default function MazeBot2DComponent({ onRuntimeReady, environmentId = "ha
   const [header, setHeader] = useState("");
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [trail, setTrail] =  useState([{ x: 0, y: 0 }]);
-  const [showRaw, setShowRaw] = useState(false);
+  const [showRaw] = useState(false);
   const runtimeRef = useRef(null);
 
   const handleStateChange = useCallback(({ header: nextHeader, grid: nextGrid, position: nextPosition }) => {
@@ -244,13 +244,6 @@ export default function MazeBot2DComponent({ onRuntimeReady, environmentId = "ha
     };
   }, [handleStateChange, onRuntimeReady, environmentId]);
 
-    const handleMove = (direction) => {
-        runtimeRef.current?.move(direction.toUpperCase()).catch((error) => {
-            if (error.name !== "AbortError" && error.message !== "Program stopped.") {
-                console.error("Error moving MazeBot2D:", error);
-            }
-        });
-    };
         
 	const parsed = useMemo(() => parseGrid(grid), [grid]);
         const hasAsciiBorder = parsed?.width === GRID_MAX_INDEX + 3 && parsed.height === GRID_MAX_INDEX + 3;
@@ -262,7 +255,6 @@ export default function MazeBot2DComponent({ onRuntimeReady, environmentId = "ha
         const rows = gridLines?.length ?? GRID_MAX_INDEX + 1;
         const cellX = (x) => (x + 0.5) * (100 / columns);
         const cellY = (y) => (y + 0.5) * (100 / rows);
-            const goalExists = gridLines?.some((line) => line.some((c) => kind(c) === "goal"));
       const trailPoints = trail.map((p) => `${cellX(p.x)},${cellY(p.y)}`).join(" ");
     
       return (
