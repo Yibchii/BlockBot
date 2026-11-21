@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import * as Blockly from "blockly";
+import { useLocation } from "react-router-dom";
+import ProjectFileDialog from "./ProjectFileDialog";
 import BlocklyComponent from "../../components/Blockly/BlocklyComponent";
 import { runBlocklyProgram } from "../../runtime/runBlocklyProgram";
 import { ROBOT_IMPLEMENTATIONS } from "../../robots/robotImplementations";
@@ -6,12 +9,22 @@ import { loadBlocksFromApi } from "../../blockGen";
 import Console from "./StudentProgramConsole";
 import { generateCodePreview } from "./blockbotCodePreview";
 import "./StudentBlockProgram.css";
+const WORKSPACE_STORAGE_KEY = "blockbot.student.workspace.v1";
 
 export default function Editor() {
+  const location = useLocation();
+  const initialProject = useRef(location.state?.newProject ?? null).current;
+  const workspaceStorageKey = initialProject
+    ? `${WORKSPACE_STORAGE_KEY}:${location.key}`
+    : WORKSPACE_STORAGE_KEY;
   const [robot, setRobot] = useState(null);
+  const [environmentId, setEnvironmentId] = useState("hard");
+  const [environments, setEnvironments] = useState([]);
+  const [environmentError, setEnvironmentError] = useState("");
   const [robotBlockTypes, setRobotBlockTypes] = useState([]);
   const [availableRobots, setAvailableRobots] = useState([]);
-  const [projectName, setProjectName] = useState("Maze Runner");
+  const [projectName, setProjectName] = useState(initialProject?.name ?? "Maze Runner");
+  const [fileMode, setFileMode] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [codeOpen, setCodeOpen] = useState(false);
@@ -29,6 +42,8 @@ export default function Editor() {
     msg: "Drag blocks into the workspace to build your program.",
   });
   const runtimeRef = useRef(null);
+  const [blocksInitialized, setBlocksInitialized] = useState(false);
+  const hasRestoredRef = useRef(false);
   const handleRuntimeReady = useCallback((runtime) => {
     runtimeRef.current = runtime;
     setRobotReady(Boolean(runtime));
@@ -45,26 +60,34 @@ export default function Editor() {
           (item) => ROBOT_IMPLEMENTATIONS[item.name]?.Component
         );
         setAvailableRobots(supportedRobots);
-        const selectedRobot = supportedRobots[0];
+        const selectedRobot = initialProject
+          ? supportedRobots.find(
+              (item) => String(item.id) === String(initialProject.robot_id)
+            )
+          : supportedRobots[0];
         if (!selectedRobot || !ROBOT_IMPLEMENTATIONS[selectedRobot.name]) {
           throw new Error("No supported robot is available.");
         }
         setRobot(selectedRobot);
       })
-      .catch((error) =>
+      .catch((error) => {
+        setBlocksInitialized(true);
         setStatus({
           state: "error",
           title: "Robot unavailable",
           msg: error.message,
-        })
-      );
+      });
+      });
   }, []);
 
   // Register the selected robot's blocks and expose them in the toolbox.
   useEffect(() => {
+    if (!robot) return;
+
     const blocksUrl = robot && ROBOT_IMPLEMENTATIONS[robot.name]?.blocksUrl;
     if (!blocksUrl) {
       setRobotBlockTypes([]);
+      setBlocksInitialized(true);
       return;
     }
 
@@ -73,10 +96,12 @@ export default function Editor() {
       .then((data) => {
         if (cancelled) return;
         setRobotBlockTypes((data.blocks?.blocks ?? []).map((def) => def.type));
+        setBlocksInitialized(true);
       })
       .catch((error) => {
         if (cancelled) return;
         setRobotBlockTypes([]);
+        setBlocksInitialized(true);
         setStatus({
           state: "error",
           title: "Robot blocks unavailable",
@@ -88,6 +113,37 @@ export default function Editor() {
       cancelled = true;
     };
   }, [robot]);
+
+  useEffect(() => {
+    if (!workspace || !blocksInitialized) return;
+
+    if (!hasRestoredRef.current) {
+      hasRestoredRef.current = true;
+      try {
+        const raw = localStorage.getItem(workspaceStorageKey);
+        if (raw) {
+          const savedState = JSON.parse(raw);
+          Blockly.serialization.workspaces.load(savedState, workspace);
+        }
+      } catch (error) {
+        console.warn("Failed to restore saved Blockly workspace:", error);
+        localStorage.removeItem(workspaceStorageKey);
+      }
+    }
+
+    const handleWorkspaceChange = (event) => {
+      if (event.isUiEvent || workspace.isDragging()) return;
+      try {
+        const state = Blockly.serialization.workspaces.save(workspace);
+        localStorage.setItem(workspaceStorageKey, JSON.stringify(state));
+      } catch (error) {
+        console.warn("Failed to persist Blockly workspace:", error);
+      }
+    };
+
+    workspace.addChangeListener(handleWorkspaceChange);
+    return () => workspace.removeChangeListener(handleWorkspaceChange);
+  }, [workspace, blocksInitialized, workspaceStorageKey]);
 
   useEffect(() => {
     if (!workspace || !codeOpen) return;
@@ -195,8 +251,98 @@ export default function Editor() {
     }
   };
 
+  async function handleSaveProject(name) {
+    if (name.includes("/") || name === "." || name === "..") {
+      throw new Error("Use a project name without slashes or standalone periods.");
+    }
+
+    const csrfToken = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("csrftoken="))
+      ?.slice("csrftoken=".length);
+
+    const response = await fetch(
+      `/api/files/save_file/${encodeURIComponent(name)}/${robot.id}/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken ?? "",
+        },
+        body: JSON.stringify(Blockly.serialization.workspaces.save(workspace)),
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.message || "Could not save the project.");
+    }
+
+    setProjectName(name);
+    setFileMode(null);
+    setStatus({ state: "success", title: "Project saved", msg: name });
+  }
+  async function handleLoadProject(project) {
+    const savedRobot = availableRobots.find((item) => item.id === project.robot);
+    if (!savedRobot) {
+      throw new Error("This project uses a robot that is unavailable.");
+    }
+
+    if (workspace.getAllBlocks(false).length > 0 &&
+        !window.confirm("Replace the current blocks with this saved project?")) {
+      return;
+    }
+
+    const response = await fetch(
+      `/api/files/load_file/${encodeURIComponent(project.name)}/`
+    );
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.message || "Could not load the project.");
+    }
+
+    const savedWorkspace = JSON.parse(result.content);
+    if (!savedWorkspace || typeof savedWorkspace !== "object" || Array.isArray(savedWorkspace)) {
+      throw new Error("The saved workspace is invalid.");
+    }
+
+    await loadBlocksFromApi(ROBOT_IMPLEMENTATIONS[savedRobot.name].blocksUrl);
+
+    const previousWorkspace = Blockly.serialization.workspaces.save(workspace);
+    try {
+      Blockly.serialization.workspaces.load(savedWorkspace, workspace);
+    } catch (error) {
+      Blockly.serialization.workspaces.load(previousWorkspace, workspace);
+      throw error;
+    }
+
+    if (savedRobot.id !== robot?.id) {
+      runtimeRef.current = null;
+      setRobotReady(false);
+      setRobot(savedRobot);
+    }
+
+    setProjectName(project.name);
+    setFileMode(null);
+    setStatus({ state: "success", title: "Project loaded", msg: project.name });
+  }
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/mazebot2d/environments/", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load maze environments.");
+        return response.json();
+      })
+      .then(({ environments }) => setEnvironments(environments))
+      .catch((error) => {
+        if (error.name !== "AbortError") setEnvironmentError(error.message);
+      });
+    return () => controller.abort();
+  }, []);
+
   const actions = [
-    ["save", "save.svg", "Save", true],
+    ["load", null, "Load", !workspace || !availableRobots.length || runState === "running"],
+    ["save", "save.svg", "Save", !workspace || !robot || runState === "running"],
     ["run", "play-icon.svg", "Run", !workspace || !robotReady || runState === "running"],
     ["pause", null, paused ? "Continue" : "Pause", !workspace || !robotReady || runState !== "running"],
     ["reset", null, "Reset", false],
@@ -223,13 +369,15 @@ export default function Editor() {
               className={`toolbar-button toolbar-${type}`}
               disabled={disabled}
               onClick={
-                type === "run"
-                  ? handleRun
-                  : type === "reset"
-                  ? handleReset
-                  : type === "pause"
-                  ? handlePauseToggle
-                  : undefined
+                type === "save" || type === "load"
+                  ? () => setFileMode(type)
+                  : type === "run"
+                    ? handleRun
+                    : type === "reset"
+                      ? handleReset
+                      : type === "pause"
+                        ? handlePauseToggle
+                        : undefined
               }
               aria-pressed={type === "pause" ? String(paused) : undefined}
             >
@@ -246,6 +394,16 @@ export default function Editor() {
         </div>
 
       </header>
+
+      {fileMode && (
+        <ProjectFileDialog
+          mode={fileMode}
+          projectName={projectName}
+          onClose={() => setFileMode(null)}
+          onSave={handleSaveProject}
+          onLoad={handleLoadProject}
+        />
+      )}
 
       {codeOpen && (
         <div className="code-preview-backdrop" onMouseDown={(event) => {
@@ -325,7 +483,41 @@ export default function Editor() {
                 </label>
               </div>
               <div className="maze-component-container">
-                {RobotComponent && <RobotComponent key={robot.id} onRuntimeReady={handleRuntimeReady} />}
+                {robot?.name === "MazeBot2D" && (
+                  <label>
+                    Environment{" "}
+                    <select
+                      value={environmentId}
+                      disabled={!environments.length || runState === "running"}
+                      onChange={(event) => {
+                        const nextId = event.target.value;
+                        if (runState === "running" || nextId === environmentId) return;
+                        runtimeRef.current?.stop?.();
+                        handleRuntimeReady(null);
+                        setEnvironmentId(nextId);
+                        setStatus({
+                          state: "idle",
+                          title: "Environment changed",
+                          msg: "The maze was reset. Your blocks are still in the workspace.",
+                        });
+                      }}
+                    >
+                      {!environments.length && (
+                        <option value="hard">{environmentError || "Loading environments..."}</option>
+                      )}
+                      {environments.map(({ id, name }) => (
+                        <option key={id} value={id}>{name}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {RobotComponent && (
+                  <RobotComponent
+                    key={`${robot.id}:${environmentId}`}
+                    environmentId={environmentId}
+                    onRuntimeReady={handleRuntimeReady}
+                  />
+                )}
               </div>
             </section>
 

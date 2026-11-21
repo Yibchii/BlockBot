@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import StudentDashboard from './Student/StudentDashboard';
 import InstructorDashboard from './Instructor/InstructorDashboard';
+import GuestDashboard from './Student/GuestDashboard';
 
 function Home() {
     const [user, setUser] = useState(null);
@@ -31,7 +32,7 @@ function Home() {
     }, []);
 
     if (loading) return <p>Loading dashboard...</p>;
-    if (!user) return <p>Please log in to access your dashboard.</p>;
+    if (!user) return <GuestDashboard />;
 
     const isInstructor = user.role === 'instructor' || user.is_instructor === true ||
         user.groups?.some((group) => (typeof group === 'string' ? group : group.name)?.toLowerCase() === 'instructor');

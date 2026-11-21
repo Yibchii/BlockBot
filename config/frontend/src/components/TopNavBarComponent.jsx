@@ -1,103 +1,204 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import "../TopNavBarComponent.css";
 
 function getCookie(name) {
-    return document.cookie
-        .split("; ")
-        .find((cookie) => cookie.startsWith(`${name}=`))
-        ?.split("=")[1];
+  return (
+    document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith(`${name}=`))
+      ?.split("=")[1] || ""
+  );
+}
+
+function instructorRole(user) {
+  return (
+    user?.role?.toLowerCase() === "instructor" ||
+    user?.is_instructor === true ||
+    user?.groups?.some((group) =>
+      (typeof group === "string" ? group : group?.name)?.toLowerCase() ===
+      "instructor"
+    )
+  );
 }
 
 export default function TopNavBarComponent() {
-    const location = useLocation();
-    const basePath = location.pathname.startsWith("/static/frontend") ? "/static/frontend" : "";
-    const [user, setUser] = useState(null);
+  const location = useLocation();
+  const basePath = location.pathname.startsWith("/static/frontend")
+    ? "/static/frontend"
+    : "";
 
-    useEffect(() => {
-        const controller = new AbortController();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-        const refreshUser = () => fetch("/api/user/info/", { signal: controller.signal })
-            .then((response) => {
-                if (response.status === 401) {
-                    return null;
-                }
-                if (!response.ok) {
-                    throw new Error(`Unable to fetch user info (${response.status})`);
-                }
-                return response.json();
-            })
-            .then(setUser)
-            .catch((error) => {
-                if (error.name !== "AbortError") {
-                    console.error(error);
-                    setUser(null);
-                }
-            });
+  useEffect(() => {
+    const controller = new AbortController();
 
-        refreshUser();
-        window.addEventListener("blockbot:login", refreshUser);
-
-        return () => {
-            controller.abort();
-            window.removeEventListener("blockbot:login", refreshUser);
-        };
-    }, []);
-
-    const handleLogout = () => {
-        fetch("/api/user/logout/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
+    const refreshUser = () => {
+      fetch("/api/user/info/", {
+        signal: controller.signal,
+        credentials: "same-origin",
+      })
+        .then((response) => {
+          if (response.status === 401) return null;
+          if (!response.ok) {
+            throw new Error(`Unable to fetch user info (${response.status})`);
+          }
+          return response.json();
         })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`Unable to log out (${response.status})`);
-                }
-                setUser(null);
-                window.location.assign("/");
-            })
-            .catch((error) => console.error(error));
+        .then(setUser)
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            console.error(err);
+            setUser(null);
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
     };
 
-    // Do not display the navigation bar on the login page
-    const hideNavbar =
-        location.pathname === "/" ||
-        location.pathname === "/login" ||
-        location.pathname === "/static/frontend/login";
+    refreshUser();
+    window.addEventListener("blockbot:login", refreshUser);
 
-    if (hideNavbar) {
-        return null;
+    return () => {
+      controller.abort();
+      window.removeEventListener("blockbot:login", refreshUser);
+    };
+  }, []);
+
+  async function handleLogout() {
+    setError("");
+
+    try {
+      const response = await fetch("/api/user/logout/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to log out. Please try again.");
+      }
+
+      setUser(null);
+      window.location.assign("/");
+    } catch (err) {
+      setError(err.message || "Logout failed.");
     }
+  }
+
+  // Wait for the role check so students don't briefly see the guest navbar.
+  if (loading) return null;
+
+  if (user) {
+    const role = instructorRole(user) ? "Instructor" : "Student";
+    const linkClass = ({ isActive }) =>
+      `bb-inav-link${isActive ? " bb-inav-active" : ""}`;
 
     return (
-        <nav className="site-nav bg-gray-200 text-black flex items-center gap-4 shadow-md">
-            {/* Logo */}
-            <a href="/" className="logo">   
-                <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Blockbot Logo" className="h-auto w-54 mr-1" />
-            </a>
+      <header className="bb-inav-header">
+        <nav className="bb-inav" aria-label={`${role} navigation`}>
+          <Link
+            className="bb-inav-brand"
+            to={`${basePath}/home`}
+            aria-label="BlockBot Studio dashboard"
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}images/logo.png`}
+              alt="BlockBot Studio"
+            />
+          </Link>
 
-            {/* Navigation links */}
-            <div className="nav-links flex gap-1 text-2xl"> 
-                <Link to={`${basePath}/home`} className="mr-4 hover:text-blue-600">
-                    Home
-                </Link>
-                <Link to={`${basePath}/projects`} className="mr-4 hover:text-gray-400">
-                    Projects
-                </Link>
-                <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
-                    Editor
-                </Link>
-                {user ? (
-                    <button type="button" onClick={handleLogout} className="hover:text-gray-400">
-                        Logout
-                    </button>
-                ) : (
-                    <Link to={`${basePath}/login`} className="hover:text-gray-400">
-                        Login
-                    </Link>
-                )}
-            </div>
+          <div className="bb-inav-links">
+            <NavLink to={`${basePath}/home`} end className={linkClass}>
+              Dashboard
+            </NavLink>
+
+            <span
+              className="bb-inav-disabled"
+              aria-disabled="true"
+              title="Learning library coming later"
+            >
+              Learn
+            </span>
+
+            <span
+              className="bb-inav-disabled"
+              aria-disabled="true"
+              title="Projects page coming later"
+            >
+              Projects
+            </span>
+
+            <NavLink to={`${basePath}/editor`} className={linkClass}>
+              Editor
+            </NavLink>
+
+            <NavLink to={`${basePath}/classroom`} className={linkClass}>
+              Classroom
+            </NavLink>
+
+            <span
+              className="bb-inav-disabled"
+              aria-disabled="true"
+              title="Help page coming later"
+            >
+              Help
+            </span>
+          </div>
+
+          <div className="bb-inav-account">
+            <img
+              src={`${import.meta.env.BASE_URL}images/profile-silhouette.svg`}
+              alt=""
+            />
+            <span className="bb-inav-name">
+              {user.first_name || user.display_name || role}
+            </span>
+            <button
+              type="button"
+              className="bb-inav-logout"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </div>
         </nav>
+
+        {error && (
+          <div className="bb-inav-error" role="alert">
+            {error}
+          </div>
+        )}
+      </header>
     );
+  }
+
+  return (
+    <nav className="site-nav bg-gray-200 text-black flex items-center gap-4 shadow-md">
+      <Link to={`${basePath}/home`} className="logo">
+        <img
+          src={`${import.meta.env.BASE_URL}images/logo.png`}
+          alt="BlockBot Studio"
+          className="h-auto w-54 mr-1"
+        />
+      </Link>
+
+      <div className="nav-links flex gap-1 text-2xl">
+        <Link to={`${basePath}/home`} className="mr-4 hover:text-blue-600">
+          Home
+        </Link>
+        <Link to={`${basePath}/editor`} className="mr-4 hover:text-gray-400">
+          Editor
+        </Link>
+        <Link to={`${basePath}/login`} className="hover:text-gray-400">
+          Login
+        </Link>
+      </div>
+
+      {error && <span role="alert">{error}</span>}
+    </nav>
+  );
 }

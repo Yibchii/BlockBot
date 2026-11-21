@@ -1,17 +1,24 @@
 import json
 from pathlib import Path
+from uuid import uuid4
+
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.views.decorators.http import require_POST
 
 from django.shortcuts import render
 
 from .utils import _register_user, loadDefaultBlocks
-from .models import CloudSavedProject, Robot, UserProfile
+from .models import Classroom, Robot, UserProfile, CloudSavedProject
 from Mazebot2D import CellType, Grid, Mazebot2D
+from Mazebot2D.environments import ENVIRONMENTS
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, logout, login
 from django.middleware.csrf import get_token
 
 # Web Pages
 def index(request):
+    get_token(request)
     return render(request, 'BlockBot/index.html')
 
 
@@ -68,14 +75,35 @@ def get_robots(request):
     return JsonResponse({"robots": robots})
 
 # Mazebot 2D API endpoints
+def get_mazebot2d_environments(request):
+    return JsonResponse({
+        "environments": [
+            {"id": key, "name": name}
+            for key, (name, _) in ENVIRONMENTS.items()
+        ],
+    })
+
+
 def get_mazebot2d_grid(request):
-    x = int(request.GET.get("x", 0))
-    y = int(request.GET.get("y", 0))
-    response_data = {
+    environment_id = request.GET.get("environment", "hard")
+    if environment_id not in ENVIRONMENTS:
+        return JsonResponse({"error": "Unknown maze environment."}, status=400)
+
+    _, layout = ENVIRONMENTS[environment_id]
+    grid = Grid(layout=layout)
+    try:
+        x = int(request.GET.get("x", 0))
+        y = int(request.GET.get("y", 0))
+        robot = Mazebot2D(x, y, grid=grid)
+    except ValueError as error:
+        return JsonResponse({"error": str(error)}, status=400)
+
+    return JsonResponse({
         "header": "Mazebot2D Grid",
-        "grid": _ascii_grid(Grid(), Mazebot2D(x, y, grid=Grid())),
-    }
-    return JsonResponse(response_data)
+        "environment": environment_id,
+        "grid": _ascii_grid(grid, robot),
+    })
+
 
 def get_mazebot2d_blocks(request):
     json_file = Path(__file__).resolve().parent / "block_files" / "mazebot2d.json"
@@ -162,34 +190,154 @@ def fetch_save_file(request, save_file_name):
         return JsonResponse({"content": content})
     except CloudSavedProject.DoesNotExist:
         return JsonResponse({"message": "Save file not found"}, status=404)
+@require_POST
+def save_to_file(request, save_file_name, project_robot):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Sign in to save a project."}, status=401)
 
-def save_to_file(request, save_file_name, project_robot, workspace_payload):
-    #if not logged in
+    profile = getattr(request.user, "profile", None)
+    if profile is None:
+        return JsonResponse({"message": "User profile not found."}, status=404)
+
+    if not save_file_name.strip() or len(save_file_name) > 255:
+        return JsonResponse({"message": "Enter a project name up to 255 characters."}, status=400)
+
+    try:
+        robot = Robot.objects.get(pk=int(project_robot))
+        workspace = json.loads(request.body)
+    except (ValueError, Robot.DoesNotExist):
+        return JsonResponse({"message": "Invalid robot or workspace data."}, status=400)
+
+    if not isinstance(workspace, dict):
+        return JsonResponse({"message": "Invalid workspace data."}, status=400)
+
+    with transaction.atomic():
+        UserProfile.objects.select_for_update().get(pk=profile.pk)
+        if request.GET.get("create_only") == "1":
+            if CloudSavedProject.objects.filter(owner=profile, name=save_file_name).exists():
+                return JsonResponse(
+                    {"message": "A project with this name already exists. Choose another name."},
+                    status=409,
+                )
+        project, created = CloudSavedProject.objects.get_or_create(
+            owner=profile, name=save_file_name, defaults={"robot": robot}
+        )
+        previous_file = project.savefile.name
+        storage = project.savefile.storage
+
+        project.robot = robot
+        project.savefile.save(
+            f"{uuid4().hex}.json", ContentFile(json.dumps(workspace)), save=False
+        )
+        try:
+            project.save(update_fields=["robot", "savefile"])
+        except Exception:
+            storage.delete(project.savefile.name)
+            raise
+
+        if previous_file and not CloudSavedProject.objects.filter(savefile=previous_file).exists():
+            transaction.on_commit(lambda: storage.delete(previous_file), robust=True)
+
+    return JsonResponse({"message": "Project saved."}, status=201 if created else 200)
+# Classroom API endpoints
+def create_classroom(request, name=None):
     if not request.user.is_authenticated:
         return JsonResponse({"message": "No user is logged in"}, status=401)
 
-    #if user profile not found
-    user_profile = UserProfile.objects.filter(user=request.user).first()
+    user_profile = getattr(request.user, "profile", None)
     if not user_profile:
         return JsonResponse({"message": "User profile not found"}, status=404)
 
-    # check if save file exists, if not create it
-    save_file = None
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if not name:
+            return JsonResponse({"message": "Classroom name is required"}, status=400)
+        classroom = Classroom.objects.create(name=name, owner=user_profile)
+        classroom.members.add(user_profile)  # Add owner as a member
+        return JsonResponse({"message": "Classroom created", "classroom_id": classroom.id})
+
+    return JsonResponse({"message": "Invalid request method"}, status=400)
+
+def join_classroom(request, classroom_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
     try:
-        save_file = CloudSavedProject.objects.get(owner=user_profile, name=save_file_name)
-    except CloudSavedProject.DoesNotExist:
-        save_file = CloudSavedProject.objects.create(
-            owner=user_profile,
-            name=save_file_name,
-            robot=project_robot,
-            savefile=f"user_data/cloud_projects/{save_file_name}.json"
-        )
-    # open file and write data to it
-    save_file_path = Path(save_file.savefile.path)
-    save_file_path.parent.mkdir(parents=True, exist_ok=True)
+        classroom = Classroom.objects.get(id=classroom_id)
+        classroom.members.add(user_profile)
+        return JsonResponse({"message": "User added to classroom", "classroom_id": classroom.id})
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+
+def remove_classroom_member(request, classroom_id, member_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+
     try:
-        with open(save_file_path, "w", encoding="utf-8") as file:
-            file.write(workspace_payload)
-    except FileNotFoundError:
-        return JsonResponse({"message": "Save file path not found"}, status=404)
-    return JsonResponse({"message": "Project Saved to File"}, status=201)
+        classroom = Classroom.objects.get(id=classroom_id)
+        if classroom.owner != user_profile:
+            return JsonResponse({"message": "Only the owner can remove members"}, status=403)
+        member_to_remove = UserProfile.objects.get(id=member_id)
+        classroom.members.remove(member_to_remove)
+        return JsonResponse({"message": "Member removed from classroom", "classroom_id": classroom.id})
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({"message": "Member not found"}, status=404)
+    
+def get_owned_classrooms(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    
+    # get each classroom user is owner of
+    classrooms = list(
+        Classroom.objects.filter(owner=user_profile).values("id", "name")
+    )
+    return JsonResponse({"classrooms": classrooms})
+
+def get_member_classrooms(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    
+    # get each classroom user is member of
+    classrooms = list(
+        Classroom.objects.filter(members=user_profile).values("id", "name")
+    )
+    return JsonResponse({"classrooms": classrooms})
+
+def get_classroom_info(request, classroom_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "No user is logged in"}, status=401)
+    #if user is not owner or member of classroom, return 403
+    user_profile = getattr(request.user, "profile", None)
+    if not user_profile:
+        return JsonResponse({"message": "User profile not found"}, status=404)
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+    except Classroom.DoesNotExist:
+        return JsonResponse({"message": "Classroom not found"}, status=404)
+    if classroom.owner != user_profile and user_profile not in classroom.members.all():
+        return JsonResponse({"message": "User is not a member of this classroom"}, status=403)
+    classroom_info = {
+        "id": classroom.id,
+        "name": classroom.name,
+        "owner": classroom.owner.display_name,
+        "members": [member.display_name for member in classroom.members.all()],
+    }
+    return JsonResponse({"classroom": classroom_info})

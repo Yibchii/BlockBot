@@ -40,3 +40,20 @@
 .bb-maze-raw pre { margin: 7px 0 0; font: 12px/1.25 ui-monospace, monospace; white-space: pre; overflow: auto; color: #2c4667; }
 @media (max-width: 760px) { .bb-maze-board { max-height: none; max-width: 440px; } .bb-maze-shell { max-width: 470px; margin: auto; } }
 @media (prefers-reduced-motion: reduce) { .bb-maze-bot { transition: none; } }
+/* Keep the goal flag noticeable alongside the robot. */
+/* Keep the goal flag noticeable alongside the robot. */
+.bb-maze-goal-flag {
+  inset: 1px 1px auto auto;
+  width: 48%;
+  height: 55%;
+  display: grid;
+  place-items: center;
+  color: #146c43;
+  background: #fff;
+  border: 1px solid #35a16a;
+  border-radius: 4px;
+  font-size: clamp(14px, 1.6vw, 20px);
+  line-height: 1;
+  z-index: 4;
+  pointer-events: none;
+}

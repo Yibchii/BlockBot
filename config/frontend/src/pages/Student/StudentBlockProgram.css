@@ -39,6 +39,8 @@
 .simulator-panel {flex:0 0 auto;}
 .console-panel {position:relative;flex:1;min-height:160px;padding-bottom:58px;}
 .console-message {display:flex;align-items:flex-start;gap:10px;padding:17px 12px;font-size:12px;}.feedback-check {display:grid;place-items:center;flex-shrink:0;width:19px;height:19px;border-radius:50%;background:#5aab75;color:#fff;}.console-message strong {color:#499b65;font-size:12px;font-weight:600;}.console-message p {margin:4px 0 0;color:#617896;font-size:11px;}
+.console-error .feedback-check {background:#b42332;color:#fff;}
+.console-error .console-message strong,.console-error .console-message p {color:#b42332;}
 .ai-help-button {position:absolute;bottom:12px;right:12px;padding:9px 15px;border:0;border-radius:5px;color:#fff;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;}.ai-help-button:focus-visible {outline:3px solid #94baff;outline-offset:3px;}.help-card {margin:0 12px 12px;padding:12px;border-radius:5px;background:#edf5ff;font-size:12px;}.help-card p {margin:5px 0 0;}
 .standalone-editor-page {display:flex;flex-direction:column;width:100%;min-height:100dvh;padding:clamp(9px,1.3vw,18px);background:#f5f8fe;}
 .standalone-editor-grid {display:grid;grid-template-columns:minmax(0,1fr) clamp(255px,30vw,440px);gap:clamp(9px,1vw,16px);height:calc(100dvh - clamp(18px,2.6vw,36px));min-height:520px;}
@@ -101,3 +103,52 @@
 .code-preview-footnote { font-size: 12px; color: #6a7f9b; margin: 12px 0 0; }
 @media (max-width: 760px) { .code-preview-trigger { flex: 1; } .project-name { max-width: none; flex: 1 1 160px; } }
 @media (max-width: 520px) { .code-preview-trigger { order: 3; } .project-name { order: 1; flex-basis: 100%; } .studio-actions { order: 4; } }
+.toolbar-button.toolbar-load {
+  background: #eaf2ff;
+  color: #174881;
+  border: 1px solid #9dbbed;
+}
+
+.project-file-dialog {
+  width: min(28rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.5rem;
+  border: 1px solid #a6b1be;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #172235;
+}
+
+.project-file-dialog::backdrop {
+  background: rgb(15 23 42 / 55%);
+}
+
+.project-file-dialog form,
+.project-file-dialog label {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.project-file-dialog h2 {
+  color: #172235;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.project-file-dialog input,
+.project-file-dialog select,
+.project-file-dialog button {
+  border: 1px solid #65748a;
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  color: #172235;
+}
+
+.project-file-dialog button[type="submit"] {
+  background: #234a87;
+  color: #fff;
+}
+
+.project-file-dialog button:disabled {
+  opacity: 0.55;
+}

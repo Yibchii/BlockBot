@@ -4,6 +4,12 @@ import TopNavBarComponent from "./components/Instructor/TopNavBarComponent.instr
 import LoginPage from "./pages/Login/LoginPage";
 import Editor from "./pages/Student/StudentBlockProgram";
 import MyProjects from "./pages/Student/Projects/MyProjects";
+import { useEffect } from "react";
+import AccessibilitySettings, {
+  applyAccessibilitySettings,
+  readAccessibilitySettings,
+} from "./pages/AccessibilitySettings";
+import Classroom from "./pages/Classroom/Classroom";
 
 function AppContent() {
   const location = useLocation();
@@ -15,31 +21,42 @@ function AppContent() {
   return (
     <>
       {!hideNavbar && <TopNavBarComponent />}
-      <main className="mx-auto w-full"> { /* Contains all content besides nav bar (and footer once added) */}
+      <main className="mx-auto w-full">
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/static/frontend/editor" element={<Editor />} />
           <Route path="/static/frontend/projects" element={<MyProjects />} />
           <Route path="/static/frontend/home" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/static/frontend/login" element={<LoginPage />} />
+          <Route path="/settings" element={<AccessibilitySettings />} />
+          <Route path="/static/frontend/settings" element={<AccessibilitySettings />} />
           <Route path="/static/frontend/*" element={<Home />} />
           <Route path="/editor" element={<Editor />} />
-          <Route path="/projects" element={<MyProjects />} />
+
           <Route path="/home" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/static/frontend/home" element={<Home />} />
+
+          <Route path="/editor" element={<Editor />} />
+          <Route path="/static/frontend/editor" element={<Editor />} />
+
+          <Route path="/classroom" element={<Classroom />} />
+          <Route path="/static/frontend/classroom" element={<Classroom />} />
+
+          <Route path="/static/frontend/*" element={<Home />} />
         </Routes>
       </main>
     </>
   );
 }
 
-function App() {
+export default function App() {
+    useEffect(() => {
+    applyAccessibilitySettings(readAccessibilitySettings());
+  }, []);
   return (
     <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   );
 }
-
-
-export default App;
