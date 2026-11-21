@@ -5,6 +5,8 @@ export default function Console({ status, showHelp, onToggleHelp }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const messagesRef = useRef(null);
+  const isError = status.state === "error";
+  const statusIcon = isError ? "!" : status.state === "running" ? "…" : "✓";
 
   useEffect(() => {
     if (!showHelp || !messagesRef.current) return;
@@ -62,8 +64,8 @@ export default function Console({ status, showHelp, onToggleHelp }) {
           </form>
         </div>
       ) : (
-        <div className="console-message" role="status">
-          <span className="feedback-check" aria-hidden="true">✓</span>
+        <div className="console-message" role={isError ? "alert" : "status"}>
+          <span className="feedback-check" aria-hidden="true">{statusIcon}</span>
           <div><strong>{status.title}</strong><p>{status.msg}</p></div>
         </div>
       )}
