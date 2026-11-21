@@ -41,5 +41,14 @@ class CloudSavedProject(models.Model):
 	owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="cloud_projects")
 	robot = models.ForeignKey(Robot, on_delete=models.CASCADE, related_name="cloud_projects")
 	savefile = models.FileField(upload_to="user_data/cloud_projects/")
+
+	class Meta:
+	    constraints = [
+	        models.UniqueConstraint(
+	            fields=["owner", "name"],
+	            name="unique_project_name_per_owner",
+	        ),
+	    ]
+
 	def __str__(self):
 		return f"{self.name} - {self.owner.display_name} - {self.robot.name} - {self.savefile}"
