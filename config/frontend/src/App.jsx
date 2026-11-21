@@ -39,6 +39,9 @@ function AppContent() {
           <Route path="/classroom" element={<Classroom />} />
           <Route path="/static/frontend/classroom" element={<Classroom />} />
 
+          <Route path="/help" element={<Help />} />
+          <Route path="/static/frontend/help" element={<Help />} />
+
           <Route path="/static/frontend/*" element={<Home />} />
         </Routes>
       </main>
